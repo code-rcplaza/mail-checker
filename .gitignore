@@ -1,0 +1,23 @@
+# Secretos y datos locales
+.env
+.env.*
+!.env.example
+backend/data/
+*.db
+*.db-*
+
+# Go
+backend/bin/
+*.test
+coverage.out
+
+# Frontend
+node_modules/
+frontend/dist/
+backend/internal/shared/platform/httpserver/web/dist/*
+!backend/internal/shared/platform/httpserver/web/dist/.gitkeep
+
+# Sistema / editores
+.DS_Store
+.idea/
+.vscode/
