@@ -158,7 +158,7 @@ type Account struct {
 
 // ports
 type AccountRepository interface {
-    Create(ctx context.Context, a *Account) error             // asigna ID y PublicID; ErrConflict si el correo ya existe
+    Create(ctx context.Context, a *Account) error             // asigna ID (PublicID viene generado en Go); ErrConflict si el correo ya existe
     List(ctx context.Context) ([]Account, error)
     Delete(ctx context.Context, publicID string) error        // ErrNotFound; borra también sus cargos
     MarkSynced(ctx context.Context, id int64, at time.Time, syncErrKey string) error
@@ -248,7 +248,7 @@ type BankStatementParser interface {
     Parse(text string) (lines []ParsedCharge, bad []string)
 }
 type StatementRepository interface {
-    Create(ctx context.Context, s *Statement, charges []Charge) error   // atómico; asigna ID y PublicID
+    Create(ctx context.Context, s *Statement, charges []Charge) error   // atómico; asigna ID (PublicID viene generado en Go)
     List(ctx context.Context) ([]Statement, error)
     Delete(ctx context.Context, publicID string) error                  // ErrNotFound; borra también sus cargos
 }
