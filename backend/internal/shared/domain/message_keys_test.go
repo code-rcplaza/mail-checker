@@ -22,6 +22,7 @@ func TestCommonKeys_FollowFeatureReasonFormat(t *testing.T) {
 		{KeyAmountNegative, "common.amount_negative"},
 		{KeyDateMissing, "common.date_missing"},
 		{KeyMerchantMissing, "common.merchant_missing"},
+		{KeyExternalIDMissing, "common.external_id_missing"},
 	}
 	for _, tc := range cases {
 		t.Run(string(tc.want), func(t *testing.T) {
