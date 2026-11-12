@@ -53,7 +53,7 @@ agregue su lógica y sus adaptadores.
 - [x] [02 Configuración con fail fast](02-config.md)
 - [x] [03 Abrir SQLite con PRAGMAs](03-sqlite-open.md)
 - [x] [04 Migraciones embebidas](04-migrations.md)
-- [ ] [05 Transacciones con `WithTx`](05-with-tx.md)
+- [x] [05 Transacciones con `WithTx`](05-with-tx.md)
 - [ ] [06 Router, health y JSON](06-router-health-json.md)
 - [ ] [07 Mapeo de errores a HTTP](07-error-mapping.md)
 - [ ] [08 `main.go`, `slog` y apagado ordenado](08-main-shutdown.md)
