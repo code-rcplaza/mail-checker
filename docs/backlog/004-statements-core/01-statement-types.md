@@ -16,8 +16,8 @@ cobros para que el caso de uso solo orqueste pasos.
 - Dada una línea sin fecha, cuando se convierte, entonces el cobro toma la fecha de
   facturación.
 - Dada una línea que no se puede convertir (ej. comercio vacío), cuando se convierte,
-  entonces no genera cobro y se devuelve en las líneas malas como `"línea <n>"`; las
-  demás líneas se convierten igual.
+  entonces no genera cobro y se devuelve su número `n` en las líneas malas (el front
+  arma el texto); las demás líneas se convierten igual.
 - Las llaves `statements.bank_not_detected`, `statements.bank_unknown`,
   `statements.already_imported`, `statements.no_charges`,
   `statements.billing_date_missing`, `statements.file_empty`,

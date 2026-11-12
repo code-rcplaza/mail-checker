@@ -235,7 +235,7 @@ type Statement struct {
     BillingDate time.Time
     ImportedAt  time.Time
     Charges     int
-    BadLines    []string
+    BadLines    []int      // números de línea; el front arma el texto
 }
 
 // ports
@@ -245,7 +245,7 @@ type FileExtractor interface {
 type BankStatementParser interface {
     Bank() Bank
     Detect(text string) bool                                // ¿esta cartola es de mi banco?
-    Parse(text string) (lines []ParsedCharge, bad []string)
+    Parse(text string) (lines []ParsedCharge, bad []int)     // bad: números de línea, nunca el texto
 }
 type StatementRepository interface {
     Create(ctx context.Context, s *Statement, charges []Charge) error   // atómico; asigna ID (PublicID viene generado en Go)
