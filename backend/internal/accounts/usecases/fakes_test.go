@@ -32,8 +32,13 @@ func (f *fakeCipher) Encrypt(plain string) ([]byte, error) {
 	return []byte("sealed:" + string(runes)), nil
 }
 
+// Decrypt fails on bytes it did not seal, like a password sealed with a lost key.
 func (f *fakeCipher) Decrypt(sealed []byte) (string, error) {
-	runes := []rune(strings.TrimPrefix(string(sealed), "sealed:"))
+	body, found := strings.CutPrefix(string(sealed), "sealed:")
+	if !found {
+		return "", errors.New("message authentication failed")
+	}
+	runes := []rune(body)
 	slices.Reverse(runes)
 	return string(runes), nil
 }
