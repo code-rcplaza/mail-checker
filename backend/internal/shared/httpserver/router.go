@@ -31,8 +31,7 @@ func healthHandler(logger *slog.Logger) http.HandlerFunc {
 
 func routeNotFoundHandler(logger *slog.Logger) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		body := errorResponse{Error: errorPayload{Key: domain.KeyRouteNotFound}}
-		respond(w, r, logger, http.StatusNotFound, body)
+		WriteError(w, r, logger, domain.NotFound(domain.KeyRouteNotFound))
 	}
 }
 
