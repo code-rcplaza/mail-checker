@@ -245,7 +245,7 @@ type FileExtractor interface {
 type BankStatementParser interface {
     Bank() Bank
     Detect(text string) bool                                // ¿esta cartola es de mi banco?
-    Parse(text string) (lines []ParsedCharge, bad []int)     // bad: números de línea, nunca el texto
+    Parse(text string) (lines []StatementLine, bad []int)    // StatementLine{Number, Charge}; bad: números de línea, nunca el texto
 }
 type StatementRepository interface {
     Create(ctx context.Context, s *Statement, charges []Charge) error   // atómico; asigna ID (PublicID viene generado en Go)
@@ -258,7 +258,8 @@ type StatementRepository interface {
 1. Extrae el texto del archivo.
 2. Banco: si viene elegido, usa ese. Si no, pregunta a cada parser `Detect`. Si exactamente uno
    lo reconoce, usa ese; si no, responde la llave `statements.bank_not_detected`.
-3. Parsea. Las líneas sin fecha toman la fecha de facturación.
+3. Parsea. Las líneas sin fecha toman la fecha de facturación. Cada línea trae su número en el texto,
+   que se usa en el external id (`"<publicID>:<n>"`) y en las líneas malas.
 4. Guarda la cartola y sus cargos en una transacción.
 
 Reglas:

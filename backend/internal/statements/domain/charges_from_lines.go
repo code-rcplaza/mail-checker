@@ -2,21 +2,27 @@ package domain
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
 
+// StatementLine is a charge the parser read, with its line number in the
+// statement text, so external ids and bad lines point to the same place.
+type StatementLine struct {
+	Number int
+	Charge shared.ParsedCharge
+}
+
 // ChargesFromLines turns the parsed lines of a statement into charges. A line
 // that is not a valid charge is reported by its number (the front words it)
-// and the others still convert. Lines are numbered from 1, in the order the
-// parser returned them.
-func ChargesFromLines(lines []shared.ParsedCharge, bank shared.Bank, publicID string, billingDate time.Time) (charges []shared.Charge, badLines []int) {
-	for i, parsed := range lines {
-		lineNumber := i + 1
-		charge, err := parsed.ToCharge(statementOrigin(bank, publicID, lineNumber, billingDate))
+// and the others still convert.
+func ChargesFromLines(lines []StatementLine, bank shared.Bank, publicID string, billingDate time.Time) (charges []shared.Charge, badLines []int) {
+	for _, line := range lines {
+		charge, err := line.Charge.ToCharge(statementOrigin(bank, publicID, line.Number, billingDate))
 		if err != nil {
-			badLines = append(badLines, lineNumber)
+			badLines = append(badLines, line.Number)
 			continue
 		}
 		charges = append(charges, charge)
@@ -33,4 +39,12 @@ func statementOrigin(bank shared.Bank, publicID string, lineNumber int, billingD
 		ExternalID:   fmt.Sprintf("%s:%d", publicID, lineNumber),
 		FallbackDate: billingDate,
 	}
+}
+
+// MergeBadLines joins the lines the parser could not read with those that
+// were not valid charges, in a new slice ordered by line number.
+func MergeBadLines(unread, invalid []int) []int {
+	merged := slices.Concat(unread, invalid)
+	slices.Sort(merged)
+	return merged
 }
