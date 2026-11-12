@@ -6,6 +6,8 @@ import (
 	"strings"
 	"testing"
 	"testing/fstest"
+
+	"github.com/code-rcplaza/mail-checker/backend/internal/shared/sqlite/migrations"
 )
 
 func tableNames(t *testing.T, db *sql.DB) []string {
@@ -38,7 +40,7 @@ func currentVersion(t *testing.T, db *sql.DB) int64 {
 func TestMigrate_AppliesEmbeddedMigrationsToNewDB(t *testing.T) {
 	db := openTempDB(t)
 
-	if err := Migrate(context.Background(), db, EmbeddedMigrations()); err != nil {
+	if err := Migrate(context.Background(), db, migrations.FS); err != nil {
 		t.Fatalf("Migrate() error = %v, want nil", err)
 	}
 
@@ -51,12 +53,12 @@ func TestMigrate_AppliesEmbeddedMigrationsToNewDB(t *testing.T) {
 func TestMigrate_IsIdempotent(t *testing.T) {
 	db := openTempDB(t)
 	ctx := context.Background()
-	if err := Migrate(ctx, db, EmbeddedMigrations()); err != nil {
+	if err := Migrate(ctx, db, migrations.FS); err != nil {
 		t.Fatalf("first Migrate() error = %v, want nil", err)
 	}
 	versionAfterFirst := currentVersion(t, db)
 
-	if err := Migrate(ctx, db, EmbeddedMigrations()); err != nil {
+	if err := Migrate(ctx, db, migrations.FS); err != nil {
 		t.Fatalf("second Migrate() error = %v, want nil", err)
 	}
 
@@ -67,11 +69,11 @@ func TestMigrate_IsIdempotent(t *testing.T) {
 
 func TestMigrate_FailsNamingTheBrokenMigration(t *testing.T) {
 	db := openTempDB(t)
-	migrations := fstest.MapFS{
+	fakeMigrations := fstest.MapFS{
 		"00001_broken.sql": {Data: []byte("-- +goose Up\nTHIS IS NOT SQL;\n")},
 	}
 
-	err := Migrate(context.Background(), db, migrations)
+	err := Migrate(context.Background(), db, fakeMigrations)
 
 	if err == nil {
 		t.Fatalf("Migrate() error = nil, want error")
@@ -83,12 +85,12 @@ func TestMigrate_FailsNamingTheBrokenMigration(t *testing.T) {
 
 func TestMigrate_RollsBackFailedMigration(t *testing.T) {
 	db := openTempDB(t)
-	migrations := fstest.MapFS{
+	fakeMigrations := fstest.MapFS{
 		"00001_applied.sql": {Data: []byte("-- +goose Up\nCREATE TABLE applied (id INTEGER);\n")},
 		"00002_partial.sql": {Data: []byte("-- +goose Up\nCREATE TABLE partial (id INTEGER);\nTHIS IS NOT SQL;\n")},
 	}
 
-	if err := Migrate(context.Background(), db, migrations); err == nil {
+	if err := Migrate(context.Background(), db, fakeMigrations); err == nil {
 		t.Fatalf("Migrate() error = nil, want error")
 	}
 
