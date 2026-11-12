@@ -29,14 +29,15 @@ func isWithinMatchWindow(a, b time.Time) bool {
 // counted through an email, pairing one to one, so each purchase counts once.
 // It returns a new slice in the original order.
 func DropStatementChargesMatchingEmail(charges []shared.Charge, identify IdentifyServiceFunc, normalize NormalizeMerchantFunc) []shared.Charge {
-	duplicates := findStatementDuplicates(charges, identify, normalize)
-	return withoutIndexes(charges, duplicates)
+	emailByStatement := pairStatementsWithEmails(charges, identify, normalize)
+	return withoutIndexes(charges, emailByStatement)
 }
 
-// findStatementDuplicates returns the indexes of statement charges paired
-// with an email charge; each email charge pairs at most once.
-func findStatementDuplicates(charges []shared.Charge, identify IdentifyServiceFunc, normalize NormalizeMerchantFunc) map[int]bool {
-	duplicates := make(map[int]bool)
+// pairStatementsWithEmails maps the index of each statement charge to the
+// index of the email charge it pairs with; each email pairs at most once.
+// Both views (summary and reconciliation) use this one pairing.
+func pairStatementsWithEmails(charges []shared.Charge, identify IdentifyServiceFunc, normalize NormalizeMerchantFunc) map[int]int {
+	emailByStatement := make(map[int]int)
 	pairedEmails := make(map[int]bool)
 	for i, statement := range charges {
 		if statement.Source != shared.SourceStatement {
@@ -47,9 +48,9 @@ func findStatementDuplicates(charges []shared.Charge, identify IdentifyServiceFu
 			continue
 		}
 		pairedEmails[emailIndex] = true
-		duplicates[i] = true
+		emailByStatement[i] = emailIndex
 	}
-	return duplicates
+	return emailByStatement
 }
 
 func findUnpairedEmailMatch(
@@ -70,10 +71,10 @@ func findUnpairedEmailMatch(
 	return 0, false
 }
 
-func withoutIndexes(charges []shared.Charge, excluded map[int]bool) []shared.Charge {
+func withoutIndexes(charges []shared.Charge, excluded map[int]int) []shared.Charge {
 	kept := make([]shared.Charge, 0, len(charges)-len(excluded))
 	for i, c := range charges {
-		if !excluded[i] {
+		if _, isExcluded := excluded[i]; !isExcluded {
 			kept = append(kept, c)
 		}
 	}

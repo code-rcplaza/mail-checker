@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/ports"
 )
@@ -33,7 +32,7 @@ func (u GetSummary) Execute(ctx context.Context, months int) (domain.Summary, er
 		return domain.Summary{}, err
 	}
 	now := u.now()
-	charges, err := u.readCharges(ctx, domain.PeriodStart(now, months))
+	charges, err := readChargesSince(ctx, u.charges, domain.PeriodStart(now, months))
 	if err != nil {
 		return domain.Summary{}, err
 	}
@@ -44,14 +43,6 @@ func (u GetSummary) Execute(ctx context.Context, months int) (domain.Summary, er
 	unique := domain.DropStatementChargesMatchingEmail(charges, u.catalog.Identify, u.catalog.Normalize)
 	groups := domain.GroupCharges(unique, u.catalog.Identify, u.catalog.Normalize)
 	return domain.BuildSummary(groups, decisions, u.catalog.LooksLikeSubscription, now), nil
-}
-
-func (u GetSummary) readCharges(ctx context.Context, since time.Time) ([]shared.Charge, error) {
-	charges, err := u.charges.ListSince(ctx, since)
-	if err != nil {
-		return nil, fmt.Errorf("read charges since %s: %w", since.Format(time.DateOnly), err)
-	}
-	return charges, nil
 }
 
 func (u GetSummary) readDecisions(ctx context.Context) (map[domain.GroupKey]domain.Decision, error) {
