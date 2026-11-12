@@ -81,10 +81,10 @@ backend/
     │   ├── adapters/
     │   │   ├── http/                GET /api/summary, GET /api/reconciliation
     │   │   ├── catalog/             ServiceCatalog (descriptor de cobro → servicio)
-    │   │   └── sqlite/              ChargeReader
+    │   │   └── sqlite/              ChargeReader, SubscriptionDecisions
     │   ├── domain/                  Subscription, Summary, Reconciliation, reglas de recurrencia y de coincidencia
-    │   ├── ports/                   ChargeReader, ServiceCatalog
-    │   └── usecases/                get_summary, reconcile_charges
+    │   ├── ports/                   ChargeReader, ServiceCatalog, SubscriptionDecisions
+    │   └── usecases/                get_summary, reconcile_charges, decide_possible_subscription
     │
     └── shared/
         ├── domain/                  Money, Currency, Bank, Card, Source, Charge, ParsedCharge, errores
@@ -126,7 +126,7 @@ type Charge struct {
     ID          int64
     Bank        Bank
     Source      Source
-    ExternalID  string  // correo: Message-ID; cartola: "<statementID>:<línea>"
+    ExternalID  string  // correo: Message-ID; cartola: "<statementPublicID>:<línea>"
     AccountID   *int64
     StatementID *int64
     OccurredAt  time.Time
@@ -183,7 +183,7 @@ type SyncResult struct {
     AccountPublicID string
     Email     string
     Found, New, Unparsed int
-    ErrorKey  string   // llave i18n, ej. accounts.imap_auth_failed
+    ErrorKey  string   // llave i18n, ej. emailsync.mail_auth_failed
 }
 type UnparsedEmail struct {
     ExternalID string
@@ -261,6 +261,14 @@ type StatementRepository interface {
 3. Parsea. Las líneas sin fecha toman la fecha de facturación.
 4. Guarda la cartola y sus cargos en una transacción.
 
+Reglas:
+- Una cartola por banco + fecha de facturación. Si ya existe, responde `ErrConflict` con
+  `statements.already_imported`; para reemplazarla se borra y se vuelve a subir.
+- Si ninguna línea queda como cargo, responde `ErrInvalid` con `statements.no_charges`
+  (params `badLines`) y no guarda nada.
+- El `PublicID` se genera en Go antes de guardar (generador inyectado), porque el external id
+  de cada cargo lo usa.
+
 ### `subscriptions`
 
 ```go
@@ -273,6 +281,10 @@ type ServiceCatalog interface {
     Normalize(merchant string) string           // "C. VERDE MALL" -> "C VERDE"
     LooksLikeSubscription(merchant string) bool // "…SUBSCRIPTION", "MEMBERSHIP"
 }
+type SubscriptionDecisions interface {
+    List(ctx context.Context) (map[GroupKey]Decision, error) // Decision: confirmed (+ cadencia) | dismissed
+    Save(ctx context.Context, key GroupKey, d Decision) error
+}
 ```
 
 **`GetSummary(months)`:**
@@ -282,14 +294,28 @@ type ServiceCatalog interface {
    - servicio conocido → un grupo por servicio (sin importar moneda ni banco);
    - servicio *umbrella* (Apple, Google Play…) → un grupo por monto;
    - comercio desconocido → por nombre normalizado y moneda.
-4. Aplica las reglas de recurrencia del dominio (ver abajo).
-5. Suma el gasto mensual de las activas, por moneda (una anual cuenta como monto / 12).
+4. Aplica las reglas de recurrencia del dominio (ver abajo) y las decisiones del usuario.
+5. Arma cuatro secciones:
+   - **Suscripciones**: activas + posibles confirmadas (suman al gasto);
+   - **Posibles**: servicio conocido con 1 solo cobro, o comercio desconocido que parece
+     suscripción; sin decidir (no suman);
+   - **Inactivas**;
+   - **Otros cobros**: lo que no es suscripción + posibles descartadas.
+6. Suma el gasto mensual de **Suscripciones**, por moneda (una anual cuenta como monto / 12).
+
+**`DecidePossibleSubscription(groupKey, confirm(monthly | yearly) | dismiss)`:** guarda la decisión del
+usuario sobre una posible. Al confirmar, **el usuario elige la cadencia** (ej. Netflix USD 120 → anual):
+la app la respeta y no la vuelve a inferir. La llave del grupo es estable entre recálculos (ej. `merchant:STREAMING CO:CLP`). Si la
+llave no es una posible actual → `ErrNotFound`.
 
 **Reglas de recurrencia** (constantes con nombre en `subscriptions/domain`):
 - **Intervalo**: mensual si los cobros están a k × 24–38 días con k ≤ 3 (tolera hasta 2 meses sin
   aviso); anual si están a 330–400 días.
-- **Mínimo de cobros**: 2 que cumplan el intervalo. Un servicio conocido con 1 solo cobro aparece
-  como **probable**.
+- **Servicio conocido**: con **≥ 2 cobros** que cumplan el intervalo es suscripción. Con **1 solo
+  cobro** es **posible** y el usuario decide (con 1 cobro no se sabe si es mensual o anual).
+- **Comercio desconocido**: nunca es seguro; es **posible** si tiene ≥ 2 cobros con cadencia y monto
+  consistentes, o 1 cobro con descriptor de suscripción (`LooksLikeSubscription`). El usuario la
+  confirma o la descarta. Si no, va a otros cobros.
 - **Activa**: último cobro hace ≤ 45 días (≤ 400 si es anual), contando desde **hoy** (reloj inyectado).
 - **Monto, servicio conocido**: el ±25 % **no separa**; el monto actual es el del último cobro y un
   salto > 25 % se muestra como **cambio de plan** (ej. Claude USD 20 → USD 100). Los cobros del
@@ -323,8 +349,9 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 | Tabla | Feature dueña | Columnas clave | Notas |
 |---|---|---|---|
 | `accounts` | accounts | `id`, `public_id` UNIQUE, `email` UNIQUE, `password_enc`, `last_sync_at`, `last_error_key` | |
-| `statements` | statements | `id`, `public_id` UNIQUE, `bank`, `filename`, `kind`, `billing_date`, `bad_lines` (JSON) | |
+| `statements` | statements | `id`, `public_id` UNIQUE, `bank`, `filename`, `kind`, `billing_date`, `bad_lines` (JSON) | `UNIQUE(bank, billing_date)` |
 | `charges` | shared | `id`, `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card` | `UNIQUE(source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola |
+| `subscription_decisions` | subscriptions | `id`, `group_key` UNIQUE, `decision` (`confirmed`/`dismissed`), `cadence` (`monthly`/`yearly`, solo si confirmada), `decided_at` | |
 | `unparsed_emails` | emailsync | `id`, `external_id` UNIQUE, `account_id`, `bank`, `subject`, `received_at`, `preview` | |
 
 - `id`: `INTEGER PRIMARY KEY AUTOINCREMENT` en todas las tablas; solo para uso interno (joins, FKs,
@@ -358,6 +385,7 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 | DELETE | `/api/statements/{publicId}` | statements | borra la cartola y sus cargos |
 | GET | `/api/summary?months=12` | subscriptions | vista unificada: suscripciones, otros cargos, totales |
 | GET | `/api/reconciliation?months=12` | subscriptions | vista diferenciada: avisados, sin aviso, solo correo |
+| POST | `/api/subscriptions/decisions` | subscriptions | `{groupKey, decision, cadence?}`: confirmar (con cadencia) o descartar una posible |
 
 En el JSON, `id` es siempre el `public_id` (UUID v7) y las fechas son unix en segundos.
 
