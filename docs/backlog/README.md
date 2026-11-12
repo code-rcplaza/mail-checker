@@ -10,3 +10,4 @@ Loop: `/idea` → `/stories NNN` → `/story NNN-MM` (TDD). Reglas en `CLAUDE.md
 
 | # | Idea | Estado |
 |---|---|---|
+| 001 | [Armazón del backend (fase 1)](001-foundation/idea.md) | doing |

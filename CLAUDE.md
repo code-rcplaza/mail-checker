@@ -182,6 +182,11 @@ la contradice, se pregunta antes de cambiarla.
 - Montos siempre como `Money` (centésimas, int64), nunca float.
 - Fechas: unix en segundos (UTC) en la base y en la API; `time.Time` dentro de Go.
   La conversión vive solo en los adaptadores sqlite y http.
+- Mensajes al usuario: el back nunca devuelve texto, devuelve llaves i18n
+  (`<feature>.<motivo>`, comunes en `common.*`) como constantes en `domain`. Formato
+  `{ "error": { "key", "params", "fields" } }`. Logs y errores de arranque sí en texto.
+  El front las traduce con `lib/i18n` (`t(key, params)`, catálogo `es.ts` tipado);
+  un test de contrato verifica que toda llave del back exista en el catálogo.
 - IDs: `id` autoincremental solo para uso interno (nunca sale por la API);
   `public_id` UUID v7 generado en Go para lo que se expone. En el JSON, `id` = `public_id`.
 - Tests: casos de uso con dobles en memoria; parsers con textos reales anonimizados.
@@ -194,4 +199,12 @@ la contradice, se pregunta antes de cambiarla.
 - Formato con Biome (hook en `.claude/settings.json`, activo cuando exista `frontend/`).
 
 ## Comandos
-(se completan cuando exista el código: test, build, dev, sqlc, migraciones)
+Backend (desde `backend/`, módulo `github.com/code-rcplaza/mail-checker/backend`):
+- Test: `go test ./...`
+- Vet: `go vet ./...`
+- Staticcheck: `staticcheck ./...` (instalado en `$(go env GOPATH)/bin`)
+- Build: `go build ./...`
+
+Tests solo con la stdlib `testing` (tablas), sin testify.
+
+(se completan: front, dev, sqlc, migraciones)

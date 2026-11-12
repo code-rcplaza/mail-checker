@@ -43,7 +43,9 @@ Cada feature responde a "¿quién eres y qué haces?":
 
 ```
 backend/
-├── cmd/api/main.go                  composition root: crea adaptadores, registra bancos, arma rutas
+├── cmd/api/
+│   ├── main.go                      composition root: crea adaptadores, registra bancos, arma rutas
+│   └── config.go                    variables de entorno, fail fast
 └── internal/
     ├── accounts/
     │   ├── adapters/
@@ -77,12 +79,12 @@ backend/
     │
     ├── subscriptions/
     │   ├── adapters/
-    │   │   ├── http/                GET /api/summary
+    │   │   ├── http/                GET /api/summary, GET /api/reconciliation
     │   │   ├── catalog/             ServiceCatalog (descriptor de cobro → servicio)
     │   │   └── sqlite/              ChargeReader
-    │   ├── domain/                  Subscription, Summary, reglas de recurrencia y de duplicados
+    │   ├── domain/                  Subscription, Summary, Reconciliation, reglas de recurrencia y de coincidencia
     │   ├── ports/                   ChargeReader, ServiceCatalog
-    │   └── usecases/                get_summary
+    │   └── usecases/                get_summary, reconcile_charges
     │
     └── shared/
         ├── domain/                  Money, Currency, Bank, Card, Source, Charge, ParsedCharge, errores
@@ -134,7 +136,10 @@ type Charge struct {
     Card        Card
 }
 
-var ErrInvalid, ErrNotFound, ErrConflict error // + Invalid(msg) con mensaje para el usuario
+var ErrInvalid, ErrNotFound, ErrConflict error
+// Invalid(key, params), NotFound(key), Conflict(key): envuelven los anteriores y llevan una
+// llave i18n (nunca texto para el usuario). Llaves comunes: common.invalid_json, common.not_found,
+// common.conflict, common.route_not_found, common.validation_failed, common.internal.
 ```
 
 ### `accounts`
@@ -148,7 +153,7 @@ type Account struct {
     PasswordEnc []byte
     CreatedAt   time.Time
     LastSyncAt  *time.Time
-    LastError   string
+    LastErrorKey string     // llave i18n de la última sincronización fallida
 }
 
 // ports
@@ -156,7 +161,7 @@ type AccountRepository interface {
     Create(ctx context.Context, a *Account) error             // asigna ID y PublicID; ErrConflict si el correo ya existe
     List(ctx context.Context) ([]Account, error)
     Delete(ctx context.Context, publicID string) error        // ErrNotFound; borra también sus cargos
-    MarkSynced(ctx context.Context, id int64, at time.Time, syncErr string) error
+    MarkSynced(ctx context.Context, id int64, at time.Time, syncErrKey string) error
 }
 type SecretCipher interface {
     Encrypt(plain string) ([]byte, error)
@@ -178,7 +183,7 @@ type SyncResult struct {
     AccountPublicID string
     Email     string
     Found, New, Unparsed int
-    Error     string
+    ErrorKey  string   // llave i18n, ej. accounts.imap_auth_failed
 }
 type UnparsedEmail struct {
     ExternalID string
@@ -192,7 +197,7 @@ type UnparsedEmail struct {
 // ports
 type AccountDirectory interface {
     Credentials(ctx context.Context) ([]Credential, error)    // {AccountID, AccountPublicID, Email, Password}
-    RecordSync(ctx context.Context, accountID int64, at time.Time, syncErr string) error
+    RecordSync(ctx context.Context, accountID int64, at time.Time, syncErrKey string) error
 }
 type MailReader interface {
     Read(ctx context.Context, cred Credential, q MailQuery) ([]RawEmail, error)
@@ -252,7 +257,7 @@ type StatementRepository interface {
 **`ImportStatement(file, billingDate, bank?)`:**
 1. Extrae el texto del archivo.
 2. Banco: si viene elegido, usa ese. Si no, pregunta a cada parser `Detect`. Si exactamente uno
-   lo reconoce, usa ese; si no, responde *"no se pudo detectar el banco, elígelo"*.
+   lo reconoce, usa ese; si no, responde la llave `statements.bank_not_detected`.
 3. Parsea. Las líneas sin fecha toman la fecha de facturación.
 4. Guarda la cartola y sus cargos en una transacción.
 
@@ -272,8 +277,7 @@ type ServiceCatalog interface {
 
 **`GetSummary(months)`:**
 1. Lee los cargos del período.
-2. Quita los cargos de cartola que ya llegaron por correo: **mismo banco**, mismo servicio y monto,
-   ±35 días.
+2. Quita los cargos de cartola que ya llegaron por correo (regla de coincidencia, ver abajo).
 3. Agrupa:
    - servicio conocido → un grupo por servicio (sin importar moneda ni banco);
    - servicio *umbrella* (Apple, Google Play…) → un grupo por monto;
@@ -281,6 +285,15 @@ type ServiceCatalog interface {
 4. Aplica las reglas de recurrencia del dominio: mensual o anual, tolerancia de ±25 %, meses
    faltantes, activa si tuvo cargo hace menos de 45 días (400 días si es anual).
 5. Suma el gasto mensual de las activas, por moneda.
+
+**`ReconcileCharges(months)`** (vista diferenciada, para ver qué cobros no se avisan):
+1. Lee los cargos del período.
+2. Cruza cartola con correo usando la misma regla de coincidencia.
+3. Devuelve tres grupos: **avisados** (en ambos), **sin aviso** (solo en cartola: el hallazgo
+   importante) y **solo correo** (aún no aparece en una cartola importada).
+
+**Regla de coincidencia** (una sola función en `domain`, usada por ambos casos de uso): mismo banco,
+mismo servicio, mismo monto y ±35 días.
 
 El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM") no depende del banco.
 
@@ -296,7 +309,7 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 
 | Tabla | Feature dueña | Columnas clave | Notas |
 |---|---|---|---|
-| `accounts` | accounts | `id`, `public_id` UNIQUE, `email` UNIQUE, `password_enc`, `last_sync_at`, `last_error` | |
+| `accounts` | accounts | `id`, `public_id` UNIQUE, `email` UNIQUE, `password_enc`, `last_sync_at`, `last_error_key` | |
 | `statements` | statements | `id`, `public_id` UNIQUE, `bank`, `filename`, `kind`, `billing_date`, `bad_lines` (JSON) | |
 | `charges` | shared | `id`, `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card` | `UNIQUE(source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola |
 | `unparsed_emails` | emailsync | `id`, `external_id` UNIQUE, `account_id`, `bank`, `subject`, `received_at`, `preview` | |
@@ -330,12 +343,25 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 | GET | `/api/statements` | statements | |
 | POST | `/api/statements` | statements | multipart: `file` o `text`, + `billingDate`, + `bank` opcional |
 | DELETE | `/api/statements/{publicId}` | statements | borra la cartola y sus cargos |
-| GET | `/api/summary?months=12` | subscriptions | suscripciones, otros cargos, totales |
+| GET | `/api/summary?months=12` | subscriptions | vista unificada: suscripciones, otros cargos, totales |
+| GET | `/api/reconciliation?months=12` | subscriptions | vista diferenciada: avisados, sin aviso, solo correo |
 
 En el JSON, `id` es siempre el `public_id` (UUID v7) y las fechas son unix en segundos.
 
-Errores: `{ "error": "mensaje" }` → 400 inválido, 404 no existe, 409 conflicto o sincronización en
-curso, 500 interno.
+**El back no devuelve textos para el usuario: devuelve llaves i18n** y el front las traduce.
+
+```json
+{ "error": { "key": "statements.bank_not_detected", "params": { "count": 2 } } }
+{ "error": { "key": "common.validation_failed", "fields": { "email": "accounts.email_invalid" } } }
+```
+
+- Llaves `<feature>.<motivo>` en inglés y snake_case; las genéricas en `common.*`. Cada llave es una
+  constante en el `domain` de su feature (las comunes en `shared/domain`).
+- Status: 400 inválido, 404 no existe, 409 conflicto o sincronización en curso, 500 interno
+  (`common.internal`, sin detalles; el error real va al log).
+- Toda falla que ve el usuario viaja como llave, también dentro de respuestas exitosas
+  (ej. `SyncResult.errorKey`).
+- Los logs y los errores de arranque sí van en texto humano: no los lee el front.
 
 ### Agregar un banco (ej. Falabella)
 
@@ -390,6 +416,7 @@ frontend/src/
 └── lib/
     ├── api/                   client.ts, types.ts
     ├── format.ts              montos y fechas (es-CL)
+    ├── i18n/                  es.ts (catálogo tipado de llaves) + t(key, params)
     └── utils.ts               cn()
 ```
 
@@ -420,19 +447,24 @@ Componentes shadcn previstos: `button`, `card`, `table`, `badge`, `drawer`, `dia
 
 Al terminar cada fase **paramos** y revisamos antes de seguir.
 
-1. **Reorganizar el núcleo en features**: `shared/domain` y, por cada feature, `domain` + `ports` +
-   `usecases` con tests usando dobles. Reutiliza la lógica y los tests ya escritos e incorpora el
-   esquema multi-banco.
-2. **Adaptadores de banco y lectura**: `bci` (avisos y cartola), `extract`, `catalog`, reutilizando
-   los parsers y sus tests.
-3. **Persistencia y cifrado**: `shared/sqlite` (goose), repositorios con sqlc y `keychain`.
-4. **IMAP + HTTP + `main.go`**: prueba real con tu Gmail.
-5. **Front, base**: Vite + Tailwind + shadcn + TanStack Router + AppShell mobile first.
-6. **Pantalla Resumen.**
-7. **Pantalla Cuentas** (agregar, quitar, sincronizar).
-8. **Pantalla Cartolas** (subir archivo, pegar texto, elegir banco).
-9. **Build único**, Makefile, README.
+1. **Armazón (backend)**: `go.mod`, `shared/sqlite` (`Open` con PRAGMAs, migraciones goose
+   embebidas sin tablas, `WithTx`), `shared/httpserver` (chi, `/api/health`, JSON, mapeo de errores,
+   apagado ordenado), `shared/domain` (solo errores), `shared/clock`, config por variables de entorno
+   (`cmd/api/config.go`, fail fast), `slog` y `main.go` mínimo. Todo con tests.
+2. **Núcleo por features**: por cada feature, `domain` + `ports` + `usecases` con tests usando dobles,
+   desde cero con TDD. Orden: `subscriptions` → `emailsync` → `statements` → `accounts`. Los tipos de
+   `shared/domain` (`Money`, `Charge`…) llegan con la primera feature que los usa.
+3. **Adaptadores de banco y lectura**: `bci` (avisos y cartola), `extract`, `catalog`, desde cero con
+   TDD y textos reales anonimizados.
+4. **Persistencia y cifrado**: `sqlc.yaml`; cada feature agrega su migración, sus queries sqlc y su
+   repositorio; `keychain`.
+5. **IMAP + HTTP de cada feature + armado en `main.go`**: prueba real con tu Gmail.
+6. **Front, base**: Vite + Tailwind + shadcn + TanStack Router + Query + AppShell mobile first.
+7. **Pantalla Resumen** (vista unificada + sección de cobros sin aviso).
+8. **Pantalla Cuentas** (agregar, quitar, sincronizar).
+9. **Pantalla Cartolas** (subir archivo, pegar texto, elegir banco).
+10. **Build único**, Makefile, README.
 
 ## Pendiente
 
-- **PDF real de cartola BCI** para ajustar el parser (fase 2 u 8).
+- **PDF real de cartola BCI** para ajustar el parser (fase 3 o 9).
