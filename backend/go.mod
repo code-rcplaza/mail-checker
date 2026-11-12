@@ -3,6 +3,7 @@ module github.com/code-rcplaza/mail-checker/backend
 go 1.27
 
 require (
+	github.com/go-chi/chi/v5 v5.5.0
 	github.com/pressly/goose/v3 v3.30.0
 	modernc.org/sqlite v1.62.0
 )
