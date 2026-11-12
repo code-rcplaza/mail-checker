@@ -58,7 +58,7 @@ vistas sobre los cobros, con TDD y dobles en memoria, sin base ni red.
 - [x] [04 Cadencia](04-cadence.md)
 - [x] [05 Monto de un servicio conocido](05-known-service-amount.md)
 - [x] [06 Monto de un comercio desconocido](06-unknown-merchant-amount.md)
-- [ ] [07 Detectar una suscripción](07-detect-subscription.md)
+- [x] [07 Detectar una suscripción](07-detect-subscription.md)
 - [ ] [08 Gasto mensual](08-monthly-spend.md)
 - [ ] [09 `GetSummary`](09-get-summary.md)
 - [ ] [10 `ReconcileCharges`](10-reconcile-charges.md)

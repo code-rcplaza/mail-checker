@@ -140,3 +140,25 @@ func TestGroupCharges_SortsEachGroupByDateAndKeepsInputUntouched(t *testing.T) {
 		t.Errorf("input was modified: %v, want %v", charges, original)
 	}
 }
+
+func TestGroupCharges_MarksKnownServices(t *testing.T) {
+	charges := []shared.Charge{
+		charge("known", "STREAMING CO", 599000, shared.CurrencyCLP, 1),
+		charge("umbrella", "APP STORE", 299000, shared.CurrencyCLP, 1),
+		charge("unknown", "MUSIC APP", 399000, shared.CurrencyCLP, 1),
+	}
+
+	got := make(map[GroupKey]bool)
+	for _, group := range GroupCharges(charges, identifyFake, normalizeFake) {
+		got[group.Key] = group.IsKnownService
+	}
+
+	want := map[GroupKey]bool{
+		"service:Streaming Co":          true,
+		"umbrella:App Store:299000:CLP": true,
+		"merchant:MUSIC APP:CLP":        false,
+	}
+	if !reflect.DeepEqual(got, want) {
+		t.Errorf("IsKnownService by key = %v, want %v", got, want)
+	}
+}

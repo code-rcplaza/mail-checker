@@ -20,8 +20,9 @@ type (
 )
 
 type ChargeGroup struct {
-	Key     GroupKey
-	Charges []shared.Charge // ascending by date
+	Key            GroupKey
+	IsKnownService bool            // known or umbrella service from the catalog
+	Charges        []shared.Charge // ascending by date
 }
 
 // GroupCharges puts together the charges of the same subscription: a known
@@ -34,8 +35,8 @@ func GroupCharges(
 	normalize NormalizeMerchantFunc,
 ) []ChargeGroup {
 	chronological := sortByDate(charges)
-	chargesByKey := collectByGroupKey(chronological, identify, normalize)
-	return toGroupsSortedByKey(chargesByKey)
+	groupsByKey := collectByGroupKey(chronological, identify, normalize)
+	return sortGroupsByKey(groupsByKey)
 }
 
 // sortByDate returns a sorted copy; the caller's slice is left untouched.
@@ -51,13 +52,15 @@ func collectByGroupKey(
 	charges []shared.Charge,
 	identify IdentifyServiceFunc,
 	normalize NormalizeMerchantFunc,
-) map[GroupKey][]shared.Charge {
-	chargesByKey := make(map[GroupKey][]shared.Charge)
+) map[GroupKey]ChargeGroup {
+	groupsByKey := make(map[GroupKey]ChargeGroup)
 	for _, c := range charges {
 		key := groupKeyOf(c, identify, normalize)
-		chargesByKey[key] = append(chargesByKey[key], c)
+		_, isKnownService := identify(c.Merchant)
+		group := groupsByKey[key]
+		groupsByKey[key] = ChargeGroup{Key: key, IsKnownService: isKnownService, Charges: append(group.Charges, c)}
 	}
-	return chargesByKey
+	return groupsByKey
 }
 
 func groupKeyOf(
@@ -87,10 +90,10 @@ func merchantKey(normalizedMerchant string, currency shared.Currency) GroupKey {
 	return GroupKey(fmt.Sprintf("merchant:%s:%s", normalizedMerchant, currency))
 }
 
-func toGroupsSortedByKey(chargesByKey map[GroupKey][]shared.Charge) []ChargeGroup {
-	groups := make([]ChargeGroup, 0, len(chargesByKey))
-	for _, key := range slices.Sorted(maps.Keys(chargesByKey)) {
-		groups = append(groups, ChargeGroup{Key: key, Charges: chargesByKey[key]})
+func sortGroupsByKey(groupsByKey map[GroupKey]ChargeGroup) []ChargeGroup {
+	groups := make([]ChargeGroup, 0, len(groupsByKey))
+	for _, key := range slices.Sorted(maps.Keys(groupsByKey)) {
+		groups = append(groups, groupsByKey[key])
 	}
 	return groups
 }

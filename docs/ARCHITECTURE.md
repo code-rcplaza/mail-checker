@@ -298,8 +298,8 @@ type SubscriptionDecisions interface {
 5. Arma cuatro secciones:
    - **Suscripciones**: activas + posibles confirmadas (suman al gasto);
    - **Posibles**: servicio conocido con 1 solo cobro, o comercio desconocido que parece
-     suscripción; sin decidir (no suman);
-   - **Inactivas**;
+     suscripción; sin decidir (no suman). Solo si siguen vigentes (ventana de **Activa**);
+   - **Inactivas**: suscripciones y posibles cuyo último cobro quedó fuera de la ventana;
    - **Otros cobros**: lo que no es suscripción + posibles descartadas.
 6. Suma el gasto mensual de **Suscripciones**, por moneda (una anual cuenta como monto / 12).
 
@@ -319,7 +319,10 @@ llave no es una posible actual → `ErrNotFound`.
 - **Comercio desconocido**: nunca es seguro; es **posible** si tiene ≥ 2 cobros con cadencia y monto
   consistentes, o 1 cobro con descriptor de suscripción (`LooksLikeSubscription`). El usuario la
   confirma o la descarta. Si no, va a otros cobros.
-- **Activa**: último cobro hace ≤ 45 días (≤ 400 si es anual), contando desde **hoy** (reloj inyectado).
+- **Activa**: último cobro hace ≤ 45 días (≤ 400 si es anual: un año + margen por una renovación
+  atrasada), contando desde **hoy** (reloj inyectado). Una posible sin cadencia (1 solo cobro) usa
+  ≤ 365 días. El objetivo es ver lo que se cobra hoy: una posible fuera de su ventana es inactiva y
+  no pide decisión.
 - **Monto, servicio conocido**: el ±25 % **no separa**; el monto actual es el del último cobro y un
   salto > 25 % se muestra como **cambio de plan** (ej. Claude USD 20 → USD 100). Los cobros del
   servicio que no siguen el patrón (ej. créditos de API) van a **otros cobros del servicio**, fuera

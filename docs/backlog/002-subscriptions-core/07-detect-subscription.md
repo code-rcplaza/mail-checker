@@ -19,6 +19,9 @@ inactiva), una posible suscripción, o no es suscripción.
   ("… SUBSCRIPTION", "MEMBERSHIP"), cuando se detecta, entonces es posible.
 - Dado un comercio desconocido con 1 cobro sin descriptor de suscripción, o con montos
   no consistentes, cuando se detecta, entonces no es suscripción.
+- Dada una posible cuyo último cobro está fuera de su ventana de actividad (45 días
+  mensual, 400 anual, 365 sin cadencia), cuando se detecta, entonces es inactiva; dentro
+  de la ventana sigue siendo posible (ej. conocido con 1 cobro hace 300 días).
 
 ## Notas
 - "Hoy" llega como parámetro (`now time.Time`), nunca `time.Now()` en `domain`.
