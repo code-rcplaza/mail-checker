@@ -325,8 +325,8 @@ llave no es una posible actual → `ErrNotFound`.
   servicio que no siguen el patrón (ej. créditos de API) van a **otros cobros del servicio**, fuera
   del gasto mensual: un cobro que llega antes de 24 días desde el último cobro del patrón no puede
   ser la siguiente factura.
-- **Monto, comercio desconocido**: cada cobro se compara con el anterior. Un salto > 25 % que luego
-  se repite es cambio de plan; si el monto cambia casi en cada cobro, no es suscripción.
+- **Monto, comercio desconocido**: cada cobro se compara con el anterior. Con a lo sumo un salto
+  > 25 % el monto es consistente y ese salto es el cambio de plan; con más de uno, no es suscripción.
 - **Umbrella** (Apple, Google Play…): un grupo por monto exacto + moneda.
 
 **`ReconcileCharges(months)`** (vista diferenciada, para ver qué cobros no se avisan):
