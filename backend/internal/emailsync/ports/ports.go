@@ -3,6 +3,7 @@ package ports
 
 import (
 	"context"
+	"time"
 
 	"github.com/code-rcplaza/mail-checker/backend/internal/emailsync/domain"
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
@@ -10,6 +11,8 @@ import (
 
 type AccountDirectory interface {
 	Credentials(ctx context.Context) ([]domain.Credential, error)
+	// RecordSync stores when the account last synced and its error key (empty when fine).
+	RecordSync(ctx context.Context, accountID int64, at time.Time, syncErrKey shared.MessageKey) error
 }
 
 type MailReader interface {

@@ -55,6 +55,6 @@ en memoria, sin IMAP ni base.
 - [x] [02 Tipos de `emailsync`](02-emailsync-types.md)
 - [x] [03 `SyncAll`: camino feliz](03-sync-all-happy-path.md)
 - [x] [04 `SyncAll`: duplicados y no reconocidos](04-sync-all-duplicates-unparsed.md)
-- [ ] [05 `SyncAll`: errores por cuenta](05-sync-all-account-errors.md)
+- [x] [05 `SyncAll`: errores por cuenta](05-sync-all-account-errors.md)
 - [ ] [06 `SyncAll`: validaciones](06-sync-all-guards.md)
 - [ ] [07 `ListUnparsed`](07-list-unparsed.md)

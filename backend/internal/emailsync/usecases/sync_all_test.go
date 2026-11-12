@@ -13,22 +13,43 @@ import (
 
 var testNow = time.Date(2026, 11, 12, 12, 0, 0, 0, time.UTC)
 
-type fakeDirectory struct {
-	credentials []domain.Credential
+type syncRecord struct {
+	accountID int64
+	at        time.Time
+	errKey    shared.MessageKey
 }
 
-func (f fakeDirectory) Credentials(context.Context) ([]domain.Credential, error) {
-	return f.credentials, nil
+type fakeDirectory struct {
+	credentials    []domain.Credential
+	credentialsErr error
+	recordErr      error
+	records        []syncRecord
+}
+
+func (f *fakeDirectory) Credentials(context.Context) ([]domain.Credential, error) {
+	return f.credentials, f.credentialsErr
+}
+
+func (f *fakeDirectory) RecordSync(_ context.Context, accountID int64, at time.Time, errKey shared.MessageKey) error {
+	if f.recordErr != nil {
+		return f.recordErr
+	}
+	f.records = append(f.records, syncRecord{accountID: accountID, at: at, errKey: errKey})
+	return nil
 }
 
 // fakeMailReader serves emails by account and sender, and records every query.
 type fakeMailReader struct {
 	emails  map[string][]domain.RawEmail // key: account email + "|" + sender
+	errs    map[string]error             // key: account email
 	queries []domain.MailQuery
 }
 
 func (f *fakeMailReader) Read(_ context.Context, credential domain.Credential, query domain.MailQuery) ([]domain.RawEmail, error) {
 	f.queries = append(f.queries, query)
+	if err := f.errs[credential.Email]; err != nil {
+		return nil, err
+	}
 	return f.emails[credential.Email+"|"+query.From], nil
 }
 
@@ -54,10 +75,14 @@ func (f fakeParser) Parse(email domain.RawEmail) (shared.ParsedCharge, bool) {
 
 // fakeChargeWriter is idempotent by external id, like the real Insert.
 type fakeChargeWriter struct {
-	inserted []shared.Charge
+	inserted  []shared.Charge
+	insertErr error
 }
 
 func (f *fakeChargeWriter) Insert(_ context.Context, charge shared.Charge) (bool, error) {
+	if f.insertErr != nil {
+		return false, f.insertErr
+	}
 	for _, existing := range f.inserted {
 		if existing.Source == charge.Source && existing.ExternalID == charge.ExternalID {
 			return false, nil
@@ -70,6 +95,8 @@ func (f *fakeChargeWriter) Insert(_ context.Context, charge shared.Charge) (bool
 type fakeUnparsed struct {
 	saved     map[string]domain.UnparsedEmail
 	forgotten []string
+	saveErr   error
+	forgetErr error
 }
 
 func newFakeUnparsed() *fakeUnparsed {
@@ -77,11 +104,17 @@ func newFakeUnparsed() *fakeUnparsed {
 }
 
 func (f *fakeUnparsed) Save(_ context.Context, email domain.UnparsedEmail) error {
+	if f.saveErr != nil {
+		return f.saveErr
+	}
 	f.saved[email.ExternalID] = email
 	return nil
 }
 
 func (f *fakeUnparsed) Forget(_ context.Context, externalID string) error {
+	if f.forgetErr != nil {
+		return f.forgetErr
+	}
 	f.forgotten = append(f.forgotten, externalID)
 	delete(f.saved, externalID)
 	return nil
@@ -101,18 +134,20 @@ func purchase(messageID, sender, merchant string) domain.RawEmail {
 }
 
 type syncFixture struct {
-	reader   *fakeMailReader
-	writer   *fakeChargeWriter
-	unparsed *fakeUnparsed
-	useCase  SyncAll
+	directory *fakeDirectory
+	reader    *fakeMailReader
+	writer    *fakeChargeWriter
+	unparsed  *fakeUnparsed
+	useCase   SyncAll
 }
 
 func newSyncFixture(credentials []domain.Credential, emails map[string][]domain.RawEmail, parsers ...ports.BankEmailParser) syncFixture {
-	reader := &fakeMailReader{emails: emails}
+	directory := &fakeDirectory{credentials: credentials}
+	reader := &fakeMailReader{emails: emails, errs: make(map[string]error)}
 	writer := &fakeChargeWriter{}
 	unparsed := newFakeUnparsed()
-	useCase := NewSyncAll(fakeDirectory{credentials: credentials}, reader, parsers, writer, unparsed, func() time.Time { return testNow })
-	return syncFixture{reader: reader, writer: writer, unparsed: unparsed, useCase: useCase}
+	useCase := NewSyncAll(directory, reader, parsers, writer, unparsed, func() time.Time { return testNow })
+	return syncFixture{directory: directory, reader: reader, writer: writer, unparsed: unparsed, useCase: useCase}
 }
 
 func TestSyncAll_ReadsWithBankFilterSinceNowMinusMonths(t *testing.T) {

@@ -197,7 +197,7 @@ type UnparsedEmail struct {
 // ports
 type AccountDirectory interface {
     Credentials(ctx context.Context) ([]Credential, error)    // {AccountID, AccountPublicID, Email, Password}
-    RecordSync(ctx context.Context, accountID int64, at time.Time, syncErrKey string) error
+    RecordSync(ctx context.Context, accountID int64, at time.Time, syncErrKey shared.MessageKey) error
 }
 type MailReader interface {
     Read(ctx context.Context, cred Credential, q MailQuery) ([]RawEmail, error)
@@ -523,3 +523,5 @@ Al terminar cada fase **paramos** y revisamos antes de seguir.
 - **PDF real de cartola BCI** para ajustar el parser (fase 3 o 9).
 - **Ocultar la contraseña de `Credential` en logs** (`LogValue()` que la reemplace), para que un
   `slog.Any("cred", cred)` accidental no la exponga.
+- **Registrar el detalle de un error de lectura de correo** en `SyncAll` (hoy solo queda la llave en
+  el `SyncResult`): con `slog`, sin correo ni contraseña, cuando exista el lector IMAP real (fase 5).

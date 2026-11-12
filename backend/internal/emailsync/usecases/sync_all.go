@@ -60,16 +60,48 @@ func (u SyncAll) readCredentials(ctx context.Context) ([]domain.Credential, erro
 	return credentials, nil
 }
 
+// syncAccount keeps a mail read failure in the account's result so the other
+// accounts still sync; a storage failure stops everything.
 func (u SyncAll) syncAccount(ctx context.Context, credential domain.Credential, since time.Time) (domain.SyncResult, error) {
+	result, err := u.syncBanks(ctx, credential, since)
+	if err != nil {
+		return domain.SyncResult{}, err
+	}
+	if err := u.recordSync(ctx, credential, result.ErrorKey); err != nil {
+		return domain.SyncResult{}, err
+	}
+	return result, nil
+}
+
+func (u SyncAll) syncBanks(ctx context.Context, credential domain.Credential, since time.Time) (domain.SyncResult, error) {
 	result := domain.SyncResult{AccountPublicID: credential.AccountPublicID, Email: credential.Email}
 	for _, parser := range u.parsers {
-		outcomes, err := u.syncBank(ctx, credential, parser, since)
+		emails, readErr := u.readBankEmails(ctx, credential, parser, since)
+		if readErr != nil {
+			result.ErrorKey = mailErrorKey(readErr)
+			return result, nil
+		}
+		outcomes, err := u.saveEmails(ctx, credential, parser, emails)
 		if err != nil {
 			return domain.SyncResult{}, err
 		}
 		result = countOutcomes(result, outcomes)
 	}
 	return result, nil
+}
+
+func mailErrorKey(readErr error) shared.MessageKey {
+	if errors.Is(readErr, domain.ErrMailAuthRejected) {
+		return domain.KeyMailAuthFailed
+	}
+	return domain.KeyMailReadFailed
+}
+
+func (u SyncAll) recordSync(ctx context.Context, credential domain.Credential, errKey shared.MessageKey) error {
+	if err := u.accounts.RecordSync(ctx, credential.AccountID, u.now(), errKey); err != nil {
+		return fmt.Errorf("record sync of account %s: %w", credential.AccountPublicID, err)
+	}
+	return nil
 }
 
 // emailOutcome is what happened to one email of the sync.
@@ -81,11 +113,7 @@ const (
 	outcomeUnparsed
 )
 
-func (u SyncAll) syncBank(ctx context.Context, credential domain.Credential, parser ports.BankEmailParser, since time.Time) ([]emailOutcome, error) {
-	emails, err := u.readBankEmails(ctx, credential, parser, since)
-	if err != nil {
-		return nil, err
-	}
+func (u SyncAll) saveEmails(ctx context.Context, credential domain.Credential, parser ports.BankEmailParser, emails []domain.RawEmail) ([]emailOutcome, error) {
 	outcomes := make([]emailOutcome, 0, len(emails))
 	for _, email := range emails {
 		outcome, err := u.saveEmail(ctx, credential, parser, email)
