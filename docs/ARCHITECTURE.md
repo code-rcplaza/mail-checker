@@ -183,7 +183,7 @@ type SyncResult struct {
     AccountPublicID string
     Email     string
     Found, New, Unparsed int
-    ErrorKey  string   // llave i18n, ej. emailsync.mail_auth_failed
+    ErrorKey  shared.MessageKey // llave i18n, ej. emailsync.mail_auth_failed; vacía si no hubo error
 }
 type UnparsedEmail struct {
     ExternalID string
@@ -521,3 +521,5 @@ Al terminar cada fase **paramos** y revisamos antes de seguir.
 ## Pendiente
 
 - **PDF real de cartola BCI** para ajustar el parser (fase 3 o 9).
+- **Ocultar la contraseña de `Credential` en logs** (`LogValue()` que la reemplace), para que un
+  `slog.Any("cred", cred)` accidental no la exponga.
