@@ -56,4 +56,4 @@ agregue su lógica y sus adaptadores.
 - [x] [05 Transacciones con `WithTx`](05-with-tx.md)
 - [x] [06 Router, health y JSON](06-router-health-json.md)
 - [x] [07 Mapeo de errores a HTTP](07-error-mapping.md)
-- [ ] [08 `main.go`, `slog` y apagado ordenado](08-main-shutdown.md)
+- [x] [08 `main.go`, `slog` y apagado ordenado](08-main-shutdown.md)
