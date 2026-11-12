@@ -294,7 +294,8 @@ type SubscriptionDecisions interface {
    - servicio conocido → un grupo por servicio (sin importar moneda ni banco);
    - servicio *umbrella* (Apple, Google Play…) → un grupo por monto;
    - comercio desconocido → por nombre normalizado y moneda.
-4. Aplica las reglas de recurrencia del dominio (ver abajo) y las decisiones del usuario.
+4. Aplica las reglas de recurrencia del dominio (ver abajo) y las decisiones del usuario (una
+   decisión solo se aplica mientras el grupo es posible).
 5. Arma cuatro secciones:
    - **Suscripciones**: activas + posibles confirmadas (suman al gasto);
    - **Posibles**: servicio conocido con 1 solo cobro, o comercio desconocido que parece

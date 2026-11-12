@@ -13,4 +13,5 @@ type Subscription struct {
 	Amount   shared.Money
 	Currency shared.Currency
 	Decision *Decision // nil while undecided
+	Charges  []shared.Charge
 }

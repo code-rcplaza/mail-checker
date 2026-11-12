@@ -64,3 +64,4 @@ vistas sobre los cobros, con TDD y dobles en memoria, sin base ni red.
 - [ ] [10 `ReconcileCharges`](10-reconcile-charges.md)
 - [ ] [11 Confirmar o descartar una posible](11-decide-possible-subscription.md)
 - [x] [12 Patrón de un servicio conocido por respaldo](12-known-service-pattern.md)
+- [x] [13 Armar el resumen](13-build-summary.md)
