@@ -6,6 +6,19 @@ import (
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
 
+// The number of unparsed emails the user can ask for at once.
+const (
+	MinUnparsedLimit = 1
+	MaxUnparsedLimit = 100
+)
+
+func ValidateUnparsedLimit(limit int) error {
+	if limit < MinUnparsedLimit || limit > MaxUnparsedLimit {
+		return shared.Invalid(KeyLimitOutOfRange, nil)
+	}
+	return nil
+}
+
 // PreviewMaxRunes caps the preview kept from an unparsed email's body.
 const PreviewMaxRunes = 200
 

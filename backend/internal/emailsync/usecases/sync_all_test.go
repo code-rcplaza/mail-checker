@@ -113,6 +113,9 @@ func (f *fakeUnparsed) Save(_ context.Context, email domain.UnparsedEmail) error
 	return nil
 }
 
+// List is unused by SyncAll; it is here to satisfy the port.
+func (f *fakeUnparsed) List(context.Context, int) ([]domain.UnparsedEmail, error) { return nil, nil }
+
 func (f *fakeUnparsed) Forget(_ context.Context, externalID string) error {
 	if f.forgetErr != nil {
 		return f.forgetErr

@@ -36,4 +36,5 @@ type ChargeWriter interface {
 type UnparsedRepository interface {
 	Save(ctx context.Context, email domain.UnparsedEmail) error
 	Forget(ctx context.Context, externalID string) error
+	List(ctx context.Context, limit int) ([]domain.UnparsedEmail, error)
 }
