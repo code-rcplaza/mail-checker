@@ -50,7 +50,7 @@ idea implementa la gestión de cuentas y el puente que le entrega las credencial
   asigna el `ID`.
 
 ## Historias
-- [ ] [01 Tipos de `accounts`](01-account-types.md)
+- [x] [01 Tipos de `accounts`](01-account-types.md)
 - [ ] [02 `AddAccount` y `ListAccounts`](02-add-and-list-accounts.md)
 - [ ] [03 `RemoveAccount` y `RecordSync`](03-remove-account-and-record-sync.md)
 - [ ] [04 `Credentials`](04-credentials.md)
