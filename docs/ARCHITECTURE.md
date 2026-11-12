@@ -323,8 +323,10 @@ llave no es una posible actual → `ErrNotFound`.
 - **Monto, servicio conocido**: el ±25 % **no separa**; el monto actual es el del último cobro y un
   salto > 25 % se muestra como **cambio de plan** (ej. Claude USD 20 → USD 100). Los cobros del
   servicio que no siguen el patrón (ej. créditos de API) van a **otros cobros del servicio**, fuera
-  del gasto mensual: un cobro que llega antes de 24 días desde el último cobro del patrón no puede
-  ser la siguiente factura.
+  del gasto mensual. Un cobro es del patrón si otro lo **respalda** (misma moneda, monto a ±25 % e
+  intervalo mensual o anual), o si está a un intervalo de la cadencia del patrón del cobro respaldado
+  más cercano (así se mantiene un cambio de plan reciente). Si ningún cobro tiene respaldo, un cobro
+  a menos de 24 días del anterior es otro cobro. Un cambio de moneda es cambio de plan.
 - **Monto, comercio desconocido**: cada cobro se compara con el anterior. Con a lo sumo un
   salto > 25 % el monto es consistente y ese salto es el cambio de plan; con más de uno, no es suscripción.
 - **Umbrella** (Apple, Google Play…): un grupo por monto exacto + moneda.

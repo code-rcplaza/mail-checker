@@ -21,7 +21,8 @@ para que el monto actual y los cambios de plan sean correctos.
   analiza, entonces hay un cambio de plan CLP 5.990 → USD 7,99 y el monto actual es
   USD 7,99.
 - Dados los cobros de los criterios de 002-05, cuando se analizan, entonces el
-  resultado no cambia (sus tests siguen en verde sin tocarlos).
+  resultado es el mismo (sus tests solo agregan la moneda en el cambio de plan
+  esperado).
 
 ## Fuera
 - Comercio desconocido → 002-06.

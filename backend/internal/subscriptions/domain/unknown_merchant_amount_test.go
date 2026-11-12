@@ -39,7 +39,7 @@ func TestAnalyzeUnknownMerchantAmount_OneJumpIsConsistentWithPlanChange(t *testi
 	if got.Current != 10000 {
 		t.Errorf("current = %d, want 10000", got.Current)
 	}
-	want := []PlanChange{{From: 2000, To: 10000, At: dayOf(61)}}
+	want := []PlanChange{{From: 2000, To: 10000, FromCurrency: shared.CurrencyCLP, ToCurrency: shared.CurrencyCLP, At: dayOf(61)}}
 	if !reflect.DeepEqual(got.PlanChanges, want) {
 		t.Errorf("plan changes = %+v, want %+v", got.PlanChanges, want)
 	}
