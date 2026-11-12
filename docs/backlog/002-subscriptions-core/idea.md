@@ -60,7 +60,7 @@ vistas sobre los cobros, con TDD y dobles en memoria, sin base ni red.
 - [x] [06 Monto de un comercio desconocido](06-unknown-merchant-amount.md)
 - [x] [07 Detectar una suscripción](07-detect-subscription.md)
 - [x] [08 Gasto mensual](08-monthly-spend.md)
-- [ ] [09 `GetSummary`](09-get-summary.md)
+- [x] [09 `GetSummary`](09-get-summary.md)
 - [ ] [10 `ReconcileCharges`](10-reconcile-charges.md)
 - [ ] [11 Confirmar o descartar una posible](11-decide-possible-subscription.md)
 - [x] [12 Patrón de un servicio conocido por respaldo](12-known-service-pattern.md)
