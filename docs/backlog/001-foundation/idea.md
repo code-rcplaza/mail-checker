@@ -49,7 +49,7 @@ agregue su lógica y sus adaptadores.
 - Ninguna.
 
 ## Historias
-- [ ] [01 Módulo, errores de dominio y reloj](01-module-errors-clock.md)
+- [x] [01 Módulo, errores de dominio y reloj](01-module-errors-clock.md)
 - [ ] [02 Configuración con fail fast](02-config.md)
 - [ ] [03 Abrir SQLite con PRAGMAs](03-sqlite-open.md)
 - [ ] [04 Migraciones embebidas](04-migrations.md)
