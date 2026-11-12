@@ -53,7 +53,7 @@ vistas sobre los cobros, con TDD y dobles en memoria, sin base ni red.
 
 ## Historias
 - [x] [01 Tipos de cobro](01-charge-types.md)
-- [ ] [02 Agrupar cobros](02-group-charges.md)
+- [x] [02 Agrupar cobros](02-group-charges.md)
 - [ ] [03 Regla de coincidencia cartola ↔ correo](03-match-across-sources.md)
 - [ ] [04 Cadencia](04-cadence.md)
 - [ ] [05 Monto de un servicio conocido](05-known-service-amount.md)

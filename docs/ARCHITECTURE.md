@@ -305,7 +305,10 @@ type SubscriptionDecisions interface {
 
 **`DecidePossibleSubscription(groupKey, confirm(monthly | yearly) | dismiss)`:** guarda la decisión del
 usuario sobre una posible. Al confirmar, **el usuario elige la cadencia** (ej. Netflix USD 120 → anual):
-la app la respeta y no la vuelve a inferir. La llave del grupo es estable entre recálculos (ej. `merchant:STREAMING CO:CLP`). Si la
+la app la respeta y no la vuelve a inferir. La llave del grupo es estable entre recálculos:
+`service:<nombre>` (servicio conocido), `umbrella:<nombre>:<monto en centésimas>:<moneda>` (ej.
+`umbrella:App Store:299000:CLP`) o `merchant:<nombre normalizado>:<moneda>` (ej.
+`merchant:STREAMING CO:CLP`). Si la
 llave no es una posible actual → `ErrNotFound`.
 
 **Reglas de recurrencia** (constantes con nombre en `subscriptions/domain`):
