@@ -120,6 +120,9 @@ la contradice, se pregunta antes de cambiarla.
 ### ACID (SQLite)
 - Atomicidad: cada método de repo que escribe más de una fila abre y cierra su
   transacción dentro del adaptador. Los casos de uso no manejan transacciones.
+- Dentro de `sqlite.WithTx` solo se usa la transacción (`q := queries.WithTx(tx)`),
+  nunca el repo ni `db`: la base tiene una sola conexión y usar `db` ahí se bloquea.
+  Los tests de repos (base temporal real + `-timeout 60s`) lo detectan.
 - Una transacción por unidad de trabajo: si falla la sincronización de una cuenta,
   se revierte solo esa; las demás siguen.
 - Idempotencia: resincronizar o reimportar no duplica (`UNIQUE` +
@@ -132,8 +135,10 @@ la contradice, se pregunta antes de cambiarla.
 
 ## Loop de desarrollo
 `/idea` → `/stories NNN` → `/story NNN-MM` (skills en `.claude/skills/`).
-- Paradas para revisión: después de la idea, de las historias, del plan, de RED y
-  de VERIFY.
+- Paradas para revisión: después de la idea, después de las historias, y al final
+  de cada `/story` (informe con RED y VERIFY). `/story` corre el ciclo TDD completo
+  sin parar, salvo paradas obligatorias (decisión del usuario, ejemplo real
+  faltante, diff > ~300 líneas, dos fallas seguidas, archivo fuera del plan).
 - Cada fase de `docs/ARCHITECTURE.md` se trabaja como una idea.
 - Referencias `NNN-MM` (idea 3 dígitos, historia 2) en historias y commits.
 
@@ -150,8 +155,9 @@ la contradice, se pregunta antes de cambiarla.
   historia cambia el diseño, se lleva a `ARCHITECTURE.md` al cerrarla.
 
 ## Reglas para Claude (no arrancarse)
-- **Antes de escribir código**: decir qué archivos se tocan y qué se hace en cada
-  uno, y esperar el ok.
+- **Antes de escribir código**: fuera de `/story`, decir qué archivos se tocan y qué
+  se hace en cada uno, y esperar el ok. Dentro de `/story`, el plan sale de la
+  historia aprobada y se reporta en el informe final.
 - **Alcance cerrado**: solo los archivos del plan; si hace falta otro, se pregunta.
   Nada "de paso" (refactors, renombres, formateo ajeno a la tarea).
 - **Siempre se pregunta antes de**: agregar dependencias, editar
@@ -200,7 +206,7 @@ la contradice, se pregunta antes de cambiarla.
 
 ## Comandos
 Backend (desde `backend/`, módulo `github.com/code-rcplaza/mail-checker/backend`):
-- Test: `go test ./...`
+- Test: `go test -timeout 60s ./...` (un bloqueo falla en 1 min, no en 10)
 - Vet: `go vet ./...`
 - Staticcheck: `staticcheck ./...` (instalado en `$(go env GOPATH)/bin`)
 - Build: `go build ./...`
