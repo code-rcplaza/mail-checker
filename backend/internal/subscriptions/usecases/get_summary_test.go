@@ -108,7 +108,7 @@ func TestGetSummary_ActiveServiceAndConfirmedPossibleAreSubscriptions(t *testing
 		chargeDaysAgo("m2", "MUSIC APP", shared.SourceEmail, 399000, 10),
 	}}
 	decisions := fakeDecisions{decisions: map[domain.GroupKey]domain.Decision{
-		"merchant:MUSIC APP:CLP": {Kind: domain.DecisionConfirmed, Cadence: domain.CadenceMonthly},
+		"merchant:MUSIC APP:CLP||d02": {Kind: domain.DecisionConfirmed, Cadence: domain.CadenceMonthly},
 	}}
 
 	got, err := getSummary(reader, decisions, 6)
@@ -120,7 +120,7 @@ func TestGetSummary_ActiveServiceAndConfirmedPossibleAreSubscriptions(t *testing
 	for _, s := range got.Subscriptions {
 		keys[s.Key] = true
 	}
-	if !keys["service:Streaming Co"] || !keys["merchant:MUSIC APP:CLP"] || len(keys) != 2 {
+	if !keys["service:Streaming Co||d02"] || !keys["merchant:MUSIC APP:CLP||d02"] || len(keys) != 2 {
 		t.Errorf("subscriptions = %v, want the active service and the confirmed possible", keys)
 	}
 }

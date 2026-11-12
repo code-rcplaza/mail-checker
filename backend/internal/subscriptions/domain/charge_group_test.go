@@ -62,6 +62,19 @@ func externalIDsByKey(groups []ChargeGroup) map[GroupKey][]string {
 	return result
 }
 
+// externalIDsByParent reduces groups to their parents and charge ids, in date order.
+func externalIDsByParent(groups []ChargeGroup) map[GroupKey][]string {
+	byParent := make(map[GroupKey][]shared.Charge, len(groups))
+	for _, group := range groups {
+		byParent[group.Parent] = append(byParent[group.Parent], group.Charges...)
+	}
+	result := make(map[GroupKey][]string, len(byParent))
+	for parent, charges := range byParent {
+		result[parent] = externalIDs(sortByDate(charges))
+	}
+	return result
+}
+
 func TestGroupCharges(t *testing.T) {
 	cases := []struct {
 		name    string
@@ -77,15 +90,12 @@ func TestGroupCharges(t *testing.T) {
 			want: map[GroupKey][]string{"service:Streaming Co": {"a", "b"}},
 		},
 		{
-			name: "umbrella service splits by exact amount",
+			name: "umbrella service groups under one parent",
 			charges: []shared.Charge{
 				charge("a", "APP STORE", 299000, shared.CurrencyCLP, 1),
 				charge("b", "APP STORE", 999000, shared.CurrencyCLP, 2),
 			},
-			want: map[GroupKey][]string{
-				"umbrella:App Store:299000:CLP": {"a"},
-				"umbrella:App Store:999000:CLP": {"b"},
-			},
+			want: map[GroupKey][]string{"umbrella:App Store": {"a", "b"}},
 		},
 		{
 			name: "umbrella service with same amount splits by currency",
@@ -93,10 +103,7 @@ func TestGroupCharges(t *testing.T) {
 				charge("a", "APP STORE", 299000, shared.CurrencyCLP, 1),
 				charge("b", "APP STORE", 299000, shared.CurrencyUSD, 2),
 			},
-			want: map[GroupKey][]string{
-				"umbrella:App Store:299000:CLP": {"a"},
-				"umbrella:App Store:299000:USD": {"b"},
-			},
+			want: map[GroupKey][]string{"umbrella:App Store": {"a", "b"}},
 		},
 		{
 			name: "unknown merchants join by normalized name and split by currency",
@@ -113,7 +120,7 @@ func TestGroupCharges(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := externalIDsByKey(GroupCharges(tc.charges, identifyFake, normalizeFake))
+			got := externalIDsByParent(GroupCharges(tc.charges, identifyFake, normalizeFake))
 
 			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("groups = %v, want %v", got, tc.want)
@@ -132,7 +139,7 @@ func TestGroupCharges_SortsEachGroupByDateAndKeepsInputUntouched(t *testing.T) {
 
 	got := externalIDsByKey(GroupCharges(charges, identifyFake, normalizeFake))
 
-	want := map[GroupKey][]string{"service:Streaming Co": {"january", "february", "march"}}
+	want := map[GroupKey][]string{"service:Streaming Co||d01": {"january", "february", "march"}}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("groups = %v, want %v", got, want)
 	}
@@ -154,9 +161,9 @@ func TestGroupCharges_MarksKnownServices(t *testing.T) {
 	}
 
 	want := map[GroupKey]bool{
-		"service:Streaming Co":          true,
-		"umbrella:App Store:299000:CLP": true,
-		"merchant:MUSIC APP:CLP":        false,
+		"service:Streaming Co||d01":   true,
+		"umbrella:App Store||d01":     true,
+		"merchant:MUSIC APP:CLP||d01": false,
 	}
 	if !reflect.DeepEqual(got, want) {
 		t.Errorf("IsKnownService by key = %v, want %v", got, want)

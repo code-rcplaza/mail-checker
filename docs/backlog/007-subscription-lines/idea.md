@@ -80,6 +80,6 @@ información, la detección debe separar cada suscripción aunque compartan serv
 - [x] [03 Encadenar líneas](03-chain-lines.md)
 - [x] [03b Líneas por banda de monto](03b-amount-bands.md)
 - [x] [04 Clave estable de la línea](04-line-key.md)
-- [ ] [05 `GroupCharges` produce líneas](05-group-charges-lines.md)
+- [x] [05 `GroupCharges` produce líneas](05-group-charges-lines.md)
 - [ ] [06 Resumen por línea con los escenarios reales](06-summary-by-line.md)
 - [ ] [07 Alias de línea](07-line-alias.md)

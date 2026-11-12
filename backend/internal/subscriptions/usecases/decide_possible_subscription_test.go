@@ -10,7 +10,7 @@ import (
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/domain"
 )
 
-const possibleKey domain.GroupKey = "merchant:MUSIC APP:CLP"
+const possibleKey domain.GroupKey = "merchant:MUSIC APP:CLP||d02"
 
 // recordingDecisions keeps what was saved, or fails on Save when saveErr is set.
 type recordingDecisions struct {
