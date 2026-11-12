@@ -130,6 +130,25 @@ la contradice, se pregunta antes de cambiarla.
 - Durabilidad: `synchronous=FULL`.
 - Cada migración de goose corre en una transacción.
 
+## Loop de desarrollo
+`/idea` → `/stories NNN` → `/story NNN-MM` (skills en `.claude/skills/`).
+- Paradas para revisión: después de la idea, de las historias, del plan, de RED y
+  de VERIFY.
+- Cada fase de `docs/ARCHITECTURE.md` se trabaja como una idea.
+- Referencias `NNN-MM` (idea 3 dígitos, historia 2) en historias y commits.
+
+### Organización de los `.md`
+- Solo en tres lugares: raíz (`README.md`, `CLAUDE.md`), `docs/ARCHITECTURE.md` y
+  `docs/backlog/**`. Cualquier otro `.md` se pregunta antes (nada de `notes.md`,
+  `plan.md`, `TODO.md`; lo temporal va al scratchpad o a Engram).
+- `docs/backlog/NNN-slug/idea.md` + `MM-slug.md` por historia. Slugs en inglés,
+  kebab-case; contenido en español.
+- Estado en un solo lugar: ideas en `docs/backlog/README.md`; historias en el
+  checklist de su `idea.md`. Los archivos de historia no llevan estado.
+- Ideas terminadas no se mueven ni se borran.
+- El backlog es historial; `docs/ARCHITECTURE.md` es la verdad vigente. Si una
+  historia cambia el diseño, se lleva a `ARCHITECTURE.md` al cerrarla.
+
 ## Reglas para Claude (no arrancarse)
 - **Antes de escribir código**: decir qué archivos se tocan y qué se hace en cada
   uno, y esperar el ok.
