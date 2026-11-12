@@ -52,11 +52,12 @@ func newConfirmation(cadence string) (Decision, error) {
 	return Decision{Kind: DecisionConfirmed, Cadence: chosen}, nil
 }
 
-// IsCurrentPossible tells whether key names a group that is a possible
-// subscription today, with the same detection the summary uses.
+// IsCurrentPossible tells whether key names a line that is a possible
+// subscription today, with the same detection the summary uses. One-off
+// charges are never asked about.
 func IsCurrentPossible(groups []ChargeGroup, key GroupKey, looksLikeSubscription LooksLikeSubscriptionFunc, now time.Time) bool {
 	group, isFound := findGroup(groups, key)
-	if !isFound {
+	if !isFound || group.IsOneOff {
 		return false
 	}
 	return DetectSubscription(group, looksLikeSubscription, now).Status == StatusPossible

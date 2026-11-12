@@ -7,7 +7,8 @@ import (
 // Subscription is a detected group with its current amount and, for a
 // possible one, the user's decision.
 type Subscription struct {
-	Key      GroupKey
+	Key      GroupKey // the line
+	Parent   GroupKey // the service, umbrella or merchant the line belongs to
 	Status   Status
 	Cadence  Cadence
 	Amount   shared.Money

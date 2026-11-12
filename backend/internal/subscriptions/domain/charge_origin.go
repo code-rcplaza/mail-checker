@@ -16,7 +16,8 @@ type origin struct {
 
 // SplitByOrigin separates the charges of one parent by where they were paid
 // from: mail account and card. A statement charge has no account, so it joins
-// the origin it chains with, or stays apart. Origins come out in order of
+// the account origin it chains with or, if none, the statement origin of its
+// card. Origins come out in order of
 // their first charge; the caller's slice is left untouched.
 func SplitByOrigin(charges []shared.Charge) [][]shared.Charge {
 	chronological := sortByDate(charges)
@@ -41,9 +42,26 @@ func joinChargesWithoutAccount(origins []origin, chronological []shared.Charge) 
 		if c.AccountID != nil {
 			continue
 		}
-		origins = addToOrigin(origins, c, func(o origin) bool { return chainsWithOrigin(o, c) })
+		origins = addToOrigin(origins, c, originForChargeWithoutAccount(origins, c))
 	}
 	return sortOriginsByFirstCharge(origins)
+}
+
+// originForChargeWithoutAccount prefers an account origin the charge chains
+// with. Otherwise it goes with the other statement charges of its card, as
+// nothing tells them apart; the lines split them later.
+func originForChargeWithoutAccount(origins []origin, c shared.Charge) func(origin) bool {
+	chainsWithAccount := func(o origin) bool {
+		return o.accountID != nil && isSameCard(o.cardLast4, c.CardLast4) && chainsWithOrigin(o, c)
+	}
+	if slices.ContainsFunc(origins, chainsWithAccount) {
+		return chainsWithAccount
+	}
+	return isStatementOrigin
+}
+
+func isStatementOrigin(o origin) bool {
+	return o.accountID == nil
 }
 
 // addToOrigin puts c in the first origin that fits, or opens a new one.

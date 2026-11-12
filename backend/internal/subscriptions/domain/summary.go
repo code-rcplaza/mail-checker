@@ -14,18 +14,40 @@ type Summary struct {
 	MonthlySpend  map[shared.Currency]shared.Money
 }
 
-// BuildSummary puts each group in its section, honoring the user's decisions
-// on possible subscriptions, and adds up the monthly spend.
+// BuildSummary puts each line in its section, honoring the user's decisions
+// on possible subscriptions, sends one-off charges to other charges and adds
+// up the monthly spend.
 func BuildSummary(
 	groups []ChargeGroup,
 	decisions map[GroupKey]Decision,
 	looksLikeSubscription LooksLikeSubscriptionFunc,
 	now time.Time,
 ) Summary {
-	subscriptions := buildSubscriptions(groups, decisions, looksLikeSubscription, now)
+	lines, oneOff := splitOneOffGroups(groups)
+	subscriptions := buildSubscriptions(lines, decisions, looksLikeSubscription, now)
 	summary := sortIntoSections(subscriptions)
+	summary.OtherCharges = append(summary.OtherCharges, chargesOfGroups(oneOff)...)
 	summary.MonthlySpend = MonthlySpend(summary.Subscriptions)
 	return summary
+}
+
+func splitOneOffGroups(groups []ChargeGroup) (lines, oneOff []ChargeGroup) {
+	for _, group := range groups {
+		if group.IsOneOff {
+			oneOff = append(oneOff, group)
+			continue
+		}
+		lines = append(lines, group)
+	}
+	return lines, oneOff
+}
+
+func chargesOfGroups(groups []ChargeGroup) []shared.Charge {
+	var charges []shared.Charge
+	for _, group := range groups {
+		charges = append(charges, group.Charges...)
+	}
+	return charges
 }
 
 func buildSubscriptions(
@@ -51,6 +73,7 @@ func buildSubscription(
 	amount, currency := currentAmount(group)
 	subscription := Subscription{
 		Key:      group.Key,
+		Parent:   group.Parent,
 		Status:   detection.Status,
 		Cadence:  detection.Cadence,
 		Amount:   amount,

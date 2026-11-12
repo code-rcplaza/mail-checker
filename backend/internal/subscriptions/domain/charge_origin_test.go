@@ -87,6 +87,17 @@ func TestSplitByOrigin_StatementChargeThatChainsWithNoOriginStaysApart(t *testin
 	assertOrigins(t, charges, [][]string{{"a1"}, {"s1"}})
 }
 
+func TestSplitByOrigin_StatementChargesWithoutAccountShareOneOrigin(t *testing.T) {
+	charges := []shared.Charge{
+		paidCharge("music-aug", nil, "4821", time.August, 5),
+		paidCharge("cloud-aug", nil, "4821", time.August, 9),
+		paidCharge("music-sep", nil, "4821", time.September, 5),
+		paidCharge("cloud-sep", nil, "4821", time.September, 9),
+	}
+
+	assertOrigins(t, charges, [][]string{{"music-aug", "cloud-aug", "music-sep", "cloud-sep"}})
+}
+
 func TestSplitByOrigin_EmptyCardDoesNotSeparate(t *testing.T) {
 	charges := []shared.Charge{
 		paidCharge("a1", &accountA, "4821", time.August, 1),
