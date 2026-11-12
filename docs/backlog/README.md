@@ -14,4 +14,4 @@ Loop: `/idea` → `/stories NNN` → `/story NNN-MM` (TDD). Reglas en `CLAUDE.md
 | 002 | [Núcleo de suscripciones (fase 2, parte 1)](002-subscriptions-core/idea.md) | done |
 | 003 | [Núcleo de sincronización de correos (fase 2, parte 2)](003-emailsync-core/idea.md) | done |
 | 004 | [Núcleo de cartolas (fase 2, parte 3)](004-statements-core/idea.md) | done |
-| 005 | [Núcleo de cuentas (fase 2, parte 4)](005-accounts-core/idea.md) | doing |
+| 005 | [Núcleo de cuentas (fase 2, parte 4)](005-accounts-core/idea.md) | done |
