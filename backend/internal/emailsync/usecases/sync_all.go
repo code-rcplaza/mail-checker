@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"slices"
+	"sync/atomic"
 	"time"
 
 	"github.com/code-rcplaza/mail-checker/backend/internal/emailsync/domain"
@@ -21,6 +22,8 @@ type SyncAll struct {
 	charges  ports.ChargeWriter
 	unparsed ports.UnparsedRepository
 	now      func() time.Time
+	// inProgress is shared by every copy of SyncAll, so only one sync runs at a time.
+	inProgress *atomic.Bool
 }
 
 // NewSyncAll copies the bank registry so it stays read-only after main builds it.
@@ -32,10 +35,41 @@ func NewSyncAll(
 	unparsed ports.UnparsedRepository,
 	now func() time.Time,
 ) SyncAll {
-	return SyncAll{accounts: accounts, mail: mail, parsers: slices.Clone(parsers), charges: charges, unparsed: unparsed, now: now}
+	return SyncAll{
+		accounts:   accounts,
+		mail:       mail,
+		parsers:    slices.Clone(parsers),
+		charges:    charges,
+		unparsed:   unparsed,
+		now:        now,
+		inProgress: &atomic.Bool{},
+	}
 }
 
 func (u SyncAll) Execute(ctx context.Context, months int) ([]domain.SyncResult, error) {
+	if err := domain.ValidateSyncMonths(months); err != nil {
+		return nil, err
+	}
+	if err := u.startSync(); err != nil {
+		return nil, err
+	}
+	defer u.finishSync()
+	return u.syncAccounts(ctx, months)
+}
+
+func (u SyncAll) startSync() error {
+	if !u.inProgress.CompareAndSwap(false, true) {
+		return shared.Conflict(domain.KeySyncInProgress)
+	}
+	return nil
+}
+
+// finishSync runs whether the sync succeeded or failed, so the next one can start.
+func (u SyncAll) finishSync() {
+	u.inProgress.Store(false)
+}
+
+func (u SyncAll) syncAccounts(ctx context.Context, months int) ([]domain.SyncResult, error) {
 	credentials, err := u.readCredentials(ctx)
 	if err != nil {
 		return nil, err

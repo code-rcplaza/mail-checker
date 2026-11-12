@@ -20,13 +20,15 @@ type syncRecord struct {
 }
 
 type fakeDirectory struct {
-	credentials    []domain.Credential
-	credentialsErr error
-	recordErr      error
-	records        []syncRecord
+	credentials      []domain.Credential
+	credentialsErr   error
+	credentialsCalls int
+	recordErr        error
+	records          []syncRecord
 }
 
 func (f *fakeDirectory) Credentials(context.Context) ([]domain.Credential, error) {
+	f.credentialsCalls++
 	return f.credentials, f.credentialsErr
 }
 
