@@ -52,7 +52,7 @@ agregue su lógica y sus adaptadores.
 - [x] [01 Módulo, errores de dominio y reloj](01-module-errors-clock.md)
 - [x] [02 Configuración con fail fast](02-config.md)
 - [x] [03 Abrir SQLite con PRAGMAs](03-sqlite-open.md)
-- [ ] [04 Migraciones embebidas](04-migrations.md)
+- [x] [04 Migraciones embebidas](04-migrations.md)
 - [ ] [05 Transacciones con `WithTx`](05-with-tx.md)
 - [ ] [06 Router, health y JSON](06-router-health-json.md)
 - [ ] [07 Mapeo de errores a HTTP](07-error-mapping.md)
