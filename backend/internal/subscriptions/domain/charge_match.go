@@ -12,11 +12,12 @@ const MatchWindow = 35 * 24 * time.Hour
 
 // ChargesMatch tells whether a statement charge and an email charge are the
 // same purchase: same bank, same service (the identity used for grouping),
-// same amount and currency, within MatchWindow.
+// same amount and currency, same card when both show it, within MatchWindow.
 func ChargesMatch(statement, email shared.Charge, identify IdentifyServiceFunc, normalize NormalizeMerchantFunc) bool {
 	return statement.Bank == email.Bank &&
 		statement.Amount == email.Amount &&
 		statement.Currency == email.Currency &&
+		isSameCard(statement.CardLast4, email.CardLast4) &&
 		isWithinMatchWindow(statement.OccurredAt, email.OccurredAt) &&
 		groupKeyOf(statement, identify, normalize) == groupKeyOf(email, identify, normalize)
 }

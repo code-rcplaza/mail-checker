@@ -76,7 +76,7 @@ información, la detección debe separar cada suscripción aunque compartan serv
 
 ## Historias
 - [x] [01 Últimos 4 dígitos de la tarjeta](01-card-last4.md)
-- [ ] [02 Separar por origen](02-split-by-origin.md)
+- [x] [02 Separar por origen](02-split-by-origin.md)
 - [ ] [03 Encadenar líneas](03-chain-lines.md)
 - [ ] [04 Clave estable de la línea](04-line-key.md)
 - [ ] [05 `GroupCharges` produce líneas](05-group-charges-lines.md)
