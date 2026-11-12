@@ -14,8 +14,8 @@ coverage.out
 # Frontend
 node_modules/
 frontend/dist/
-backend/internal/shared/platform/httpserver/web/dist/*
-!backend/internal/shared/platform/httpserver/web/dist/.gitkeep
+backend/internal/shared/httpserver/web/dist/*
+!backend/internal/shared/httpserver/web/dist/.gitkeep
 
 # Sistema / editores
 .DS_Store

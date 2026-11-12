@@ -19,6 +19,8 @@ Uso: personal y local. Sin login ni multiusuario.
 | Cifrado | AES-256-GCM; la llave vive en el **Keychain de macOS** (`zalando/go-keyring`), con respaldo `MAILCHECKER_KEY` |
 | Frontend | React + TypeScript + Vite + Tailwind v4 + **shadcn/ui**, **mobile first** |
 | Routing / datos / formularios | TanStack Router + TanStack Query + react-hook-form + zod |
+| Fechas | Unix en **segundos** (UTC) en la base y en la API; `time.Time` dentro de Go; la UI muestra hora de `America/Santiago` |
+| IDs | `id` autoincremental interno; `public_id` UUID v7 (`google/uuid`, generado en Go) para lo que se expone |
 | Fuera de alcance v1 | Suscripciones manuales, OAuth, multiusuario |
 
 ---
@@ -84,10 +86,9 @@ backend/
     │
     └── shared/
         ├── domain/                  Money, Currency, Bank, Card, Source, Charge, ParsedCharge, errores
-        └── platform/
-            ├── sqlite/              conexión + migraciones goose (todas las tablas)
-            ├── httpserver/          router chi, JSON, mapeo de errores a códigos HTTP
-            └── clock/               Clock real
+        ├── sqlite/                  conexión + migraciones goose (todas las tablas)
+        ├── httpserver/              router chi, JSON, mapeo de errores a códigos HTTP
+        └── clock/                   Clock real
 ```
 
 ### Reglas de dependencias
@@ -97,7 +98,7 @@ backend/
 2. **Una feature no importa a otra**, salvo desde un adaptador puente. Ejemplo: `emailsync` necesita
    las credenciales, así que declara el puerto `AccountDirectory`, y `emailsync/adapters/accounts`
    lo implementa llamando a `accounts/usecases`.
-3. Todas pueden importar `shared/domain`. Solo los adaptadores y `main.go` importan `shared/platform`.
+3. Todas pueden importar `shared/domain`. Solo los adaptadores y `main.go` importan `shared/sqlite`, `shared/httpserver` y `shared/clock`.
 4. `main.go` es el único lugar que conoce todas las piezas concretas.
 
 ### `shared/domain`
@@ -141,7 +142,8 @@ var ErrInvalid, ErrNotFound, ErrConflict error // + Invalid(msg) con mensaje par
 ```go
 // domain
 type Account struct {
-    ID          int64
+    ID          int64      // interno, nunca sale por la API
+    PublicID    string     // UUID v7, el que se expone
     Email       string
     PasswordEnc []byte
     CreatedAt   time.Time
@@ -151,9 +153,9 @@ type Account struct {
 
 // ports
 type AccountRepository interface {
-    Create(ctx context.Context, a *Account) error             // ErrConflict si el correo ya existe
+    Create(ctx context.Context, a *Account) error             // asigna ID y PublicID; ErrConflict si el correo ya existe
     List(ctx context.Context) ([]Account, error)
-    Delete(ctx context.Context, id int64) error               // ErrNotFound; borra también sus cargos
+    Delete(ctx context.Context, publicID string) error        // ErrNotFound; borra también sus cargos
     MarkSynced(ctx context.Context, id int64, at time.Time, syncErr string) error
 }
 type SecretCipher interface {
@@ -173,7 +175,7 @@ Las cuentas **ya no guardan filtros** (`from`/`subject`): cada banco aporta el s
 ```go
 // domain
 type SyncResult struct {
-    AccountID int64
+    AccountPublicID string
     Email     string
     Found, New, Unparsed int
     Error     string
@@ -189,7 +191,7 @@ type UnparsedEmail struct {
 
 // ports
 type AccountDirectory interface {
-    Credentials(ctx context.Context) ([]Credential, error)    // {AccountID, Email, Password}
+    Credentials(ctx context.Context) ([]Credential, error)    // {AccountID, AccountPublicID, Email, Password}
     RecordSync(ctx context.Context, accountID int64, at time.Time, syncErr string) error
 }
 type MailReader interface {
@@ -220,7 +222,8 @@ sincronización a la vez.
 ```go
 // domain
 type Statement struct {
-    ID          int64
+    ID          int64      // interno
+    PublicID    string     // UUID v7, el que se expone
     Bank        Bank
     Filename    string
     Kind        FileKind   // pdf, xlsx, csv, text
@@ -240,9 +243,9 @@ type BankStatementParser interface {
     Parse(text string) (lines []ParsedCharge, bad []string)
 }
 type StatementRepository interface {
-    Create(ctx context.Context, s *Statement, charges []Charge) error   // atómico
+    Create(ctx context.Context, s *Statement, charges []Charge) error   // atómico; asigna ID y PublicID
     List(ctx context.Context) ([]Statement, error)
-    Delete(ctx context.Context, id int64) error                         // borra también sus cargos
+    Delete(ctx context.Context, publicID string) error                  // ErrNotFound; borra también sus cargos
 }
 ```
 
@@ -293,13 +296,25 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 
 | Tabla | Feature dueña | Columnas clave | Notas |
 |---|---|---|---|
-| `accounts` | accounts | `email` UNIQUE, `password_enc`, `last_sync_at`, `last_error` | |
-| `statements` | statements | `bank`, `filename`, `kind`, `billing_date`, `bad_lines` (JSON) | |
-| `charges` | shared | `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card` | `UNIQUE(source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola |
-| `unparsed_emails` | emailsync | `external_id` PK, `account_id`, `bank`, `subject`, `received_at`, `preview` | |
+| `accounts` | accounts | `id`, `public_id` UNIQUE, `email` UNIQUE, `password_enc`, `last_sync_at`, `last_error` | |
+| `statements` | statements | `id`, `public_id` UNIQUE, `bank`, `filename`, `kind`, `billing_date`, `bad_lines` (JSON) | |
+| `charges` | shared | `id`, `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card` | `UNIQUE(source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola |
+| `unparsed_emails` | emailsync | `id`, `external_id` UNIQUE, `account_id`, `bank`, `subject`, `received_at`, `preview` | |
 
-- Migraciones: centralizadas en `shared/platform/sqlite/migrations`, porque es una sola base.
+- `id`: `INTEGER PRIMARY KEY AUTOINCREMENT` en todas las tablas; solo para uso interno (joins, FKs,
+  `external_id`), nunca sale por la API.
+- `public_id`: `TEXT UNIQUE NOT NULL`, UUID v7 generado en Go por el repo en `Create`. Solo en las
+  tablas que la API referencia (`accounts`, `statements`).
+- Fechas: `INTEGER` unix en segundos, UTC. Una fecha sin hora (`billing_date`) se guarda como las
+  00:00 de ese día en `America/Santiago`. La conversión `time.Time` ↔ unix vive solo en los
+  adaptadores sqlite y http.
+- Migraciones: centralizadas en `shared/sqlite/migrations`, porque es una sola base.
 - Consultas: cada feature tiene las suyas en `adapters/sqlite/queries.sql`, y sqlc genera el código Go.
+- Conexión: `PRAGMA journal_mode=WAL`, `foreign_keys=ON`, `busy_timeout=5000`, `synchronous=FULL`;
+  un solo escritor. Si algo falla al abrir la base o migrar, la app no arranca.
+- Transacciones: viven dentro de los métodos de los repos (adaptador). Los casos de uso no las
+  manejan. La sincronización usa una transacción por cuenta.
+- Integridad en la base: `NOT NULL` y `CHECK` en montos (`amount >= 0`) y monedas (`currency IN ('CLP','USD')`).
 
 ### API REST
 
@@ -308,14 +323,16 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 | GET | `/api/health` | — | |
 | GET | `/api/accounts` | accounts | lista (sin contraseñas) |
 | POST | `/api/accounts` | accounts | `{email, appPassword}` |
-| DELETE | `/api/accounts/{id}` | accounts | borra la cuenta y sus cargos |
+| DELETE | `/api/accounts/{publicId}` | accounts | borra la cuenta y sus cargos |
 | POST | `/api/sync` | emailsync | `{months}` → resultado por cuenta |
 | GET | `/api/unparsed` | emailsync | correos no reconocidos |
 | GET | `/api/banks` | statements | bancos soportados (para el selector) |
 | GET | `/api/statements` | statements | |
 | POST | `/api/statements` | statements | multipart: `file` o `text`, + `billingDate`, + `bank` opcional |
-| DELETE | `/api/statements/{id}` | statements | borra la cartola y sus cargos |
+| DELETE | `/api/statements/{publicId}` | statements | borra la cartola y sus cargos |
 | GET | `/api/summary?months=12` | subscriptions | suscripciones, otros cargos, totales |
+
+En el JSON, `id` es siempre el `public_id` (UUID v7) y las fechas son unix en segundos.
 
 Errores: `{ "error": "mensaje" }` → 400 inválido, 404 no existe, 409 conflicto o sincronización en
 curso, 500 interno.
@@ -394,7 +411,7 @@ Componentes shadcn previstos: `button`, `card`, `table`, `badge`, `drawer`, `dia
 ### Desarrollo y build
 
 - Desarrollo: Vite en `:5173` con proxy `/api` → Go en `:8765`.
-- Build: `pnpm build` deja el front en `backend/internal/shared/platform/httpserver/web/dist` y Go lo
+- Build: `pnpm build` deja el front en `backend/internal/shared/httpserver/web/dist` y Go lo
   embebe, así queda **un solo binario**.
 
 ---
@@ -408,7 +425,7 @@ Al terminar cada fase **paramos** y revisamos antes de seguir.
    esquema multi-banco.
 2. **Adaptadores de banco y lectura**: `bci` (avisos y cartola), `extract`, `catalog`, reutilizando
    los parsers y sus tests.
-3. **Persistencia y cifrado**: `shared/platform/sqlite` (goose), repositorios con sqlc y `keychain`.
+3. **Persistencia y cifrado**: `shared/sqlite` (goose), repositorios con sqlc y `keychain`.
 4. **IMAP + HTTP + `main.go`**: prueba real con tu Gmail.
 5. **Front, base**: Vite + Tailwind + shadcn + TanStack Router + AppShell mobile first.
 6. **Pantalla Resumen.**
