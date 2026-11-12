@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"slices"
+	"strings"
 	"time"
 
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
@@ -46,6 +47,9 @@ func NewImportStatement(
 }
 
 func (u ImportStatement) Execute(ctx context.Context, input ImportStatementInput) (domain.Statement, error) {
+	if err := validateInput(input); err != nil {
+		return domain.Statement{}, err
+	}
 	text, kind, err := u.extractText(input)
 	if err != nil {
 		return domain.Statement{}, err
@@ -55,16 +59,33 @@ func (u ImportStatement) Execute(ctx context.Context, input ImportStatementInput
 		return domain.Statement{}, err
 	}
 	statement, charges := u.parseStatement(input, kind, parser, text)
+	if err := rejectWithoutCharges(statement); err != nil {
+		return domain.Statement{}, err
+	}
 	if err := u.saveStatement(ctx, &statement, charges); err != nil {
 		return domain.Statement{}, err
 	}
 	return statement, nil
 }
 
+func validateInput(input ImportStatementInput) error {
+	if len(input.Data) == 0 {
+		return shared.Invalid(domain.KeyFileEmpty, nil)
+	}
+	if input.BillingDate.IsZero() {
+		return shared.Invalid(domain.KeyBillingDateMissing, nil)
+	}
+	return nil
+}
+
+// extractText also rejects files whose content has no text, like a scanned PDF.
 func (u ImportStatement) extractText(input ImportStatementInput) (string, domain.FileKind, error) {
 	text, kind, err := u.extractor.Extract(input.Filename, input.Data)
 	if err != nil {
 		return "", "", fmt.Errorf("extract statement text: %w", err)
+	}
+	if strings.TrimSpace(text) == "" {
+		return "", "", shared.Invalid(domain.KeyFileEmpty, nil)
 	}
 	return text, kind, nil
 }
@@ -118,6 +139,15 @@ func (u ImportStatement) parseStatement(input ImportStatementInput, kind domain.
 		BadLines:    domain.MergeBadLines(unread, invalid),
 	}
 	return statement, charges
+}
+
+// rejectWithoutCharges keeps a statement with no charges out of the base, so a
+// misread file does not block a correct reimport of the same billing date.
+func rejectWithoutCharges(statement domain.Statement) error {
+	if statement.Charges > 0 {
+		return nil
+	}
+	return shared.Invalid(domain.KeyNoCharges, map[string]any{"badLines": len(statement.BadLines)})
 }
 
 func (u ImportStatement) saveStatement(ctx context.Context, statement *domain.Statement, charges []shared.Charge) error {
