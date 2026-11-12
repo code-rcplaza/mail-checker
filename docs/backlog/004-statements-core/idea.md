@@ -60,4 +60,4 @@ implementa con TDD y dobles en memoria, sin lectores de archivo reales ni base.
 - [x] [02 `ImportStatement`: camino feliz con banco elegido](02-import-statement-happy-path.md)
 - [x] [03 `ImportStatement`: elegir banco](03-import-statement-bank-selection.md)
 - [x] [04 `ImportStatement`: validaciones](04-import-statement-guards.md)
-- [ ] [05 `ListStatements`, `RemoveStatement`, `ListBanks`](05-list-remove-banks.md)
+- [x] [05 `ListStatements`, `RemoveStatement`, `ListBanks`](05-list-remove-banks.md)

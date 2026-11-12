@@ -63,6 +63,10 @@ type createdStatement struct {
 type fakeStatements struct {
 	created   []createdStatement
 	createErr error
+	listed    []domain.Statement
+	listErr   error
+	deleted   []string
+	deleteErr error
 }
 
 func (f *fakeStatements) Create(_ context.Context, statement *domain.Statement, charges []shared.Charge) error {
@@ -72,6 +76,15 @@ func (f *fakeStatements) Create(_ context.Context, statement *domain.Statement, 
 	statement.ID = int64(len(f.created) + 1)
 	f.created = append(f.created, createdStatement{statement: *statement, charges: charges})
 	return nil
+}
+
+func (f *fakeStatements) List(context.Context) ([]domain.Statement, error) {
+	return f.listed, f.listErr
+}
+
+func (f *fakeStatements) Delete(_ context.Context, publicID string) error {
+	f.deleted = append(f.deleted, publicID)
+	return f.deleteErr
 }
 
 func statementLine(number int, merchant string) domain.StatementLine {

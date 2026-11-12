@@ -270,6 +270,9 @@ Reglas:
 - El `PublicID` se genera en Go antes de guardar (generador inyectado), porque el external id
   de cada cargo lo usa.
 
+**`RemoveStatement(publicID)`:** `Delete` devuelve `shared.ErrNotFound` sin llave y el caso de
+uso agrega `statements.not_found`; los adaptadores no conocen llaves i18n.
+
 ### `subscriptions`
 
 ```go

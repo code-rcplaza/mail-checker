@@ -24,4 +24,7 @@ type BankStatementParser interface {
 type StatementRepository interface {
 	// Create saves the statement and its charges atomically and assigns the ID.
 	Create(ctx context.Context, statement *domain.Statement, charges []shared.Charge) error
+	List(ctx context.Context) ([]domain.Statement, error)
+	// Delete also removes the statement's charges; an unknown publicID is shared.ErrNotFound.
+	Delete(ctx context.Context, publicID string) error
 }
