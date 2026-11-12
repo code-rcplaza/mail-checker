@@ -323,7 +323,8 @@ llave no es una posible actual → `ErrNotFound`.
 - **Monto, servicio conocido**: el ±25 % **no separa**; el monto actual es el del último cobro y un
   salto > 25 % se muestra como **cambio de plan** (ej. Claude USD 20 → USD 100). Los cobros del
   servicio que no siguen el patrón (ej. créditos de API) van a **otros cobros del servicio**, fuera
-  del gasto mensual.
+  del gasto mensual: un cobro que llega antes de 24 días desde el último cobro del patrón no puede
+  ser la siguiente factura.
 - **Monto, comercio desconocido**: cada cobro se compara con el anterior. Un salto > 25 % que luego
   se repite es cambio de plan; si el monto cambia casi en cada cobro, no es suscripción.
 - **Umbrella** (Apple, Google Play…): un grupo por monto exacto + moneda.
