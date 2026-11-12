@@ -282,7 +282,7 @@ type ChargeReader interface {
 }
 type ServiceCatalog interface {
     Identify(merchant string) (Service, bool)   // "ANYSPHERE INC" -> Cursor
-    Normalize(merchant string) string           // "C. VERDE MALL" -> "C VERDE"
+    Normalize(merchant string) string           // "C. Verde Mall" -> "C VERDE MALL"; "DLOCAL*SPOTIFY" -> "SPOTIFY"
     LooksLikeSubscription(merchant string) bool // "…SUBSCRIPTION", "MEMBERSHIP"
 }
 type SubscriptionDecisions interface {
