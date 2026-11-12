@@ -310,7 +310,8 @@ la app la respeta y no la vuelve a inferir. La llave del grupo es estable entre 
 `service:<nombre>` (servicio conocido), `umbrella:<nombre>:<monto en centésimas>:<moneda>` (ej.
 `umbrella:App Store:299000:CLP`) o `merchant:<nombre normalizado>:<moneda>` (ej.
 `merchant:STREAMING CO:CLP`). Si la
-llave no es una posible actual → `ErrNotFound`.
+llave no es una posible actual → `ErrNotFound`. La posible se busca en la ventana máxima (24 meses),
+con el mismo paso de lectura y agrupación de `GetSummary`; se puede volver a decidir.
 
 **Reglas de recurrencia** (constantes con nombre en `subscriptions/domain`):
 - **Intervalo**: mensual si los cobros están a k × 24–38 días con k ≤ 3 (tolera hasta 2 meses sin

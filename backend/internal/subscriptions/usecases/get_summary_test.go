@@ -46,6 +46,9 @@ func (f fakeDecisions) List(context.Context) (map[domain.GroupKey]domain.Decisio
 	return f.decisions, f.err
 }
 
+// Save is unused by GetSummary; it is here to satisfy the port.
+func (fakeDecisions) Save(context.Context, domain.GroupKey, domain.Decision) error { return nil }
+
 func chargeDaysAgo(externalID, merchant string, source shared.Source, amount shared.Money, daysAgo int) shared.Charge {
 	return shared.Charge{
 		Bank:       "bci",

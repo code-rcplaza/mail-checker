@@ -62,6 +62,6 @@ vistas sobre los cobros, con TDD y dobles en memoria, sin base ni red.
 - [x] [08 Gasto mensual](08-monthly-spend.md)
 - [x] [09 `GetSummary`](09-get-summary.md)
 - [x] [10 `ReconcileCharges`](10-reconcile-charges.md)
-- [ ] [11 Confirmar o descartar una posible](11-decide-possible-subscription.md)
+- [x] [11 Confirmar o descartar una posible](11-decide-possible-subscription.md)
 - [x] [12 Patrón de un servicio conocido por respaldo](12-known-service-pattern.md)
 - [x] [13 Armar el resumen](13-build-summary.md)

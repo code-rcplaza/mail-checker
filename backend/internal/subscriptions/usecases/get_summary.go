@@ -32,7 +32,7 @@ func (u GetSummary) Execute(ctx context.Context, months int) (domain.Summary, er
 		return domain.Summary{}, err
 	}
 	now := u.now()
-	charges, err := readChargesSince(ctx, u.charges, domain.PeriodStart(now, months))
+	groups, err := readGroupsSince(ctx, u.charges, u.catalog, domain.PeriodStart(now, months))
 	if err != nil {
 		return domain.Summary{}, err
 	}
@@ -40,8 +40,6 @@ func (u GetSummary) Execute(ctx context.Context, months int) (domain.Summary, er
 	if err != nil {
 		return domain.Summary{}, err
 	}
-	unique := domain.DropStatementChargesMatchingEmail(charges, u.catalog.Identify, u.catalog.Normalize)
-	groups := domain.GroupCharges(unique, u.catalog.Identify, u.catalog.Normalize)
 	return domain.BuildSummary(groups, decisions, u.catalog.LooksLikeSubscription, now), nil
 }
 

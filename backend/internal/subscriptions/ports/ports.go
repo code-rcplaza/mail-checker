@@ -21,4 +21,5 @@ type ServiceCatalog interface {
 
 type SubscriptionDecisions interface {
 	List(ctx context.Context) (map[domain.GroupKey]domain.Decision, error)
+	Save(ctx context.Context, key domain.GroupKey, decision domain.Decision) error
 }
