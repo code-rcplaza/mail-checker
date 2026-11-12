@@ -50,7 +50,7 @@ func (u ImportStatement) Execute(ctx context.Context, input ImportStatementInput
 	if err != nil {
 		return domain.Statement{}, err
 	}
-	parser, err := u.chooseParser(input.Bank)
+	parser, err := u.chooseParser(input.Bank, text)
 	if err != nil {
 		return domain.Statement{}, err
 	}
@@ -69,13 +69,36 @@ func (u ImportStatement) extractText(input ImportStatementInput) (string, domain
 	return text, kind, nil
 }
 
-func (u ImportStatement) chooseParser(bank shared.Bank) (ports.BankStatementParser, error) {
+// chooseParser uses the chosen bank, or detects it when none was chosen.
+func (u ImportStatement) chooseParser(bank shared.Bank, text string) (ports.BankStatementParser, error) {
+	if bank == "" {
+		return u.detectParser(text)
+	}
+	return u.findParser(bank)
+}
+
+func (u ImportStatement) findParser(bank shared.Bank) (ports.BankStatementParser, error) {
 	for _, parser := range u.parsers {
 		if parser.Bank() == bank {
 			return parser, nil
 		}
 	}
 	return nil, shared.Invalid(domain.KeyBankUnknown, nil)
+}
+
+// detectParser accepts only an unambiguous match: guessing between two banks
+// would import charges under the wrong one.
+func (u ImportStatement) detectParser(text string) (ports.BankStatementParser, error) {
+	var detected []ports.BankStatementParser
+	for _, parser := range u.parsers {
+		if parser.Detect(text) {
+			detected = append(detected, parser)
+		}
+	}
+	if len(detected) != 1 {
+		return nil, shared.Invalid(domain.KeyBankNotDetected, map[string]any{"count": len(detected)})
+	}
+	return detected[0], nil
 }
 
 // parseStatement builds the statement and its charges; the public id is
