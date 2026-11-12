@@ -11,4 +11,8 @@ const (
 	KeyRouteNotFound    MessageKey = "common.route_not_found"
 	KeyValidationFailed MessageKey = "common.validation_failed"
 	KeyInternal         MessageKey = "common.internal"
+	KeyCurrencyUnknown  MessageKey = "common.currency_unknown"
+	KeyAmountNegative   MessageKey = "common.amount_negative"
+	KeyDateMissing      MessageKey = "common.date_missing"
+	KeyMerchantMissing  MessageKey = "common.merchant_missing"
 )

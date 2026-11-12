@@ -52,7 +52,7 @@ vistas sobre los cobros, con TDD y dobles en memoria, sin base ni red.
   "MUSIC APP"); sin datos personales.
 
 ## Historias
-- [ ] [01 Tipos de cobro](01-charge-types.md)
+- [x] [01 Tipos de cobro](01-charge-types.md)
 - [ ] [02 Agrupar cobros](02-group-charges.md)
 - [ ] [03 Regla de coincidencia cartola ↔ correo](03-match-across-sources.md)
 - [ ] [04 Cadencia](04-cadence.md)

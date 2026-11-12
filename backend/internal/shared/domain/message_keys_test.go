@@ -18,6 +18,10 @@ func TestCommonKeys_FollowFeatureReasonFormat(t *testing.T) {
 		{KeyRouteNotFound, "common.route_not_found"},
 		{KeyValidationFailed, "common.validation_failed"},
 		{KeyInternal, "common.internal"},
+		{KeyCurrencyUnknown, "common.currency_unknown"},
+		{KeyAmountNegative, "common.amount_negative"},
+		{KeyDateMissing, "common.date_missing"},
+		{KeyMerchantMissing, "common.merchant_missing"},
 	}
 	for _, tc := range cases {
 		t.Run(string(tc.want), func(t *testing.T) {
