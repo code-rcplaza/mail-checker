@@ -153,7 +153,7 @@ type Account struct {
     PasswordEnc []byte
     CreatedAt   time.Time
     LastSyncAt  *time.Time
-    LastErrorKey string     // llave i18n de la última sincronización fallida
+    LastErrorKey shared.MessageKey // llave i18n de la última sincronización fallida; vacía si no hubo error
 }
 
 // ports
