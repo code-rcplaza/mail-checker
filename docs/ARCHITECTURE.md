@@ -282,9 +282,22 @@ type ServiceCatalog interface {
    - servicio conocido → un grupo por servicio (sin importar moneda ni banco);
    - servicio *umbrella* (Apple, Google Play…) → un grupo por monto;
    - comercio desconocido → por nombre normalizado y moneda.
-4. Aplica las reglas de recurrencia del dominio: mensual o anual, tolerancia de ±25 %, meses
-   faltantes, activa si tuvo cargo hace menos de 45 días (400 días si es anual).
-5. Suma el gasto mensual de las activas, por moneda.
+4. Aplica las reglas de recurrencia del dominio (ver abajo).
+5. Suma el gasto mensual de las activas, por moneda (una anual cuenta como monto / 12).
+
+**Reglas de recurrencia** (constantes con nombre en `subscriptions/domain`):
+- **Intervalo**: mensual si los cobros están a k × 24–38 días con k ≤ 3 (tolera hasta 2 meses sin
+  aviso); anual si están a 330–400 días.
+- **Mínimo de cobros**: 2 que cumplan el intervalo. Un servicio conocido con 1 solo cobro aparece
+  como **probable**.
+- **Activa**: último cobro hace ≤ 45 días (≤ 400 si es anual), contando desde **hoy** (reloj inyectado).
+- **Monto, servicio conocido**: el ±25 % **no separa**; el monto actual es el del último cobro y un
+  salto > 25 % se muestra como **cambio de plan** (ej. Claude USD 20 → USD 100). Los cobros del
+  servicio que no siguen el patrón (ej. créditos de API) van a **otros cobros del servicio**, fuera
+  del gasto mensual.
+- **Monto, comercio desconocido**: cada cobro se compara con el anterior. Un salto > 25 % que luego
+  se repite es cambio de plan; si el monto cambia casi en cada cobro, no es suscripción.
+- **Umbrella** (Apple, Google Play…): un grupo por monto exacto + moneda.
 
 **`ReconcileCharges(months)`** (vista diferenciada, para ver qué cobros no se avisan):
 1. Lee los cargos del período.
@@ -452,7 +465,8 @@ Al terminar cada fase **paramos** y revisamos antes de seguir.
    apagado ordenado), `shared/domain` (solo errores), `shared/clock`, config por variables de entorno
    (`cmd/api/config.go`, fail fast), `slog` y `main.go` mínimo. Todo con tests.
 2. **Núcleo por features**: por cada feature, `domain` + `ports` + `usecases` con tests usando dobles,
-   desde cero con TDD. Orden: `subscriptions` → `emailsync` → `statements` → `accounts`. Los tipos de
+   desde cero con TDD. **Una idea por feature**, en orden: `subscriptions` → `emailsync` →
+   `statements` → `accounts`. Los tipos de
    `shared/domain` (`Money`, `Charge`…) llegan con la primera feature que los usa.
 3. **Adaptadores de banco y lectura**: `bci` (avisos y cartola), `extract`, `catalog`, desde cero con
    TDD y textos reales anonimizados.
