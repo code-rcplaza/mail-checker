@@ -8,11 +8,12 @@ import (
 // ParsedCharge is what a bank parser extracts from a purchase email or a
 // statement line.
 type ParsedCharge struct {
-	Amount   Money
-	Currency Currency
-	Merchant string
-	Card     Card
-	Date     time.Time // zero when a statement line has no date
+	Amount    Money
+	Currency  Currency
+	Merchant  string
+	Card      Card
+	CardLast4 string
+	Date      time.Time // zero when a statement line has no date
 }
 
 // ChargeOrigin is where a parsed charge came from.
@@ -40,6 +41,7 @@ func (p ParsedCharge) ToCharge(origin ChargeOrigin) (Charge, error) {
 		Currency:   p.Currency,
 		Merchant:   p.Merchant,
 		Card:       p.Card,
+		CardLast4:  p.CardLast4,
 	})
 }
 

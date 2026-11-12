@@ -30,6 +30,7 @@ type Charge struct {
 	Currency    Currency
 	Merchant    string
 	Card        Card
+	CardLast4   string // last four card digits; empty when the bank does not show them
 }
 
 // NewCharge returns c only if it holds the charge invariants, so no other
@@ -42,6 +43,9 @@ func NewCharge(c Charge) (Charge, error) {
 		return Charge{}, err
 	}
 	if err := validateMerchantPresent(c.Merchant); err != nil {
+		return Charge{}, err
+	}
+	if err := validateCardLast4(c.CardLast4); err != nil {
 		return Charge{}, err
 	}
 	return c, nil
@@ -59,6 +63,23 @@ func validateDatePresent(date time.Time) error {
 		return Invalid(KeyDateMissing, nil)
 	}
 	return nil
+}
+
+// cardLast4Length is how many card digits a bank shows; the full number is never stored.
+const cardLast4Length = 4
+
+func validateCardLast4(last4 string) error {
+	if last4 == "" || isFourDigits(last4) {
+		return nil
+	}
+	return Invalid(KeyCardLastDigitsInvalid, nil)
+}
+
+func isFourDigits(text string) bool {
+	if len(text) != cardLast4Length {
+		return false
+	}
+	return !strings.ContainsFunc(text, func(r rune) bool { return r < '0' || r > '9' })
 }
 
 func validateMerchantPresent(merchant string) error {

@@ -75,7 +75,7 @@ información, la detección debe separar cada suscripción aunque compartan serv
 - Renumeración de la fase 3: avisos BCI → 008, extractor → 009, cartola BCI → 010.
 
 ## Historias
-- [ ] [01 Últimos 4 dígitos de la tarjeta](01-card-last4.md)
+- [x] [01 Últimos 4 dígitos de la tarjeta](01-card-last4.md)
 - [ ] [02 Separar por origen](02-split-by-origin.md)
 - [ ] [03 Encadenar líneas](03-chain-lines.md)
 - [ ] [04 Clave estable de la línea](04-line-key.md)
