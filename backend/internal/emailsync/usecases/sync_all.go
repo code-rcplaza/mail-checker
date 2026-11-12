@@ -2,12 +2,14 @@ package usecases
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"slices"
 	"time"
 
 	"github.com/code-rcplaza/mail-checker/backend/internal/emailsync/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/emailsync/ports"
+	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
 
 // SyncAll reads the purchase emails of every account, for every registered
@@ -17,6 +19,7 @@ type SyncAll struct {
 	mail     ports.MailReader
 	parsers  []ports.BankEmailParser
 	charges  ports.ChargeWriter
+	unparsed ports.UnparsedRepository
 	now      func() time.Time
 }
 
@@ -26,9 +29,10 @@ func NewSyncAll(
 	mail ports.MailReader,
 	parsers []ports.BankEmailParser,
 	charges ports.ChargeWriter,
+	unparsed ports.UnparsedRepository,
 	now func() time.Time,
 ) SyncAll {
-	return SyncAll{accounts: accounts, mail: mail, parsers: slices.Clone(parsers), charges: charges, now: now}
+	return SyncAll{accounts: accounts, mail: mail, parsers: slices.Clone(parsers), charges: charges, unparsed: unparsed, now: now}
 }
 
 func (u SyncAll) Execute(ctx context.Context, months int) ([]domain.SyncResult, error) {
@@ -59,32 +63,51 @@ func (u SyncAll) readCredentials(ctx context.Context) ([]domain.Credential, erro
 func (u SyncAll) syncAccount(ctx context.Context, credential domain.Credential, since time.Time) (domain.SyncResult, error) {
 	result := domain.SyncResult{AccountPublicID: credential.AccountPublicID, Email: credential.Email}
 	for _, parser := range u.parsers {
-		found, inserted, err := u.syncBank(ctx, credential, parser, since)
+		outcomes, err := u.syncBank(ctx, credential, parser, since)
 		if err != nil {
 			return domain.SyncResult{}, err
 		}
-		result.Found += found
-		result.New += inserted
+		result = countOutcomes(result, outcomes)
 	}
 	return result, nil
 }
 
-// syncBank returns how many emails it read and how many became new charges.
-func (u SyncAll) syncBank(ctx context.Context, credential domain.Credential, parser ports.BankEmailParser, since time.Time) (found, inserted int, err error) {
+// emailOutcome is what happened to one email of the sync.
+type emailOutcome int
+
+const (
+	outcomeNew emailOutcome = iota
+	outcomeAlreadySaved
+	outcomeUnparsed
+)
+
+func (u SyncAll) syncBank(ctx context.Context, credential domain.Credential, parser ports.BankEmailParser, since time.Time) ([]emailOutcome, error) {
 	emails, err := u.readBankEmails(ctx, credential, parser, since)
 	if err != nil {
-		return 0, 0, err
+		return nil, err
 	}
+	outcomes := make([]emailOutcome, 0, len(emails))
 	for _, email := range emails {
-		isNew, err := u.saveRecognized(ctx, credential, parser, email)
+		outcome, err := u.saveEmail(ctx, credential, parser, email)
 		if err != nil {
-			return 0, 0, err
+			return nil, err
 		}
-		if isNew {
-			inserted++
+		outcomes = append(outcomes, outcome)
+	}
+	return outcomes, nil
+}
+
+func countOutcomes(result domain.SyncResult, outcomes []emailOutcome) domain.SyncResult {
+	for _, outcome := range outcomes {
+		result.Found++
+		switch outcome {
+		case outcomeNew:
+			result.New++
+		case outcomeUnparsed:
+			result.Unparsed++
 		}
 	}
-	return len(emails), inserted, nil
+	return result
 }
 
 func (u SyncAll) readBankEmails(ctx context.Context, credential domain.Credential, parser ports.BankEmailParser, since time.Time) ([]domain.RawEmail, error) {
@@ -97,20 +120,44 @@ func (u SyncAll) readBankEmails(ctx context.Context, credential domain.Credentia
 	return emails, nil
 }
 
-// saveRecognized stores the email as a charge when its bank's parser reads it.
-// Error messages name the account by public id, never by address.
-func (u SyncAll) saveRecognized(ctx context.Context, credential domain.Credential, parser ports.BankEmailParser, email domain.RawEmail) (bool, error) {
+// saveEmail stores the email as a charge, or as unparsed when its bank's
+// parser cannot read it or what it read is not a valid charge. Error
+// messages name the account by public id, never by address.
+func (u SyncAll) saveEmail(ctx context.Context, credential domain.Credential, parser ports.BankEmailParser, email domain.RawEmail) (emailOutcome, error) {
 	parsed, isRecognized := parser.Parse(email)
 	if !isRecognized {
-		return false, nil
+		return u.saveUnparsed(ctx, credential, parser, email)
 	}
 	charge, err := domain.ChargeFromEmail(parsed, email, credential.AccountID, parser.Bank())
-	if err != nil {
-		return false, fmt.Errorf("convert %s email of account %s: %w", parser.Bank(), credential.AccountPublicID, err)
+	if errors.Is(err, shared.ErrInvalid) {
+		return u.saveUnparsed(ctx, credential, parser, email)
 	}
+	if err != nil {
+		return 0, fmt.Errorf("convert %s email of account %s: %w", parser.Bank(), credential.AccountPublicID, err)
+	}
+	return u.saveCharge(ctx, credential, email, charge)
+}
+
+// saveCharge forgets the email as unparsed once it becomes a charge, since a
+// newer parser may now read what an older one could not.
+func (u SyncAll) saveCharge(ctx context.Context, credential domain.Credential, email domain.RawEmail, charge shared.Charge) (emailOutcome, error) {
 	isNew, err := u.charges.Insert(ctx, charge)
 	if err != nil {
-		return false, fmt.Errorf("insert charge of account %s: %w", credential.AccountPublicID, err)
+		return 0, fmt.Errorf("insert charge of account %s: %w", credential.AccountPublicID, err)
 	}
-	return isNew, nil
+	if !isNew {
+		return outcomeAlreadySaved, nil
+	}
+	if err := u.unparsed.Forget(ctx, email.MessageID); err != nil {
+		return 0, fmt.Errorf("forget unparsed email of account %s: %w", credential.AccountPublicID, err)
+	}
+	return outcomeNew, nil
+}
+
+func (u SyncAll) saveUnparsed(ctx context.Context, credential domain.Credential, parser ports.BankEmailParser, email domain.RawEmail) (emailOutcome, error) {
+	unparsed := domain.UnparsedFromEmail(email, credential.AccountID, parser.Bank())
+	if err := u.unparsed.Save(ctx, unparsed); err != nil {
+		return 0, fmt.Errorf("save unparsed email of account %s: %w", credential.AccountPublicID, err)
+	}
+	return outcomeUnparsed, nil
 }

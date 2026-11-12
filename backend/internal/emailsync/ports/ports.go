@@ -23,6 +23,14 @@ type BankEmailParser interface {
 	Parse(email domain.RawEmail) (shared.ParsedCharge, bool)
 }
 
+// ChargeWriter inserts idempotently by source and external id.
 type ChargeWriter interface {
 	Insert(ctx context.Context, charge shared.Charge) (inserted bool, err error)
+}
+
+// UnparsedRepository keeps the emails no parser could read; Forget removes
+// one once it is recognized.
+type UnparsedRepository interface {
+	Save(ctx context.Context, email domain.UnparsedEmail) error
+	Forget(ctx context.Context, externalID string) error
 }

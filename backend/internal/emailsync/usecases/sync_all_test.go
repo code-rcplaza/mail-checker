@@ -52,13 +52,39 @@ func (f fakeParser) Parse(email domain.RawEmail) (shared.ParsedCharge, bool) {
 	return shared.ParsedCharge{Amount: 599000, Currency: shared.CurrencyCLP, Merchant: email.Subject, Card: "credito"}, true
 }
 
+// fakeChargeWriter is idempotent by external id, like the real Insert.
 type fakeChargeWriter struct {
 	inserted []shared.Charge
 }
 
 func (f *fakeChargeWriter) Insert(_ context.Context, charge shared.Charge) (bool, error) {
+	for _, existing := range f.inserted {
+		if existing.Source == charge.Source && existing.ExternalID == charge.ExternalID {
+			return false, nil
+		}
+	}
 	f.inserted = append(f.inserted, charge)
 	return true, nil
+}
+
+type fakeUnparsed struct {
+	saved     map[string]domain.UnparsedEmail
+	forgotten []string
+}
+
+func newFakeUnparsed() *fakeUnparsed {
+	return &fakeUnparsed{saved: make(map[string]domain.UnparsedEmail)}
+}
+
+func (f *fakeUnparsed) Save(_ context.Context, email domain.UnparsedEmail) error {
+	f.saved[email.ExternalID] = email
+	return nil
+}
+
+func (f *fakeUnparsed) Forget(_ context.Context, externalID string) error {
+	f.forgotten = append(f.forgotten, externalID)
+	delete(f.saved, externalID)
+	return nil
 }
 
 var (
@@ -75,16 +101,18 @@ func purchase(messageID, sender, merchant string) domain.RawEmail {
 }
 
 type syncFixture struct {
-	reader  *fakeMailReader
-	writer  *fakeChargeWriter
-	useCase SyncAll
+	reader   *fakeMailReader
+	writer   *fakeChargeWriter
+	unparsed *fakeUnparsed
+	useCase  SyncAll
 }
 
 func newSyncFixture(credentials []domain.Credential, emails map[string][]domain.RawEmail, parsers ...ports.BankEmailParser) syncFixture {
 	reader := &fakeMailReader{emails: emails}
 	writer := &fakeChargeWriter{}
-	useCase := NewSyncAll(fakeDirectory{credentials: credentials}, reader, parsers, writer, func() time.Time { return testNow })
-	return syncFixture{reader: reader, writer: writer, useCase: useCase}
+	unparsed := newFakeUnparsed()
+	useCase := NewSyncAll(fakeDirectory{credentials: credentials}, reader, parsers, writer, unparsed, func() time.Time { return testNow })
+	return syncFixture{reader: reader, writer: writer, unparsed: unparsed, useCase: useCase}
 }
 
 func TestSyncAll_ReadsWithBankFilterSinceNowMinusMonths(t *testing.T) {
