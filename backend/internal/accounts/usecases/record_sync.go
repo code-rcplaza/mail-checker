@@ -1,0 +1,33 @@
+package usecases
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"time"
+
+	"github.com/code-rcplaza/mail-checker/backend/internal/accounts/ports"
+	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
+)
+
+// RecordSync keeps when each account was last synced and why it failed, if it did.
+type RecordSync struct {
+	accounts ports.AccountRepository
+}
+
+func NewRecordSync(accounts ports.AccountRepository) RecordSync {
+	return RecordSync{accounts: accounts}
+}
+
+// Execute ignores an account removed while the sync ran: one missing account
+// must not stop the sync of the others.
+func (u RecordSync) Execute(ctx context.Context, accountID int64, at time.Time, syncErrKey shared.MessageKey) error {
+	err := u.accounts.MarkSynced(ctx, accountID, at, syncErrKey)
+	if errors.Is(err, shared.ErrNotFound) {
+		return nil
+	}
+	if err != nil {
+		return fmt.Errorf("record account sync: %w", err)
+	}
+	return nil
+}

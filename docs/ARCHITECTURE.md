@@ -161,7 +161,7 @@ type AccountRepository interface {
     Create(ctx context.Context, a *Account) error             // asigna ID (PublicID viene generado en Go); ErrConflict si el correo ya existe
     List(ctx context.Context) ([]Account, error)
     Delete(ctx context.Context, publicID string) error        // ErrNotFound; borra también sus cargos
-    MarkSynced(ctx context.Context, id int64, at time.Time, syncErrKey string) error
+    MarkSynced(ctx context.Context, id int64, at time.Time, syncErrKey shared.MessageKey) error
 }
 type SecretCipher interface {
     Encrypt(plain string) ([]byte, error)

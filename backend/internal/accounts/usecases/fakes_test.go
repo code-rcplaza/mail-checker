@@ -44,6 +44,16 @@ type fakeAccounts struct {
 	createErr error
 	listed    []domain.Account
 	listErr   error
+	deleted   []string
+	deleteErr error
+	marked    []syncMark
+	markErr   error
+}
+
+type syncMark struct {
+	id     int64
+	at     time.Time
+	errKey shared.MessageKey
 }
 
 func (f *fakeAccounts) Create(_ context.Context, account *domain.Account) error {
@@ -57,6 +67,16 @@ func (f *fakeAccounts) Create(_ context.Context, account *domain.Account) error 
 
 func (f *fakeAccounts) List(context.Context) ([]domain.Account, error) {
 	return f.listed, f.listErr
+}
+
+func (f *fakeAccounts) Delete(_ context.Context, publicID string) error {
+	f.deleted = append(f.deleted, publicID)
+	return f.deleteErr
+}
+
+func (f *fakeAccounts) MarkSynced(_ context.Context, id int64, at time.Time, syncErrKey shared.MessageKey) error {
+	f.marked = append(f.marked, syncMark{id: id, at: at, errKey: syncErrKey})
+	return f.markErr
 }
 
 func assertKeyedError(t *testing.T, err error, sentinel error, want shared.MessageKey) {
