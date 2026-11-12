@@ -81,10 +81,10 @@ backend/
     │   ├── adapters/
     │   │   ├── http/                GET /api/summary, GET /api/reconciliation
     │   │   ├── catalog/             ServiceCatalog (descriptor de cobro → servicio)
-    │   │   └── sqlite/              ChargeReader, SubscriptionDecisions
+    │   │   └── sqlite/              ChargeReader, SubscriptionDecisions, LineAliases
     │   ├── domain/                  Subscription, Summary, Reconciliation, reglas de recurrencia y de coincidencia
-    │   ├── ports/                   ChargeReader, ServiceCatalog, SubscriptionDecisions
-    │   └── usecases/                get_summary, reconcile_charges, decide_possible_subscription
+    │   ├── ports/                   ChargeReader, ServiceCatalog, SubscriptionDecisions, LineAliases
+    │   └── usecases/                get_summary, reconcile_charges, decide_possible_subscription, name_line
     │
     └── shared/
         ├── domain/                  Money, Currency, Bank, Card, Source, Charge, ParsedCharge, errores
@@ -118,6 +118,7 @@ type ParsedCharge struct {
     Currency Currency
     Merchant string
     Card     Card
+    CardLast4 string   // últimos 4 dígitos; vacío si el aviso o la cartola no los trae
     Date     time.Time // cero si la línea de cartola no trae fecha
 }
 
@@ -134,6 +135,7 @@ type Charge struct {
     Currency    Currency
     Merchant    string
     Card        Card
+    CardLast4   string // vacío o exactamente 4 dígitos (common.card_last_digits_invalid)
 }
 
 var ErrInvalid, ErrNotFound, ErrConflict error
@@ -289,17 +291,25 @@ type SubscriptionDecisions interface {
     List(ctx context.Context) (map[GroupKey]Decision, error) // Decision: confirmed (+ cadencia) | dismissed
     Save(ctx context.Context, key GroupKey, d Decision) error
 }
+type LineAliases interface {
+    List(ctx context.Context) (map[GroupKey]string, error) // alias por clave de línea
+    Save(ctx context.Context, key GroupKey, alias string) error
+    Delete(ctx context.Context, key GroupKey) error
+}
 ```
 
 **`GetSummary(months)`:**
 1. Lee los cargos del período.
 2. Quita los cargos de cartola que ya llegaron por correo (regla de coincidencia, ver abajo).
-3. Agrupa:
-   - servicio conocido → un grupo por servicio (sin importar moneda ni banco);
-   - servicio *umbrella* (Apple, Google Play…) → un grupo por monto;
-   - comercio desconocido → por nombre normalizado y moneda.
-4. Aplica las reglas de recurrencia del dominio (ver abajo) y las decisiones del usuario (una
-   decisión solo se aplica mientras el grupo es posible).
+3. Agrupa en **padres** y, dentro de cada padre, en **líneas** (una línea = una suscripción; ver
+   "Líneas" abajo):
+   - padre: servicio conocido (sin importar moneda ni banco), servicio *umbrella* (Apple, Google
+     Play…) o comercio desconocido por nombre normalizado y moneda;
+   - los cobros sueltos de un padre (no encadenan con ninguna línea de su origen) van a su grupo
+     `<padre>|one-off`, que termina en **otros cobros**.
+4. Aplica las reglas de recurrencia del dominio (ver abajo) a cada línea y las decisiones del
+   usuario (una decisión solo se aplica mientras la línea es posible). Cada línea lleva su padre y
+   el alias que el usuario le dio (`LineAliases`).
 5. Arma cuatro secciones:
    - **Suscripciones**: activas + posibles confirmadas (suman al gasto);
    - **Posibles**: servicio conocido con 1 solo cobro, o comercio desconocido que parece
@@ -310,12 +320,34 @@ type SubscriptionDecisions interface {
 
 **`DecidePossibleSubscription(groupKey, confirm(monthly | yearly) | dismiss)`:** guarda la decisión del
 usuario sobre una posible. Al confirmar, **el usuario elige la cadencia** (ej. Netflix USD 120 → anual):
-la app la respeta y no la vuelve a inferir. La llave del grupo es estable entre recálculos:
-`service:<nombre>` (servicio conocido), `umbrella:<nombre>:<monto en centésimas>:<moneda>` (ej.
-`umbrella:App Store:299000:CLP`) o `merchant:<nombre normalizado>:<moneda>` (ej.
-`merchant:STREAMING CO:CLP`). Si la
+la app la respeta y no la vuelve a inferir. La decisión se guarda por **clave de línea**, estable
+entre recálculos: `<padre>|<últimos 4 dígitos>|d<día típico>` (ej. `service:Netflix|4821|d01`;
+sin dígitos: `umbrella:App Store||d09`). El padre es `service:<nombre>`, `umbrella:<nombre>` o
+`merchant:<nombre normalizado>:<moneda>`. El día típico es la mediana de los días del mes de la
+línea (el menor de los dos del medio si son pares). Si dos líneas chocan, la segunda (por su primer
+cobro) lleva `#2`, la tercera `#3`. Sin ids ni correos en la clave (sale por la API). Si la línea
+cambia de día de verdad, la clave cambia y la decisión se pierde (aceptado). Si la
 llave no es una posible actual → `ErrNotFound`. La posible se busca en la ventana máxima (24 meses),
 con el mismo paso de lectura y agrupación de `GetSummary`; se puede volver a decidir.
+
+**`NameLine(lineKey, alias)`:** el usuario nombra una línea (Personal, Padres…) para distinguir
+suscripciones paralelas de un servicio. Se recorta; vacío borra el alias; más de 40 caracteres
+(runas) → `ErrInvalid` `subscriptions.alias_too_long`. La línea (activa, posible o inactiva, nunca
+el grupo `|one-off`) se busca en la ventana máxima; si no existe → `ErrNotFound`
+`subscriptions.line_not_found`.
+
+**Líneas** (constantes con nombre en `subscriptions/domain`):
+1. **Origen**: dentro del padre, los cobros se separan por cuenta de correo y por últimos 4 dígitos
+   (un cobro sin dígitos no separa). Un cobro de cartola sin cuenta se une al origen de cuenta con
+   el que encadena; si no encadena con ninguno, va al origen de cartola de su tarjeta.
+2. **Banda de monto**: dentro del origen, los cobros se separan en bandas de ±25 % (misma moneda).
+3. **Cadena**: en cada banda, un cobro continúa una línea si está a un intervalo válido de su
+   último cobro (mensual k × 24–38 o anual 330–400 días); con varias, la de monto más parecido y,
+   si empatan, la de fecha esperada más cercana. Si ninguna calza, abre una línea nueva.
+4. **Cambio de plan**: en el mismo origen, una línea que empieza justo cuando otra termina (salto de
+   monto > 25 %) se une a ella. En otro origen es otra suscripción.
+5. **Cobro suelto**: una línea de un solo cobro cuyo origen volvió a cobrar más de 38 días después
+   no siguió: va a `<padre>|one-off`. Hasta entonces se ve como posible.
 
 **Reglas de recurrencia** (constantes con nombre en `subscriptions/domain`):
 - **Intervalo**: mensual si los cobros están a k × 24–38 días con k ≤ 3 (tolera hasta 2 meses sin
@@ -338,7 +370,7 @@ con el mismo paso de lectura y agrupación de `GetSummary`; se puede volver a de
   a menos de 24 días del anterior es otro cobro. Un cambio de moneda es cambio de plan.
 - **Monto, comercio desconocido**: cada cobro se compara con el anterior. Con a lo sumo un
   salto > 25 % el monto es consistente y ese salto es el cambio de plan; con más de uno, no es suscripción.
-- **Umbrella** (Apple, Google Play…): un grupo por monto exacto + moneda.
+- **Umbrella** (Apple, Google Play…): sin regla propia; sus suscripciones salen de las líneas.
 
 **`ReconcileCharges(months)`** (vista diferenciada, para ver qué cobros no se avisan):
 1. Lee los cargos del período.
@@ -347,7 +379,7 @@ con el mismo paso de lectura y agrupación de `GetSummary`; se puede volver a de
    importante) y **solo correo** (aún no aparece en una cartola importada).
 
 **Regla de coincidencia** (una sola función en `domain`, usada por ambos casos de uso): mismo banco,
-mismo servicio, mismo monto y ±35 días.
+mismo servicio, mismo monto y ±35 días; si ambos traen los últimos 4 dígitos, deben ser iguales.
 
 El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM") no depende del banco.
 
@@ -365,8 +397,9 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 |---|---|---|---|
 | `accounts` | accounts | `id`, `public_id` UNIQUE, `email` UNIQUE, `password_enc`, `last_sync_at`, `last_error_key` | |
 | `statements` | statements | `id`, `public_id` UNIQUE, `bank`, `filename`, `kind`, `billing_date`, `bad_lines` (JSON) | `UNIQUE(bank, billing_date)` |
-| `charges` | shared | `id`, `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card` | `UNIQUE(source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola |
-| `subscription_decisions` | subscriptions | `id`, `group_key` UNIQUE, `decision` (`confirmed`/`dismissed`), `cadence` (`monthly`/`yearly`, solo si confirmada), `decided_at` | |
+| `charges` | shared | `id`, `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card`, `card_last4` (vacío o 4 dígitos) | `UNIQUE(source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola |
+| `subscription_decisions` | subscriptions | `id`, `group_key` UNIQUE (clave de línea), `decision` (`confirmed`/`dismissed`), `cadence` (`monthly`/`yearly`, solo si confirmada), `decided_at` | |
+| `line_aliases` | subscriptions | `id`, `line_key` UNIQUE, `alias` (≤ 40 caracteres) | |
 | `unparsed_emails` | emailsync | `id`, `external_id` UNIQUE, `account_id`, `bank`, `subject`, `received_at`, `preview` | |
 
 - `id`: `INTEGER PRIMARY KEY AUTOINCREMENT` en todas las tablas; solo para uso interno (joins, FKs,

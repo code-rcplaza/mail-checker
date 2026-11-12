@@ -23,3 +23,9 @@ type SubscriptionDecisions interface {
 	List(ctx context.Context) (map[domain.GroupKey]domain.Decision, error)
 	Save(ctx context.Context, key domain.GroupKey, decision domain.Decision) error
 }
+
+type LineAliases interface {
+	List(ctx context.Context) (map[domain.GroupKey]string, error)
+	Save(ctx context.Context, key domain.GroupKey, alias string) error
+	Delete(ctx context.Context, key domain.GroupKey) error
+}

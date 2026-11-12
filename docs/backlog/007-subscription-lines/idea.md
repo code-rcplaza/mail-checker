@@ -69,7 +69,7 @@ información, la detección debe separar cada suscripción aunque compartan serv
 ## Dudas abiertas
 - Ninguna. Decidido: modelo padre → líneas; separar por cuenta y últimos 4 dígitos;
   salto de monto en el mismo origen = cambio de plan; clave (b) con día típico.
-- Cambios a `docs/ARCHITECTURE.md` al cerrar: formato de `GroupKey`, regla de líneas
+- Cambios aplicados a `docs/ARCHITECTURE.md` al cerrar (más `LineAliases`, `NameLine` y el grupo `|one-off`): formato de `GroupKey`, regla de líneas
   (reemplaza "umbrella → un grupo por monto"), últimos 4 dígitos en `Charge`, columna
   `card_last4` en el modelo de datos.
 - Renumeración de la fase 3: avisos BCI → 008, extractor → 009, cartola BCI → 010.
@@ -82,4 +82,4 @@ información, la detección debe separar cada suscripción aunque compartan serv
 - [x] [04 Clave estable de la línea](04-line-key.md)
 - [x] [05 `GroupCharges` produce líneas](05-group-charges-lines.md)
 - [x] [06 Resumen por línea con los escenarios reales](06-summary-by-line.md)
-- [ ] [07 Alias de línea](07-line-alias.md)
+- [x] [07 Alias de línea](07-line-alias.md)

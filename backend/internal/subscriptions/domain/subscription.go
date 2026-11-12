@@ -9,6 +9,7 @@ import (
 type Subscription struct {
 	Key      GroupKey // the line
 	Parent   GroupKey // the service, umbrella or merchant the line belongs to
+	Alias    string   // the user's name for the line; empty if none
 	Status   Status
 	Cadence  Cadence
 	Amount   shared.Money

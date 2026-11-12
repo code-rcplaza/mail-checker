@@ -63,7 +63,7 @@ func chargeDaysAgo(externalID, merchant string, source shared.Source, amount sha
 }
 
 func getSummary(reader *fakeChargeReader, decisions fakeDecisions, months int) (domain.Summary, error) {
-	useCase := NewGetSummary(reader, fakeCatalog{}, decisions, func() time.Time { return testNow })
+	useCase := NewGetSummary(reader, fakeCatalog{}, decisions, newRecordingAliases(), func() time.Time { return testNow })
 	return useCase.Execute(context.Background(), months)
 }
 

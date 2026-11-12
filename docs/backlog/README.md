@@ -16,4 +16,4 @@ Loop: `/idea` → `/stories NNN` → `/story NNN-MM` (TDD). Reglas en `CLAUDE.md
 | 004 | [Núcleo de cartolas (fase 2, parte 3)](004-statements-core/idea.md) | done |
 | 005 | [Núcleo de cuentas (fase 2, parte 4)](005-accounts-core/idea.md) | done |
 | 006 | [Catálogo de servicios (fase 3, parte 1)](006-service-catalog/idea.md) | doing |
-| 007 | [Líneas de suscripción (corrección de la detección)](007-subscription-lines/idea.md) | doing |
+| 007 | [Líneas de suscripción (corrección de la detección)](007-subscription-lines/idea.md) | done |
