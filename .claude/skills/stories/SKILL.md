@@ -15,7 +15,8 @@ Idea: $ARGUMENTS (4 dígitos, ej. `0006` = `FOKKO-0006-SUBS`)
 2. Proponer la lista de tareas (título + una línea cada una), en orden de
    implementación. Cada tarea:
    - toca **una sola feature** (o `shared`);
-   - se puede hacer con un diff de menos de ~300 líneas;
+   - es una sola operación (función, método de repo, ruta o componente) con un test de tabla;
+   - tiene hasta 3 criterios y el título sin "y" ni comas (si no, se parte con sufijo de letra: `TASK-001A`);
    - entrega algo verificable por tests.
 3. **Parar** y esperar aprobación de la lista (se puede reordenar, partir o quitar).
 4. Con la lista aprobada, crear un archivo por tarea:

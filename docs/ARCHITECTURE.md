@@ -17,7 +17,7 @@ endpoints, decisiones abiertas) está en `docs/mvp.md`; lo marcado **post-MVP** 
 - [Convenciones Go](#convenciones-go)
 - [Frontend](#frontend)
   - [Estructura del frontend](#estructura-del-frontend) · [Mobile first](#mobile-first) · [Desarrollo y build](#desarrollo-y-build)
-- [Plan por fases](#plan-por-fases) · [Post-MVP](#post-mvp)
+- [Plan](#plan) · [Post-MVP](#post-mvp)
 - [Pendiente](#pendiente)
 
 ## Decisiones
@@ -432,7 +432,7 @@ el grupo `|one-off`) se busca en la ventana máxima; si no existe → `ErrNotFou
 **Otras acciones del usuario (MVP)**, cada una con su caso de uso y su validación en el borde:
 - **Manual** `{name, amount, billingDay}`: crear, editar y quitar una suscripción agregada a mano.
 - **Override** `{lineKey, amount?, billingDay?}`: monto y día que reemplazan lo detectado.
-- **Decisión de alza** `{lineKey, keep | later}`: qué hace `later` queda por definir (Pendiente).
+- **Decisión de alza** `{lineKey}`: solo `keep` (cierra la tarjeta del alza). `later` (posponer o recordar) es post-MVP: sin correo no hay aviso previo.
 - **Por cancelar** `{lineKey}`: marca la línea; no cancela nada ni lee correos. El enlace al sitio
   del servicio sale del catálogo.
 - **Dejar de seguir** una línea: la oculta y guarda la marca por clave (`docs/mvp.md`, decisión 10).
@@ -509,7 +509,8 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 | `unparsed_emails` (post-MVP) | emailsync | `id`, `external_id` UNIQUE, `account_id`, `bank`, `subject`, `received_at`, `preview` | |
 | `manual_subscriptions` | subscriptions | `id`, `public_id` UNIQUE, `user_id`, `name`, `amount`, `currency`, `billing_day` | `CHECK(billing_day BETWEEN 1 AND 31)` |
 | `line_overrides` | subscriptions | `id`, `user_id`, `line_key`, `amount`?, `billing_day`? | `UNIQUE(user_id, line_key)` |
-| `price_alert_decisions` | subscriptions | `id`, `user_id`, `line_key`, `amount` (el monto nuevo), `decision` (`keep`/`later`) | `UNIQUE(user_id, line_key, amount)` |
+| `price_alert_decisions` | subscriptions | `id`, `user_id`, `line_key`, `amount` (el monto nuevo) | `UNIQUE(user_id, line_key, amount)` |
+| `hidden_lines` | subscriptions | `id`, `user_id`, `line_key`, `hidden_at` | `UNIQUE(user_id, line_key)`; la usa "dejar de seguir" |
 | `cancellations` | subscriptions | `id`, `user_id`, `line_key`, `marked_at` | `UNIQUE(user_id, line_key)` |
 
 Toda tabla de datos lleva `user_id` con `ON DELETE CASCADE` desde `users`.
@@ -554,7 +555,7 @@ Toda ruta exige sesión salvo `/api/health` y `/api/auth/*`.
 | POST | `/api/subscriptions/manual` | subscriptions | `{name, amount, billingDay}` |
 | PUT, DELETE | `/api/subscriptions/manual/{publicId}` | subscriptions | edita o quita una manual |
 | DELETE | `/api/subscriptions/line?lineKey=` | subscriptions | "dejar de seguir": oculta la línea (mvp.md decisión 10) |
-| POST | `/api/subscriptions/price-alerts/decision` | subscriptions | `{lineKey, keep \| later}` |
+| POST | `/api/subscriptions/price-alerts/decision` | subscriptions | `{lineKey}`: el usuario mantiene la suscripción tras el alza |
 | GET | `/api/subscriptions/cancel-guide?lineKey=` | subscriptions | enlace al sitio del servicio (catálogo) |
 | POST | `/api/subscriptions/cancellations` | subscriptions | `{lineKey}`: marca la línea como "por cancelar" |
 
@@ -680,28 +681,17 @@ dependencia aprobada.
 
 ---
 
-## Plan por fases
+## Plan
 
-Al terminar cada fase **paramos** y revisamos antes de seguir. Cada fase se trabaja como una idea
-(`docs/backlog/`). El MVP es lo de `docs/mvp.md`; lo marcado post-MVP viene después.
+El plan vive en `docs/backlog/README.md`: ideas pequeñas `FOKKO-XXXX-SUBS`, cada una con tareas
+unitarias `TASK-XXX`, agrupadas en bloques (catálogo y cartolas, detección, acceso, persistencia,
+HTTP, front, cierre). Cubre el 100 % de `docs/mvp.md`. Se trabaja con `/idea` → `/stories` →
+`/story`; al terminar cada tarea se detiene para revisión.
 
-1. ✅ **Armazón (backend)**: idea 001.
-2. ✅ **Núcleos por features**: ideas 002 a 005 (`subscriptions`, `emailsync`, `statements`,
-   `accounts`). Los núcleos de `emailsync` y `accounts` quedan hechos y sin uso hasta el post-MVP.
-3. **Catálogo y lectura de cartolas**: catálogo de servicios (idea 006, con el enlace para cancelar),
-   `extract` (pdf; csv en el post-MVP) y parser de cartola BCI, con textos reales anonimizados.
-4. ✅ **Líneas de suscripción**: idea 007.
-5. **Detección para el MVP**: ajustes de "Pendiente" (fecha de facturación, `UserID`), deshacer
-   decisión, próximo cobro, cobros del mes, alzas, total en CLP (`ExchangeRates`), manuales,
-   overrides y "por cancelar".
-6. **Acceso y multiusuario**: `auth` (registro, código por correo, sesión) y `user_id` en todos los
-   puertos de datos.
-7. **Persistencia**: `sqlc.yaml`; migraciones, queries y repositorios de cada feature del MVP.
-8. **HTTP de cada feature + armado en `main.go`**.
-9. **Front, base**: Vite + Tailwind + componentes propios + TanStack Router + Query + AppShell mobile first.
-10. **Pantallas**, en el orden de los flujos de `docs/mvp.md`: acceso → primera vez → Resumen y Subs →
-    alerta y cancelar → Perfil.
-11. **Alojamiento, build único y README** (alojamiento: decisión abierta).
+**Alojamiento:** todo va dockerizado (Dockerfile multi-stage, un solo binario con el front
+embebido, `docker-compose` local) para que el despliegue no dependa de la plataforma; el proveedor
+queda abierto (`docs/mvp.md`, decisión 20). El correo de los códigos de acceso se envía con Resend
+por HTTP (`net/http` con timeout, sin SDK), detrás de un puerto; en desarrollo, un doble de consola.
 
 ### Post-MVP
 
@@ -720,8 +710,8 @@ Ajustes al código ya escrito, por las decisiones del MVP:
 Otros:
 
 - **Deshacer una decisión** (`UndoDecision` + `SubscriptionDecisions.Delete`): está en el diseño
-  pero no en el código; el núcleo de suscripciones (idea 002) se cerró sin él. Entra en la fase 5.
-- **Cartola BCI en PDF**: ya hay dos reales (sep y oct 2026) para escribir el parser (fase 3); se
+  pero no en el código; el núcleo de suscripciones (idea 002) se cerró sin él. Está en el backlog (`FOKKO-0022-SUBS`).
+- **Cartola BCI en PDF**: ya hay dos reales (sep y oct 2026) para escribir el parser (`FOKKO-0011A-SUBS` en adelante); se
   anonimizan antes de crear los fixtures. Cada una trae un estado nacional y uno internacional,
   que se leen como un solo flujo de cobros (`docs/mvp.md`, decisión 6). Falta un ejemplo de CSV
   (post-MVP) y uno con un cobro en euros u otra moneda.
@@ -732,7 +722,6 @@ Otros:
   cartolas.
 - **Cruces entre features**: `GET /api/export` y `DELETE /api/me` recorren datos de varias
   features; se resuelven con adaptadores puente, como `emailsync/adapters/accounts`.
-- **Qué hace `later`** en la decisión de alza (¿recordatorio?, ¿solo cierra la tarjeta?).
 - **Sin diseño en el handoff:** tablet (768–1023 px) y las versiones de escritorio de Revisión vacía y Resumen vacío.
 - **Post-MVP:** ocultar la contraseña de `Credential` en logs (`LogValue()` que la reemplace), para que un
   `slog.Any("cred", cred)` accidental no la exponga.

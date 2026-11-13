@@ -118,7 +118,7 @@ cuerpo o como parámetro de consulta codificado.
 
 | Endpoint | Para qué |
 |---|---|
-| `POST /api/subscriptions/price-alerts/decision` | `{lineKey, keep \| later}` |
+| `POST /api/subscriptions/price-alerts/decision` | `{lineKey}`: mantener la suscripción tras el alza (`later` es post-MVP) |
 | `GET /api/subscriptions/cancel-guide?lineKey=` | enlace al sitio del servicio (dato del catálogo); los 3 pasos son texto fijo del front |
 | `POST /api/subscriptions/cancellations` | `{lineKey}`: el usuario marca la suscripción como "por cancelar" |
 
@@ -249,7 +249,7 @@ Cerradas:
     previo (el servicio anuncia el precio nuevo) solo es posible con lectura de correo, en el post-MVP.
 19. **Moneda extranjera.** Un cobro en USD se muestra con su monto original y el equivalente en CLP
     (ej. "USD 20 · ≈ $19.000"); el total del mes va en CLP.
-20. **Alojamiento.** Por ahora se dockeriza la app; el proveedor donde corre queda abierto.
+20. **Alojamiento.** Todo va dockerizado para que el despliegue sea independiente de la plataforma; el proveedor donde corre queda abierto. Los códigos de acceso se envían con Resend.
 
 Abiertas (se deciden al avanzar; los números se conservan):
 

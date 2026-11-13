@@ -54,7 +54,7 @@ Qué falta y por qué importa (2–4 líneas).
 
 ## Reglas
 - Contenido en español; slug en inglés.
-- Una idea es unitaria: un resultado verificable, una capa, una feature, ~300 líneas;
+- Una idea es unitaria: un resultado verificable, una capa, una feature; si el título lleva "y", se parte con sufijo de letra (`FOKKO-0072A-SUBS`);
   si el título lleva una "y", se parte (y se avisa para ajustar el plan).
 - Nada de código ni de tests en este paso.
 - Si la idea contradice `ARCHITECTURE.md`, decirlo y preguntar antes de seguir.
