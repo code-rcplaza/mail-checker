@@ -81,6 +81,6 @@ idea implementa el adaptador real, sin depender de ejemplos de banco.
 
 ## Tareas
 - [x] [TASK-001 `Normalize`](TASK-001-NORMALIZE.md)
-- [ ] [TASK-002 `Identify` y la tabla del catálogo](TASK-002-IDENTIFY.md)
-- [ ] [TASK-003 `LooksLikeSubscription`](TASK-003-LOOKS-LIKE-SUBSCRIPTION.md)
-- [ ] [TASK-004 Catálogo con la agrupación real](TASK-004-CATALOG-GROUPING.md)
+- [x] [TASK-002 `Identify` y la tabla del catálogo](TASK-002-IDENTIFY.md)
+- [x] [TASK-003 `LooksLikeSubscription`](TASK-003-LOOKS-LIKE-SUBSCRIPTION.md)
+- [x] [TASK-004 Catálogo con la agrupación real](TASK-004-CATALOG-GROUPING.md)

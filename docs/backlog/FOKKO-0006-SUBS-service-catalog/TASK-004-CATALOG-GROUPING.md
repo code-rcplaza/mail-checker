@@ -16,8 +16,9 @@ correctas cuando el catálogo real se usa con la detección.
 - Dados tres cobros mensuales de `"PAYU *UBER TRIP"` en CLP, cuando se agrupan, entonces
   forman una línea cuyo padre es el comercio desconocido `merchant:UBER TRIP:CLP`
   (el prefijo del procesador no cambia el padre).
-- Dado un único cobro `"MICROSOFT. SUBSCRIPTION"`, cuando se agrupa, entonces cae en el
-  grupo suelto `umbrella:Microsoft|one-off`, marcado como servicio conocido.
+- Dado un único cobro `"MICROSOFT. SUBSCRIPTION"`, cuando se agrupa, entonces forma una
+  línea de un cobro cuyo padre es `umbrella:Microsoft`, marcada como servicio conocido (no es
+  un grupo suelto: un `one-off` nunca aparece como posible).
 
 ## Fuera
 - Separar el lugar pegado a la descripción (`SANTIAGO`, teléfono) → parser de cartola

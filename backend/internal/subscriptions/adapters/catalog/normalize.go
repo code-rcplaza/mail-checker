@@ -22,6 +22,10 @@ var accentFolds = strings.NewReplacer(
 	"Á", "A", "É", "E", "Í", "I", "Ó", "O", "Ú", "U", "Ü", "U", "Ñ", "N",
 )
 
+func (Catalog) Normalize(merchant string) string {
+	return normalizeMerchant(merchant)
+}
+
 // normalizeMerchant gives the descriptor a stable form so charges of the same
 // merchant group together however the bank wrote it.
 func normalizeMerchant(merchant string) string {
