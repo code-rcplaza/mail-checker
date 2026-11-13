@@ -10,10 +10,10 @@ Loop: `/idea` → `/stories NNN` → `/story NNN-MM` (TDD). Reglas en `CLAUDE.md
 
 | # | Idea | Estado |
 |---|---|---|
-| 001 | [Armazón del backend (fase 1)](001-foundation/idea.md) | done |
-| 002 | [Núcleo de suscripciones (fase 2, parte 1)](002-subscriptions-core/idea.md) | done |
-| 003 | [Núcleo de sincronización de correos (fase 2, parte 2)](003-emailsync-core/idea.md) | done |
-| 004 | [Núcleo de cartolas (fase 2, parte 3)](004-statements-core/idea.md) | done |
-| 005 | [Núcleo de cuentas (fase 2, parte 4)](005-accounts-core/idea.md) | done |
-| 006 | [Catálogo de servicios (fase 3, parte 1)](006-service-catalog/idea.md) | doing |
-| 007 | [Líneas de suscripción (corrección de la detección)](007-subscription-lines/idea.md) | done |
+| FOKKO-0001-SUBS | [Armazón del backend (fase 1)](FOKKO-0001-SUBS-foundation/idea.md) | done |
+| FOKKO-0002-SUBS | [Núcleo de suscripciones (fase 2, parte 1)](FOKKO-0002-SUBS-subscriptions-core/idea.md) | done |
+| FOKKO-0003-SUBS | [Núcleo de sincronización de correos (fase 2, parte 2)](FOKKO-0003-SUBS-emailsync-core/idea.md) | done |
+| FOKKO-0004-SUBS | [Núcleo de cartolas (fase 2, parte 3)](FOKKO-0004-SUBS-statements-core/idea.md) | done |
+| FOKKO-0005-SUBS | [Núcleo de cuentas (fase 2, parte 4)](FOKKO-0005-SUBS-accounts-core/idea.md) | done |
+| FOKKO-0006-SUBS | [Catálogo de servicios (fase 3, parte 1)](FOKKO-0006-SUBS-service-catalog/idea.md) | doing |
+| FOKKO-0007-SUBS | [Líneas de suscripción (corrección de la detección)](FOKKO-0007-SUBS-subscription-lines/idea.md) | done |
