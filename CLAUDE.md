@@ -135,30 +135,33 @@ la contradice, se pregunta antes de cambiarla.
 - Cada migración de goose corre en una transacción.
 
 ## Loop de desarrollo
-`/idea` → `/stories NNN` → `/story NNN-MM` (skills en `.claude/skills/`).
+`/idea` → `/stories XXXX` → `/story XXXX-XXX` (skills en `.claude/skills/`).
 - Paradas para revisión: después de la idea, después de las historias, y al final
   de cada `/story` (informe con RED y VERIFY). `/story` corre el ciclo TDD completo
   sin parar, salvo paradas obligatorias (decisión del usuario, ejemplo real
   faltante, diff > ~300 líneas, dos fallas seguidas, archivo fuera del plan).
 - Cada fase de `docs/ARCHITECTURE.md` se trabaja como una idea.
-- Referencias `NNN-MM` (idea 3 dígitos, historia 2) en historias y commits.
+- Ideas `FOKKO-XXXX-SUBS` (4 dígitos) y tareas `TASK-XXX-NOMBRE` (3 dígitos, reinician
+  en cada idea). Se citan como `FOKKO-XXXX-SUBS/TASK-XXX` en las tareas y en los commits.
+  Una idea o tarea es unitaria: un resultado verificable, una capa, ~300 líneas; si el
+  título lleva una "y", se parte.
 
 ### Organización de los `.md`
 - Solo en tres lugares: raíz (`README.md`, `CLAUDE.md`), `docs/ARCHITECTURE.md` y
   `docs/backlog/**`. Cualquier otro `.md` se pregunta antes (nada de `notes.md`,
   `plan.md`, `TODO.md`; lo temporal va al scratchpad o a Engram).
-- `docs/backlog/NNN-slug/idea.md` + `MM-slug.md` por historia. Slugs en inglés,
-  kebab-case; contenido en español.
-- Estado en un solo lugar: ideas en `docs/backlog/README.md`; historias en el
-  checklist de su `idea.md`. Los archivos de historia no llevan estado.
+- `docs/backlog/FOKKO-XXXX-SUBS-slug/idea.md` + `TASK-XXX-NOMBRE.md` por tarea. Slugs
+  en inglés, kebab-case; NOMBRE en mayúsculas y guiones; contenido en español.
+- Estado en un solo lugar: ideas en `docs/backlog/README.md`; tareas en el
+  checklist de su `idea.md`. Los archivos de tarea no llevan estado.
 - Ideas terminadas no se mueven ni se borran.
 - El backlog es historial; `docs/ARCHITECTURE.md` es la verdad vigente. Si una
-  historia cambia el diseño, se lleva a `ARCHITECTURE.md` al cerrarla.
+  tarea cambia el diseño, se lleva a `ARCHITECTURE.md` al cerrarla.
 
 ## Reglas para Claude (no arrancarse)
 - **Antes de escribir código**: fuera de `/story`, decir qué archivos se tocan y qué
   se hace en cada uno, y esperar el ok. Dentro de `/story`, el plan sale de la
-  historia aprobada y se reporta en el informe final.
+  tarea aprobada y se reporta en el informe final.
 - **Alcance cerrado**: solo los archivos del plan; si hace falta otro, se pregunta.
   Nada "de paso" (refactors, renombres, formateo ajeno a la tarea).
 - **Siempre se pregunta antes de**: agregar dependencias, editar
