@@ -1,7 +1,8 @@
 # Mail Checker
 
-Detecta suscripciones a partir de los avisos de compra en Gmail y de las cartolas de
-la tarjeta. Multi-banco (BCI primero). Uso personal y local. **Repo público.**
+Detecta suscripciones a partir de las cartolas de la tarjeta (MVP) y, desde el post-MVP, de los
+avisos de compra en Gmail. Multi-banco (BCI primero). Producto multiusuario; el alcance
+del MVP está en `docs/mvp.md`. **Repo público.**
 
 La arquitectura está en `docs/ARCHITECTURE.md` y es la fuente de verdad: si algo
 la contradice, se pregunta antes de cambiarla.
@@ -199,7 +200,7 @@ la contradice, se pregunta antes de cambiarla.
 - `gofmt` corre solo después de cada edición (hook en `.claude/settings.json`).
 
 ## Frontend (React + TS)
-- shadcn/ui, Tailwind v4, mobile first (base 375 px, `md:`/`lg:` para escritorio).
+- Tailwind v4 con componentes propios (sin librería de UI), mobile first (base 390 px; desde `lg:`, 1024 px, el diseño de escritorio con barra lateral).
 - TanStack Router + TanStack Query; formularios con react-hook-form + zod.
 - Estructura por features, reflejando el backend.
 - Formato con Biome (hook en `.claude/settings.json`, activo cuando exista `frontend/`).

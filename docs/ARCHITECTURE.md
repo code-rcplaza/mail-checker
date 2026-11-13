@@ -1,11 +1,24 @@
 # Mail Checker — Arquitectura v1
 
-Detecta suscripciones a partir de (1) avisos de compra que llegan por correo, desde una o más
-cuentas Gmail, y (2) cartolas de tarjeta (PDF, Excel, CSV o texto pegado). Soporta **varios
-bancos**: BCI es el primero; agregar otro (ej. Falabella) es escribir adaptadores nuevos, sin
-modificar los casos de uso.
+Detecta suscripciones a partir de las cartolas de tarjeta (PDF; CSV en el post-MVP). En el post-MVP suma los avisos
+de compra que llegan al correo (Gmail). Soporta **varios bancos**: BCI es el primero; agregar otro
+(ej. Falabella) es escribir adaptadores nuevos, sin modificar los casos de uso.
 
-Uso: personal y local. Sin login ni multiusuario.
+Producto multiusuario: cada usuario ve y borra solo lo suyo. Qué entra en el MVP (pantallas,
+endpoints, decisiones abiertas) está en `docs/mvp.md`; lo marcado **post-MVP** viene después.
+
+## Contenido
+
+- [Decisiones](#decisiones)
+- [Backend](#backend)
+  - [Features](#features) · [Estructura del backend](#estructura-del-backend) · [Reglas de dependencias](#reglas-de-dependencias) · [Multiusuario](#multiusuario)
+  - Por feature: [`shared/domain`](#shareddomain) · [`auth`](#auth) · [`accounts`](#accounts-post-mvp) · [`emailsync`](#emailsync-post-mvp) · [`statements`](#statements) · [`subscriptions`](#subscriptions)
+  - [Cifrado](#cifrado-post-mvp) · [Modelo de datos](#modelo-de-datos-sqlite) · [API REST](#api-rest) · [Agregar un banco](#agregar-un-banco-ej-falabella) · [Tests](#tests)
+- [Convenciones Go](#convenciones-go)
+- [Frontend](#frontend)
+  - [Estructura del frontend](#estructura-del-frontend) · [Mobile first](#mobile-first) · [Desarrollo y build](#desarrollo-y-build)
+- [Plan por fases](#plan-por-fases) · [Post-MVP](#post-mvp)
+- [Pendiente](#pendiente)
 
 ## Decisiones
 
@@ -15,13 +28,15 @@ Uso: personal y local. Sin login ni multiusuario.
 | Bancos | Multi-banco desde el inicio: un parser por banco, registrados en `main.go` |
 | Router HTTP | `go-chi/chi` |
 | Base de datos | SQLite (`modernc.org/sqlite`, sin cgo) + **sqlc** para las consultas + **goose** para las migraciones |
-| Correo | IMAP + contraseña de aplicación de Google |
-| Cifrado | AES-256-GCM; la llave vive en el **Keychain de macOS** (`zalando/go-keyring`), con respaldo `MAILCHECKER_KEY` |
-| Frontend | React + TypeScript + Vite + Tailwind v4 + **shadcn/ui**, **mobile first** |
+| Fuente de datos | MVP: **cartolas** (PDF). Post-MVP: CSV y correo por IMAP + contraseña de aplicación de Google (solo Gmail) |
+| Acceso | Código por correo, sin contraseña; todo dato pertenece a un usuario |
+| Cifrado (post-MVP) | AES-256-GCM para las contraseñas de aplicación; dónde vive la llave depende del alojamiento (hoy: Keychain de macOS con `zalando/go-keyring`, respaldo `MAILCHECKER_KEY`) |
+| Alojamiento | Abierto (`docs/mvp.md`, decisión 20) |
+| Frontend | React + TypeScript + Vite + Tailwind v4, componentes propios, **mobile first** |
 | Routing / datos / formularios | TanStack Router + TanStack Query + react-hook-form + zod |
 | Fechas | Unix en **segundos** (UTC) en la base y en la API; `time.Time` dentro de Go; la UI muestra hora de `America/Santiago` |
 | IDs | `id` autoincremental interno; `public_id` UUID v7 (`google/uuid`, generado en Go) para lo que se expone |
-| Fuera de alcance v1 | Suscripciones manuales, OAuth, multiusuario |
+| Fuera del MVP | Lectura de correo, conciliación cartola-correo, OAuth de Gmail, login con Google y Apple, calendario, notificaciones |
 
 ---
 
@@ -33,13 +48,16 @@ Cada feature responde a "¿quién eres y qué haces?":
 
 | Feature | Responsabilidad |
 |---|---|
-| `accounts` | Administro las cuentas de correo y sus credenciales cifradas |
-| `emailsync` | Leo los avisos de compra de cada banco y los convierto en cargos |
+| `auth` | Registro usuarios, les doy acceso por código y mantengo su sesión |
+| `accounts` (post-MVP) | Administro las cuentas de correo y sus credenciales cifradas |
+| `emailsync` (post-MVP) | Leo los avisos de compra de cada banco y los convierto en cargos |
 | `statements` | Importo cartolas, detecto de qué banco son y las convierto en cargos |
-| `subscriptions` | Detecto suscripciones a partir de los cargos y calculo el gasto mensual |
+| `subscriptions` | Detecto suscripciones a partir de los cargos, calculo el gasto mensual, el próximo cobro y las alzas, y guardo lo que el usuario decide |
+
+`accounts` y `emailsync` tienen su núcleo escrito (ideas 003 y 005) pero no entran al MVP.
 | `shared` | Lo mínimo común: el cargo, el dinero, errores y la plataforma (SQLite, HTTP, reloj) |
 
-### Estructura
+### Estructura del backend
 
 ```
 backend/
@@ -47,7 +65,13 @@ backend/
 │   ├── main.go                      composition root: crea adaptadores, registra bancos, arma rutas
 │   └── config.go                    variables de entorno, fail fast
 └── internal/
-    ├── accounts/
+    ├── auth/                            registro, código por correo, sesión
+    │   ├── adapters/                    http/, sqlite/, mailer/ (envío del código)
+    │   ├── domain/                      User
+    │   ├── ports/                       UserRepository, CodeSender (formas abiertas, mvp.md decisión 11)
+    │   └── usecases/                    register, login, verify_code, logout, get_me
+    │
+    ├── accounts/                        (post-MVP)
     │   ├── adapters/
     │   │   ├── http/                GET/POST/DELETE /api/accounts
     │   │   ├── sqlite/              AccountRepository
@@ -56,7 +80,7 @@ backend/
     │   ├── ports/                   AccountRepository, SecretCipher
     │   └── usecases/                add_account, list_accounts, remove_account, credentials, record_sync
     │
-    ├── emailsync/
+    ├── emailsync/                       (post-MVP)
     │   ├── adapters/
     │   │   ├── http/                POST /api/sync, GET /api/unparsed
     │   │   ├── imap/                MailReader (Gmail)
@@ -69,8 +93,8 @@ backend/
     │
     ├── statements/
     │   ├── adapters/
-    │   │   ├── http/                GET/POST/DELETE /api/statements, GET /api/banks
-    │   │   ├── extract/             FileExtractor: pdf / xlsx / csv / texto
+    │   │   ├── http/                POST /api/statements, GET /api/banks (GET y DELETE de cartolas: post-MVP)
+    │   │   ├── extract/             FileExtractor: pdf (csv: post-MVP)
     │   │   ├── bci/                 BankStatementParser de BCI
     │   │   └── sqlite/              StatementRepository
     │   ├── domain/                  Statement, StatementLine
@@ -79,12 +103,13 @@ backend/
     │
     ├── subscriptions/
     │   ├── adapters/
-    │   │   ├── http/                GET /api/summary, GET /api/reconciliation
-    │   │   ├── catalog/             ServiceCatalog (descriptor de cobro → servicio)
-    │   │   └── sqlite/              ChargeReader, SubscriptionDecisions, LineAliases
+    │   │   ├── http/                summary, decisions, aliases, overrides, manual, price-alerts, cancellations (reconciliation: post-MVP)
+    │   │   ├── catalog/             ServiceCatalog (descriptor de cobro → servicio, enlace para cancelar)
+    │   │   ├── exchangerates/       ExchangeRates (tipo de cambio; fuente abierta)
+    │   │   └── sqlite/              ChargeReader, SubscriptionDecisions, LineAliases, ManualSubscriptions, LineOverrides, PriceAlertDecisions, Cancellations
     │   ├── domain/                  Subscription, Summary, Reconciliation, reglas de recurrencia y de coincidencia
-    │   ├── ports/                   ChargeReader, ServiceCatalog, SubscriptionDecisions, LineAliases
-    │   └── usecases/                get_summary, reconcile_charges, decide_possible_subscription, name_line
+    │   ├── ports/                   ChargeReader, ServiceCatalog, SubscriptionDecisions, LineAliases, ManualSubscriptions, LineOverrides, PriceAlertDecisions, Cancellations, ExchangeRates
+    │   └── usecases/                get_summary, decide_possible_subscription, undo_decision, name_line, manuales, overrides, alzas, cancelaciones (reconcile_charges: post-MVP)
     │
     └── shared/
         ├── domain/                  Money, Currency, Bank, Card, Source, Charge, ParsedCharge, errores
@@ -103,6 +128,16 @@ backend/
 3. Todas pueden importar `shared/domain`. Solo los adaptadores y `main.go` importan `shared/sqlite`, `shared/httpserver` y `shared/clock`.
 4. `main.go` es el único lugar que conoce todas las piezas concretas.
 
+### Multiusuario
+
+- Todo dato (cargos, cartolas, decisiones, alias, manuales, overrides, decisiones de alza,
+  cancelaciones) pertenece a un usuario y lleva `user_id`.
+- Todo puerto de lectura y escritura filtra por el usuario; los `UNIQUE` pasan a ser por usuario.
+  Un usuario nunca ve ni toca datos de otro.
+- El `userID` sale de la sesión en el handler HTTP. Cómo viaja por las capas (parámetro o contexto)
+  se define al construir `auth`.
+- Eliminar al usuario borra todo lo suyo en cascada.
+
 ### `shared/domain`
 
 ```go
@@ -110,7 +145,7 @@ type Money int64               // centésimas: CLP 5.990 => 599000, USD 20,00 =>
 type Currency string           // "CLP", "USD"
 type Bank string               // "bci", "falabella"…
 type Card string               // "credito", "debito"
-type Source string             // "email", "statement"
+type Source string             // "statement" (MVP), "email" (post-MVP)
 
 // ParsedCharge: lo que un parser de banco extrae de un aviso o línea de cartola.
 type ParsedCharge struct {
@@ -125,6 +160,7 @@ type ParsedCharge struct {
 // Charge: un cargo guardado.
 type Charge struct {
     ID          int64
+    UserID      int64    // dueño del cargo
     Bank        Bank
     Source      Source
     ExternalID  string  // correo: Message-ID; cartola: "<statementPublicID>:<línea>"
@@ -144,7 +180,23 @@ var ErrInvalid, ErrNotFound, ErrConflict error
 // common.conflict, common.route_not_found, common.validation_failed, common.internal.
 ```
 
-### `accounts`
+### `auth`
+
+- **Registro** `{name, email, acceptedTerms}` y **login** `{email}` envían un código al correo;
+  **verificar el código** abre la sesión; **cerrar sesión** la termina. No hay contraseñas: el único
+  secreto es el código.
+- Fail fast en el borde: correo con formato válido y términos aceptados; si no, `ErrInvalid` con
+  una llave `auth.*`.
+- Enviar el código es un puerto (`CodeSender`) con un adaptador de correo saliente (proveedor abierto).
+- Código de 6 dígitos, vigencia de 10 minutos, 5 intentos por código, 3 envíos por hora por correo
+  y sesión de 30 días (`docs/mvp.md`, decisión 11). La forma de los puertos queda abierta hasta
+  construir `auth`.
+- `GET /api/export` y `DELETE /api/me` recorren datos de varias features: se resuelven con
+  adaptadores puente (ver Pendiente).
+
+### `accounts` (post-MVP)
+
+> Fuera del MVP. El núcleo existe (idea 005) y queda sin uso hasta la lectura de correo por IMAP.
 
 ```go
 // domain
@@ -177,7 +229,9 @@ type SecretCipher interface {
 
 Las cuentas **ya no guardan filtros** (`from`/`subject`): cada banco aporta el suyo.
 
-### `emailsync`
+### `emailsync` (post-MVP)
+
+> Fuera del MVP. El núcleo existe (idea 003) y queda sin uso hasta la lectura de correo por IMAP.
 
 ```go
 // domain
@@ -233,7 +287,7 @@ type Statement struct {
     PublicID    string     // UUID v7, el que se expone
     Bank        Bank
     Filename    string
-    Kind        FileKind   // pdf, xlsx, csv, text
+    Kind        FileKind   // pdf (csv: post-MVP)
     BillingDate time.Time
     ImportedAt  time.Time
     Charges     int
@@ -248,6 +302,7 @@ type BankStatementParser interface {
     Bank() Bank
     Detect(text string) bool                                // ¿esta cartola es de mi banco?
     Parse(text string) (lines []StatementLine, bad []int)    // StatementLine{Number, Charge}; bad: números de línea, nunca el texto
+    BillingDate(text string) (time.Time, bool)               // fecha de facturación que trae el archivo
 }
 type StatementRepository interface {
     Create(ctx context.Context, s *Statement, charges []Charge) error   // atómico; asigna ID (PublicID viene generado en Go)
@@ -256,7 +311,7 @@ type StatementRepository interface {
 }
 ```
 
-**`ImportStatement(file, billingDate, bank?)`:**
+**`ImportStatement(file, billingDate?, bank?)`:**
 1. Extrae el texto del archivo.
 2. Banco: si viene elegido, usa ese. Si no, pregunta a cada parser `Detect`. Si exactamente uno
    lo reconoce, usa ese; si no, responde la llave `statements.bank_not_detected`.
@@ -265,14 +320,22 @@ type StatementRepository interface {
 4. Guarda la cartola y sus cargos en una transacción.
 
 Reglas:
-- Una cartola por banco + fecha de facturación. Si ya existe, responde `ErrConflict` con
+- Una cartola por usuario + banco + fecha de facturación. Si ya existe, responde `ErrConflict` con
   `statements.already_imported`; para reemplazarla se borra y se vuelve a subir.
 - Si ninguna línea queda como cargo, responde `ErrInvalid` con `statements.no_charges`
   (params `badLines`) y no guarda nada.
 - El `PublicID` se genera en Go antes de guardar (generador inyectado), porque el external id
   de cada cargo lo usa.
+- La fecha de facturación sale del propio archivo (`BillingDate`). Si el parser no la encuentra, se
+  usa la `billingDate` que el usuario escribió en la pantalla de subida; si tampoco viene,
+  `ErrInvalid` `statements.billing_date_required`.
+- **Qué se guarda:** por línea, el descriptor del comercio, el monto, la fecha, la tarjeta y sus
+  últimos 4 dígitos. El texto de la cartola se descarta al terminar de parsear; `BadLines` guarda
+  números, nunca texto.
+- La subida responde archivo y meses leídos. Lo que Análisis muestra como "seguras" y "por
+  confirmar" lo lee de `GET /api/summary`, para que `statements` no importe `subscriptions`.
 
-**`RemoveStatement(publicID)`:** `Delete` devuelve `shared.ErrNotFound` sin llave y el caso de
+**`RemoveStatement(publicID)`:** (se expone en el post-MVP, pantalla Fuentes) `Delete` devuelve `shared.ErrNotFound` sin llave y el caso de
 uso agrega `statements.not_found`; los adaptadores no conocen llaves i18n.
 
 ### `subscriptions`
@@ -290,6 +353,7 @@ type ServiceCatalog interface {
 type SubscriptionDecisions interface {
     List(ctx context.Context) (map[GroupKey]Decision, error) // Decision: confirmed (+ cadencia) | dismissed
     Save(ctx context.Context, key GroupKey, d Decision) error
+    Delete(ctx context.Context, key GroupKey) error
 }
 type LineAliases interface {
     List(ctx context.Context) (map[GroupKey]string, error) // alias por clave de línea
@@ -298,9 +362,13 @@ type LineAliases interface {
 }
 ```
 
+Puertos nuevos del MVP, con su firma al escribir su historia: `ManualSubscriptions`,
+`LineOverrides`, `PriceAlertDecisions`, `Cancellations` y `ExchangeRates`. Todos filtran por usuario.
+
 **`GetSummary(months)`:**
 1. Lee los cargos del período.
 2. Quita los cargos de cartola que ya llegaron por correo (regla de coincidencia, ver abajo).
+   **Post-MVP:** en el MVP no hay correo y este paso no hace nada.
 3. Agrupa en **padres** y, dentro de cada padre, en **líneas** (una línea = una suscripción; ver
    "Líneas" abajo):
    - padre: servicio conocido (sin importar moneda ni banco), servicio *umbrella* (Apple, Google
@@ -316,7 +384,29 @@ type LineAliases interface {
      suscripción; sin decidir (no suman). Solo si siguen vigentes (ventana de **Activa**);
    - **Inactivas**: suscripciones y posibles cuyo último cobro quedó fuera de la ventana;
    - **Otros cobros**: lo que no es suscripción + posibles descartadas.
-6. Suma el gasto mensual de **Suscripciones**, por moneda (una anual cuenta como monto / 12).
+6. Suma el gasto mensual de **Suscripciones** por moneda (una anual cuenta como monto / 12) y el
+   **total en CLP**: los cobros en USD se convierten (ver Pendiente, tipo de cambio).
+7. Calcula el **próximo cobro** de cada línea: su último cobro más un intervalo de su cadencia (mes
+   o año), en su día típico.
+8. Cuenta los **cobros del mes**: cobrados (con un cobro en el mes calendario actual) y restantes
+   (con próximo cobro aún dentro del mes).
+9. Detecta las **alzas** y descarta las que el usuario ya decidió mantener.
+
+Una **alza** es un cobro mayor que el anterior en la misma línea y moneda; cualquier aumento
+cuenta. Trae el monto de antes y de después, la fecha del cobro con el monto nuevo ("desde") y el
+impacto: anual = diferencia × 12 en una línea mensual (la diferencia misma si es anual) y mensual =
+anual / 12. Si el salto supera 25 % se muestra además como cambio de plan. Sin correos de aviso, el
+alza se detecta al llegar el cobro, es decir, con la cartola siguiente.
+
+Las **manuales** y los **overrides** entran antes del cálculo: una manual es una línea sin cobros
+que suma al gasto con su monto y su día de cobro; un override reemplaza el monto o el día
+detectado. Una manual tiene como próximo cobro la siguiente vez que ocurre su día de cobro; un
+override cambia lo que se muestra, el total y el próximo cobro, pero no los cobros reales.
+"Dejar de seguir" oculta la línea (no suma ni aparece) y la marca se guarda por clave de línea
+(`docs/mvp.md`, decisión 10).
+
+En el MVP el handler HTTP devuelve **Suscripciones**, **Posibles** y las alzas; **Inactivas** y
+**Otros cobros** se calculan (la detección los necesita) pero no se exponen.
 
 **`DecidePossibleSubscription(groupKey, confirm(monthly | yearly) | dismiss)`:** guarda la decisión del
 usuario sobre una posible. Al confirmar, **el usuario elige la cadencia** (ej. Netflix USD 120 → anual):
@@ -330,14 +420,25 @@ cambia de día de verdad, la clave cambia y la decisión se pierde (aceptado). S
 llave no es una posible actual → `ErrNotFound`. La posible se busca en la ventana máxima (24 meses),
 con el mismo paso de lectura y agrupación de `GetSummary`; se puede volver a decidir.
 
+**`UndoDecision(groupKey)`:** borra la decisión guardada para esa clave de línea; la línea vuelve a
+**Posibles** en el siguiente `GetSummary`. Es idempotente: si no había decisión, no falla.
+
 **`NameLine(lineKey, alias)`:** el usuario nombra una línea (Personal, Padres…) para distinguir
 suscripciones paralelas de un servicio. Se recorta; vacío borra el alias; más de 40 caracteres
 (runas) → `ErrInvalid` `subscriptions.alias_too_long`. La línea (activa, posible o inactiva, nunca
 el grupo `|one-off`) se busca en la ventana máxima; si no existe → `ErrNotFound`
 `subscriptions.line_not_found`.
 
+**Otras acciones del usuario (MVP)**, cada una con su caso de uso y su validación en el borde:
+- **Manual** `{name, amount, billingDay}`: crear, editar y quitar una suscripción agregada a mano.
+- **Override** `{lineKey, amount?, billingDay?}`: monto y día que reemplazan lo detectado.
+- **Decisión de alza** `{lineKey, keep | later}`: qué hace `later` queda por definir (Pendiente).
+- **Por cancelar** `{lineKey}`: marca la línea; no cancela nada ni lee correos. El enlace al sitio
+  del servicio sale del catálogo.
+- **Dejar de seguir** una línea: la oculta y guarda la marca por clave (`docs/mvp.md`, decisión 10).
+
 **Líneas** (constantes con nombre en `subscriptions/domain`):
-1. **Origen**: dentro del padre, los cobros se separan por cuenta de correo y por últimos 4 dígitos
+1. **Origen**: dentro del padre, los cobros se separan por cuenta de correo y por últimos 4 dígitos (en el MVP no hay cuentas de correo: separan solo los dígitos)
    (un cobro sin dígitos no separa). Un cobro de cartola sin cuenta se une al origen de cuenta con
    el que encadena; si no encadena con ninguno, va al origen de cartola de su tarjeta.
 2. **Banda de monto**: dentro del origen, los cobros se separan en bandas de ±25 % (misma moneda).
@@ -372,7 +473,7 @@ el grupo `|one-off`) se busca en la ventana máxima; si no existe → `ErrNotFou
   salto > 25 % el monto es consistente y ese salto es el cambio de plan; con más de uno, no es suscripción.
 - **Umbrella** (Apple, Google Play…): sin regla propia; sus suscripciones salen de las líneas.
 
-**`ReconcileCharges(months)`** (vista diferenciada, para ver qué cobros no se avisan):
+**`ReconcileCharges(months)`** (post-MVP: necesita correo y cartola; vista diferenciada, para ver qué cobros no se avisan):
 1. Lee los cargos del período.
 2. Cruza cartola con correo usando la misma regla de coincidencia.
 3. Devuelve tres grupos: **avisados** (en ambos), **sin aviso** (solo en cartola: el hallazgo
@@ -383,7 +484,10 @@ mismo servicio, mismo monto y ±35 días; si ambos traen los últimos 4 dígitos
 
 El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM") no depende del banco.
 
-### Cifrado
+### Cifrado (post-MVP)
+
+> Solo aplica cuando se guarden contraseñas de aplicación (lectura de correo). El Keychain sirve
+> si la app corre en un Mac; con alojamiento, la llave va a otro lado (decisión abierta).
 
 - AES-256-GCM, nonce aleatorio de 96 bits antepuesto al texto cifrado.
 - Llave de 32 bytes creada la primera vez y guardada en el **Keychain** (servicio `mail-checker`,
@@ -395,17 +499,25 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 
 | Tabla | Feature dueña | Columnas clave | Notas |
 |---|---|---|---|
-| `accounts` | accounts | `id`, `public_id` UNIQUE, `email` UNIQUE, `password_enc`, `last_sync_at`, `last_error_key` | |
-| `statements` | statements | `id`, `public_id` UNIQUE, `bank`, `filename`, `kind`, `billing_date`, `bad_lines` (JSON) | `UNIQUE(bank, billing_date)` |
-| `charges` | shared | `id`, `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card`, `card_last4` (vacío o 4 dígitos) | `UNIQUE(source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola |
-| `subscription_decisions` | subscriptions | `id`, `group_key` UNIQUE (clave de línea), `decision` (`confirmed`/`dismissed`), `cadence` (`monthly`/`yearly`, solo si confirmada), `decided_at` | |
-| `line_aliases` | subscriptions | `id`, `line_key` UNIQUE, `alias` (≤ 40 caracteres) | |
-| `unparsed_emails` | emailsync | `id`, `external_id` UNIQUE, `account_id`, `bank`, `subject`, `received_at`, `preview` | |
+| `users` | auth | `id`, `public_id` UNIQUE, `name`, `email` UNIQUE, `accepted_terms_at`, `created_at` | |
+| sesiones y códigos de acceso | auth | forma abierta; reglas en `docs/mvp.md`, decisión 11 | |
+| `accounts` (post-MVP) | accounts | `id`, `public_id` UNIQUE, `user_id`, `email`, `password_enc`, `last_sync_at`, `last_error_key` | `UNIQUE(user_id, email)` |
+| `statements` | statements | `id`, `public_id` UNIQUE, `user_id`, `bank`, `filename`, `kind`, `billing_date`, `bad_lines` (JSON) | `UNIQUE(user_id, bank, billing_date)` |
+| `charges` | shared | `id`, `user_id`, `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card`, `card_last4` (vacío o 4 dígitos) | `UNIQUE(user_id, source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola |
+| `subscription_decisions` | subscriptions | `id`, `user_id`, `group_key` (clave de línea; `UNIQUE(user_id, group_key)`), `decision` (`confirmed`/`dismissed`), `cadence` (`monthly`/`yearly`, solo si confirmada), `decided_at` | |
+| `line_aliases` | subscriptions | `id`, `user_id`, `line_key`, `alias` (≤ 40 caracteres) | `UNIQUE(user_id, line_key)` |
+| `unparsed_emails` (post-MVP) | emailsync | `id`, `external_id` UNIQUE, `account_id`, `bank`, `subject`, `received_at`, `preview` | |
+| `manual_subscriptions` | subscriptions | `id`, `public_id` UNIQUE, `user_id`, `name`, `amount`, `currency`, `billing_day` | `CHECK(billing_day BETWEEN 1 AND 31)` |
+| `line_overrides` | subscriptions | `id`, `user_id`, `line_key`, `amount`?, `billing_day`? | `UNIQUE(user_id, line_key)` |
+| `price_alert_decisions` | subscriptions | `id`, `user_id`, `line_key`, `amount` (el monto nuevo), `decision` (`keep`/`later`) | `UNIQUE(user_id, line_key, amount)` |
+| `cancellations` | subscriptions | `id`, `user_id`, `line_key`, `marked_at` | `UNIQUE(user_id, line_key)` |
+
+Toda tabla de datos lleva `user_id` con `ON DELETE CASCADE` desde `users`.
 
 - `id`: `INTEGER PRIMARY KEY AUTOINCREMENT` en todas las tablas; solo para uso interno (joins, FKs,
   `external_id`), nunca sale por la API.
 - `public_id`: `TEXT UNIQUE NOT NULL`, UUID v7 generado en Go por el repo en `Create`. Solo en las
-  tablas que la API referencia (`accounts`, `statements`).
+  tablas que la API referencia (`users`, `accounts`, `statements`, `manual_subscriptions`).
 - Fechas: `INTEGER` unix en segundos, UTC. Una fecha sin hora (`billing_date`) se guarda como las
   00:00 de ese día en `America/Santiago`. La conversión `time.Time` ↔ unix vive solo en los
   adaptadores sqlite y http.
@@ -419,21 +531,47 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 
 ### API REST
 
+Toda ruta exige sesión salvo `/api/health` y `/api/auth/*`.
+
 | Método | Ruta | Feature | Descripción |
 |---|---|---|---|
 | GET | `/api/health` | — | |
-| GET | `/api/accounts` | accounts | lista (sin contraseñas) |
-| POST | `/api/accounts` | accounts | `{email, appPassword}` |
+| POST | `/api/auth/register` | auth | `{name, email, acceptedTerms}`; envía el código |
+| POST | `/api/auth/login` | auth | `{email}`; envía el código |
+| POST | `/api/auth/code/verify` | auth | `{email, code}`; abre la sesión |
+| POST | `/api/auth/code/resend` | auth | reenvía el código |
+| POST | `/api/auth/logout` | auth | cierra la sesión |
+| GET | `/api/me` | auth | nombre, correo e iniciales del avatar |
+| DELETE | `/api/me` | auth + puentes | elimina al usuario y todo lo suyo |
+| GET | `/api/export` | auth + puentes | copia de los datos del usuario (formato abierto, mvp.md decisión 13) |
+| GET | `/api/banks` | statements | bancos soportados (para el selector) |
+| POST | `/api/statements` | statements | multipart: `file`, `billingDate` opcional, `bank` opcional; responde archivo y meses leídos |
+| GET | `/api/summary?months=12` | subscriptions | suscripciones con próximo cobro, detalle y alza; posibles con su evidencia; total del mes en CLP; cobros del mes; alzas pendientes |
+| POST | `/api/subscriptions/decisions` | subscriptions | `{groupKey, decision, cadence?}`: confirmar (con cadencia) o descartar una posible |
+| DELETE | `/api/subscriptions/decisions?groupKey=` | subscriptions | deshace la decisión; la línea vuelve a posibles |
+| PUT | `/api/subscriptions/aliases` | subscriptions | `{lineKey, alias}`: nombra una línea; alias vacío lo borra |
+| PUT | `/api/subscriptions/overrides` | subscriptions | `{lineKey, amount?, billingDay?}`: reemplaza lo detectado |
+| POST | `/api/subscriptions/manual` | subscriptions | `{name, amount, billingDay}` |
+| PUT, DELETE | `/api/subscriptions/manual/{publicId}` | subscriptions | edita o quita una manual |
+| DELETE | `/api/subscriptions/line?lineKey=` | subscriptions | "dejar de seguir": oculta la línea (mvp.md decisión 10) |
+| POST | `/api/subscriptions/price-alerts/decision` | subscriptions | `{lineKey, keep \| later}` |
+| GET | `/api/subscriptions/cancel-guide?lineKey=` | subscriptions | enlace al sitio del servicio (catálogo) |
+| POST | `/api/subscriptions/cancellations` | subscriptions | `{lineKey}`: marca la línea como "por cancelar" |
+
+**Post-MVP:**
+
+| Método | Ruta | Feature | Descripción |
+|---|---|---|---|
+| GET, POST | `/api/accounts` | accounts | lista (sin contraseñas) / `{email, appPassword}` |
 | DELETE | `/api/accounts/{publicId}` | accounts | borra la cuenta y sus cargos |
 | POST | `/api/sync` | emailsync | `{months}` → resultado por cuenta |
-| GET | `/api/unparsed` | emailsync | correos no reconocidos |
-| GET | `/api/banks` | statements | bancos soportados (para el selector) |
+| GET | `/api/unparsed` | emailsync | correos no reconocidos (revisar contra "solo servicio, monto y fecha") |
 | GET | `/api/statements` | statements | |
-| POST | `/api/statements` | statements | multipart: `file` o `text`, + `billingDate`, + `bank` opcional |
 | DELETE | `/api/statements/{publicId}` | statements | borra la cartola y sus cargos |
-| GET | `/api/summary?months=12` | subscriptions | vista unificada: suscripciones, otros cargos, totales |
-| GET | `/api/reconciliation?months=12` | subscriptions | vista diferenciada: avisados, sin aviso, solo correo |
-| POST | `/api/subscriptions/decisions` | subscriptions | `{groupKey, decision, cadence?}`: confirmar (con cadencia) o descartar una posible |
+| GET | `/api/reconciliation?months=12` | subscriptions | avisados, sin aviso, solo correo |
+
+Las claves de línea llevan `|`, `:`, `#` y espacios, así que nunca van en el path: viajan en el
+cuerpo o, en el `DELETE`, como parámetro de consulta codificado.
 
 En el JSON, `id` es siempre el `public_id` (UUID v7) y las fechas son unix en segundos.
 
@@ -454,10 +592,10 @@ En el JSON, `id` es siempre el `public_id` (UUID v7) y las fechas son unix en se
 
 ### Agregar un banco (ej. Falabella)
 
-1. `emailsync/adapters/falabella/`: implementa `BankEmailParser` (filtro y parser de sus avisos).
-2. `statements/adapters/falabella/`: implementa `BankStatementParser` (`Detect` y parser de su cartola).
-3. Tests de ambos con correos y cartolas reales (con nombres anonimizados).
-4. Registrarlos en `main.go`.
+1. `statements/adapters/falabella/`: implementa `BankStatementParser` (`Detect`, `BillingDate` y parser de su cartola).
+2. Tests con cartolas reales (con nombres anonimizados).
+3. Registrarlo en `main.go`.
+4. **Post-MVP:** `emailsync/adapters/falabella/` con `BankEmailParser` (filtro y parser de sus avisos).
 
 No se modifica ningún caso de uso, ni el dominio, ni la base, ni el frontend.
 
@@ -484,7 +622,7 @@ No se modifica ningún caso de uso, ni el dominio, ni la base, ni el frontend.
 
 ## Frontend
 
-### Estructura (refleja las features del backend)
+### Estructura del frontend
 
 ```
 frontend/src/
@@ -492,37 +630,35 @@ frontend/src/
 ├── routes/                    TanStack Router (file-based)
 │   ├── __root.tsx             AppShell
 │   ├── index.tsx              Resumen
-│   ├── cuentas.tsx
-│   └── cartolas.tsx
+│   └── ...                    el resto de las pantallas del MVP (`docs/mvp.md`)
 ├── components/
-│   ├── ui/                    generados por shadcn
-│   └── layout/                AppShell, BottomNav, Sidebar
+│   ├── ui/                    componentes propios de base (Button, Input, Card, Badge, ListRow…; lista en `docs/mvp.md`), en Tailwind
+│   └── layout/                AppShell, BrandHeader, BottomNav, SideNav
 ├── features/
-│   ├── subscriptions/         SubscriptionCard, SubscriptionTable, TotalsTiles, useSummary
-│   ├── accounts/              AccountList, AddAccountDrawer, useAccounts
-│   ├── emailsync/             SyncButton, SyncResults, UnparsedList, useSync
-│   └── statements/            UploadDropzone, BankSelect, PasteForm, StatementList, useStatements
+│   ├── subscriptions/         SpendHero, SubscriptionList, SubscriptionDetail, ReviewCard, useSummary
+│   ├── auth/                  RegisterForm, LoginForm, CodeForm, useSession
+│   ├── profile/               ProfileHeader, DeleteAllConfirm, useMe
+│   └── statements/            UploadDropzone, BankSelect, useUploadStatement
 └── lib/
     ├── api/                   client.ts, types.ts
     ├── format.ts              montos y fechas (es-CL)
-    ├── i18n/                  es.ts (catálogo tipado de llaves) + t(key, params)
-    └── utils.ts               cn()
+    └── i18n/                  es.ts (catálogo tipado de llaves) + t(key, params)
 ```
 
 ### Mobile first
 
-- Las clases base de Tailwind son para ~375 px; `md:` y `lg:` agregan el layout de escritorio.
-- **Celular:**
-  - header compacto y navegación inferior fija (Resumen · Cuentas · Cartolas);
-  - suscripciones como `Card` apiladas;
-  - formularios en `Drawer` desde abajo;
-  - objetivos táctiles de al menos 44 px.
-- **md+:** barra lateral, `Table` de shadcn, formularios en `Dialog`/`Sheet`.
+- Las clases base de Tailwind son para ~390 px; desde `lg:` (1024 px) se ve el diseño de escritorio.
+- **Celular:** el diseño del handoff (`docs/mvp.md`): header de marca, navegación inferior fija
+  (Resumen · Subs), hoja con esquinas redondeadas y objetivos táctiles de al menos 44 px.
+- **Escritorio (`lg:`, 1024 px):** barra lateral con Resumen y Subs y contenido en dos columnas (detalle en
+  `docs/mvp.md`). La tablet (768–1023 px) no está diseñada: usa el layout de escritorio con barra inferior.
 - Cada cargo y suscripción muestra su banco y tarjeta (ej. "BCI · crédito").
-- Tema claro/oscuro con las variables CSS de shadcn.
+- Tema claro/oscuro con tokens de color propios en `:root` (con variante `dark`), sin librería de UI.
 
-Componentes shadcn previstos: `button`, `card`, `table`, `badge`, `drawer`, `dialog`, `sheet`, `form`,
-`input`, `select`, `tabs`, `skeleton`, `sonner` (toasts), `collapsible`.
+Los componentes del MVP están listados en `docs/mvp.md`. Se escriben cuando la pantalla que los
+usa los pida (YAGNI), no todos de golpe. Si hace falta un overlay (diálogo, hoja), hay que cuidar
+foco, Esc y scroll lock a mano; si eso resulta frágil, se propone agregar Radix Primitives como
+dependencia aprobada.
 
 ### Desarrollo y build
 
@@ -534,31 +670,59 @@ Componentes shadcn previstos: `button`, `card`, `table`, `badge`, `drawer`, `dia
 
 ## Plan por fases
 
-Al terminar cada fase **paramos** y revisamos antes de seguir.
+Al terminar cada fase **paramos** y revisamos antes de seguir. Cada fase se trabaja como una idea
+(`docs/backlog/`). El MVP es lo de `docs/mvp.md`; lo marcado post-MVP viene después.
 
-1. **Armazón (backend)**: `go.mod`, `shared/sqlite` (`Open` con PRAGMAs, migraciones goose
-   embebidas sin tablas, `WithTx`), `shared/httpserver` (chi, `/api/health`, JSON, mapeo de errores,
-   apagado ordenado), `shared/domain` (solo errores), `shared/clock`, config por variables de entorno
-   (`cmd/api/config.go`, fail fast), `slog` y `main.go` mínimo. Todo con tests.
-2. **Núcleo por features**: por cada feature, `domain` + `ports` + `usecases` con tests usando dobles,
-   desde cero con TDD. **Una idea por feature**, en orden: `subscriptions` → `emailsync` →
-   `statements` → `accounts`. Los tipos de
-   `shared/domain` (`Money`, `Charge`…) llegan con la primera feature que los usa.
-3. **Adaptadores de banco y lectura**: `bci` (avisos y cartola), `extract`, `catalog`, desde cero con
-   TDD y textos reales anonimizados.
-4. **Persistencia y cifrado**: `sqlc.yaml`; cada feature agrega su migración, sus queries sqlc y su
-   repositorio; `keychain`.
-5. **IMAP + HTTP de cada feature + armado en `main.go`**: prueba real con tu Gmail.
-6. **Front, base**: Vite + Tailwind + shadcn + TanStack Router + Query + AppShell mobile first.
-7. **Pantalla Resumen** (vista unificada + sección de cobros sin aviso).
-8. **Pantalla Cuentas** (agregar, quitar, sincronizar).
-9. **Pantalla Cartolas** (subir archivo, pegar texto, elegir banco).
-10. **Build único**, Makefile, README.
+1. ✅ **Armazón (backend)**: idea 001.
+2. ✅ **Núcleos por features**: ideas 002 a 005 (`subscriptions`, `emailsync`, `statements`,
+   `accounts`). Los núcleos de `emailsync` y `accounts` quedan hechos y sin uso hasta el post-MVP.
+3. **Catálogo y lectura de cartolas**: catálogo de servicios (idea 006, con el enlace para cancelar),
+   `extract` (pdf; csv en el post-MVP) y parser de cartola BCI, con textos reales anonimizados.
+4. ✅ **Líneas de suscripción**: idea 007.
+5. **Detección para el MVP**: ajustes de "Pendiente" (fecha de facturación, `UserID`), deshacer
+   decisión, próximo cobro, cobros del mes, alzas, total en CLP (`ExchangeRates`), manuales,
+   overrides y "por cancelar".
+6. **Acceso y multiusuario**: `auth` (registro, código por correo, sesión) y `user_id` en todos los
+   puertos de datos.
+7. **Persistencia**: `sqlc.yaml`; migraciones, queries y repositorios de cada feature del MVP.
+8. **HTTP de cada feature + armado en `main.go`**.
+9. **Front, base**: Vite + Tailwind + componentes propios + TanStack Router + Query + AppShell mobile first.
+10. **Pantallas**, en el orden de los flujos de `docs/mvp.md`: acceso → primera vez → Resumen y Subs →
+    alerta y cancelar → Perfil.
+11. **Alojamiento, build único y README** (alojamiento: decisión abierta).
+
+### Post-MVP
+
+- Lectura de correo por IMAP: `accounts`, `emailsync`, cifrado, sincronización, parser de avisos
+  BCI, conciliación cartola-correo y las pantallas Cuentas de correo, Añadir cuenta y Fuentes.
+- Evaluar OAuth de Gmail con usuarios reales (exige verificación y auditoría de Google).
+- Login con Google y Apple, calendario, notificaciones, recuperar acceso, uso sin conexión.
 
 ## Pendiente
 
-- **PDF real de cartola BCI** para ajustar el parser (fase 3 o 9).
-- **Ocultar la contraseña de `Credential` en logs** (`LogValue()` que la reemplace), para que un
+Ajustes al código ya escrito, por las decisiones del MVP:
+
+- **`UserID`** en `Charge` y en todos los puertos de datos (ver "Multiusuario").
+- **`BankStatementParser.BillingDate`**: sacar la fecha de facturación del archivo.
+
+Otros:
+
+- **Deshacer una decisión** (`UndoDecision` + `SubscriptionDecisions.Delete`): está en el diseño
+  pero no en el código; el núcleo de suscripciones (idea 002) se cerró sin él. Entra en la fase 5.
+- **Cartola BCI en PDF**: ya hay dos reales (sep y oct 2026) para escribir el parser (fase 3); se
+  anonimizan antes de crear los fixtures. Cada una trae un estado nacional y uno internacional,
+  que se leen como un solo flujo de cobros (`docs/mvp.md`, decisión 6). Falta un ejemplo de CSV
+  (post-MVP) y uno con un cobro en euros u otra moneda.
+- **Tipo de cambio** (`docs/mvp.md`, decisión 6): el diseño con el puerto `ExchangeRates` y su
+  "fuente abierta" quedó viejo. El parser de cada banco debe devolver el monto de origen y el tipo
+  de cambio que derive de la cartola (en BCI, el par de traspasos), y se guarda el último derivado
+  con su fecha: falta una tabla en el modelo de datos. Se rediseña al abrir la idea de lectura de
+  cartolas.
+- **Cruces entre features**: `GET /api/export` y `DELETE /api/me` recorren datos de varias
+  features; se resuelven con adaptadores puente, como `emailsync/adapters/accounts`.
+- **Qué hace `later`** en la decisión de alza (¿recordatorio?, ¿solo cierra la tarjeta?).
+- **Sin diseño en el handoff:** tablet (768–1023 px) y las versiones de escritorio de Revisión vacía y Resumen vacío.
+- **Post-MVP:** ocultar la contraseña de `Credential` en logs (`LogValue()` que la reemplace), para que un
   `slog.Any("cred", cred)` accidental no la exponga.
-- **Registrar el detalle de un error de lectura de correo** en `SyncAll` (hoy solo queda la llave en
-  el `SyncResult`): con `slog`, sin correo ni contraseña, cuando exista el lector IMAP real (fase 5).
+- **Post-MVP:** registrar el detalle de un error de lectura de correo en `SyncAll` (hoy solo queda la
+  llave en el `SyncResult`): con `slog`, sin correo ni contraseña, cuando exista el lector IMAP real.
