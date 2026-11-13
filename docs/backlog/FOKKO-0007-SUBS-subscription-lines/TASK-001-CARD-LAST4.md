@@ -15,7 +15,7 @@ suscripciones del mismo servicio pagadas con tarjetas distintas.
   `common.card_last4_invalid`.
 
 ## Fuera
-- Extraer los dígitos de avisos y cartolas → post-MVP (avisos) y FOKKO-0011-SUBS (cartola).
+- Extraer los dígitos de avisos y cartolas → post-MVP (avisos) y FOKKO-0011A-SUBS y FOKKO-0011B-SUBS (cartola).
 - Columna `card_last4` en la base → fase 4.
 
 ## Notas

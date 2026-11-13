@@ -56,7 +56,7 @@ idea implementa el adaptador real, sin depender de ejemplos de banco.
 ## Fuera
 - Parser de avisos BCI → post-MVP (lectura de correo).
 - Extractor de archivos (`ledongthuc/pdf`, `excelize`, CSV, texto) → FOKKO-0009-SUBS.
-- Parser de cartola BCI → FOKKO-0011-SUBS y FOKKO-0012-SUBS.
+- Parser de cartola BCI → FOKKO-0011A-SUBS y FOKKO-0011B-SUBS y FOKKO-0012-SUBS.
 - Editar el catálogo desde la app → YAGNI (cambiarlo es un commit).
 - Quitar sufijos de lugar o sucursal (`MALL`, `0123`) → no: podría juntar comercios
   distintos.
@@ -71,7 +71,7 @@ idea implementa el adaptador real, sin depender de ejemplos de banco.
 - Ninguna. La lista de servicios y prefijos sale de dos cartolas BCI reales (nacional e
   internacional); en internet no hay una lista confiable (los descriptores cambian por
   país y procesador).
-- Para el parser de cartola, FOKKO-0011-SUBS y FOKKO-0012-SUBS (no para esta idea): la descripción de la cartola trae pegado el lugar
+- Para el parser de cartola, FOKKO-0011A-SUBS y FOKKO-0011B-SUBS y FOKKO-0012-SUBS (no para esta idea): la descripción de la cartola trae pegado el lugar
   (`NETFLIX.COM 866-579-7172`, `HOSTGATOR LAS CONDES`) y el aviso por correo puede
   traer otro texto para el mismo cobro. Separarlo es trabajo del parser.
 - La tarea TASK-004 se reescribió tras la idea FOKKO-0007-SUBS: verifica padre y número de líneas

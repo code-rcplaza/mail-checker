@@ -21,7 +21,7 @@ correctas cuando el catálogo real se usa con la detección.
 
 ## Fuera
 - Separar el lugar pegado a la descripción (`SANTIAGO`, teléfono) → parser de cartola
-  (FOKKO-0011-SUBS, parser de cartola BCI).
+  (FOKKO-0011A-SUBS y FOKKO-0011B-SUBS, parser de cartola BCI).
 - Claves de línea con tarjeta y día (`padre|tarjeta|dDD`) → ya cubiertas en FOKKO-0007-SUBS/TASK-004; aquí
   solo se verifica el padre y la cantidad de líneas.
 

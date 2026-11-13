@@ -55,11 +55,11 @@ información, la detección debe separar cada suscripción aunque compartan serv
   iguales el mismo día (se separan, la segunda clave lleva `#2`).
 
 ## Fuera
-- Extraer los últimos 4 dígitos de avisos y cartolas → parsers (avisos: post-MVP; cartola: FOKKO-0011-SUBS).
+- Extraer los últimos 4 dígitos de avisos y cartolas → parsers (avisos: post-MVP; cartola: FOKKO-0011A-SUBS y FOKKO-0011B-SUBS).
 - Columna nueva en la base → fase 4 (migración de `charges`).
 - Vista agrupada padre → líneas en el front → fases 7–9.
 - Reglas del parser de cartola encontradas en la auditoría (monto en moneda de
-  origen, excluir cuotas y pagos, separar el lugar pegado) → FOKKO-0011-SUBS y FOKKO-0012-SUBS.
+  origen, excluir cuotas y pagos, separar el lugar pegado) → FOKKO-0011B-SUBS y FOKKO-0012-SUBS.
 - Catálogo de servicios → idea FOKKO-0006-SUBS (en pausa hasta cerrar esta).
 
 ## Features afectadas
@@ -72,7 +72,7 @@ información, la detección debe separar cada suscripción aunque compartan serv
 - Cambios aplicados a `docs/ARCHITECTURE.md` al cerrar (más `LineAliases`, `NameLine` y el grupo `|one-off`): formato de `GroupKey`, regla de líneas
   (reemplaza "umbrella → un grupo por monto"), últimos 4 dígitos en `Charge`, columna
   `card_last4` en el modelo de datos.
-- Plan vigente: avisos BCI → post-MVP, extractor → FOKKO-0009-SUBS, cartola BCI → FOKKO-0011-SUBS y FOKKO-0012-SUBS.
+- Plan vigente: avisos BCI → post-MVP, extractor → FOKKO-0009-SUBS, cartola BCI → FOKKO-0011B-SUBS y FOKKO-0012-SUBS.
 
 ## Tareas
 - [x] [TASK-001 Últimos 4 dígitos de la tarjeta](TASK-001-CARD-LAST4.md)
