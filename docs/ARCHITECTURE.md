@@ -624,26 +624,38 @@ No se modifica ningún caso de uso, ni el dominio, ni la base, ni el frontend.
 
 ### Estructura del frontend
 
+Clean architecture por feature, igual que el back: las dependencias apuntan hacia adentro
+(`presentation → application → domain`; `infrastructure → application`).
+
 ```
 frontend/src/
-├── main.tsx
-├── routes/                    TanStack Router (file-based)
-│   ├── __root.tsx             AppShell
-│   ├── index.tsx              Resumen
-│   └── ...                    el resto de las pantallas del MVP (`docs/mvp.md`)
+├── main.tsx                   composición: crea los gateways reales y monta `GatewaysProvider`
+├── routes/                    TanStack Router (file-based); cada ruta monta un contenedor de `screens`
 ├── components/
-│   ├── ui/                    componentes propios de base (Button, Input, Card, Badge, ListRow…; lista en `docs/mvp.md`), en Tailwind
-│   └── layout/                AppShell, BrandHeader, BottomNav, SideNav
-├── features/
-│   ├── subscriptions/         SpendHero, SubscriptionList, SubscriptionDetail, ReviewCard, useSummary
-│   ├── auth/                  RegisterForm, LoginForm, CodeForm, useSession
-│   ├── profile/               ProfileHeader, DeleteAllConfirm, useMe
-│   └── statements/            UploadDropzone, BankSelect, useUploadStatement
+│   ├── ui/                    componentes de base presentacionales (Button, Input, Card, Badge, ListRow…; lista en `docs/mvp.md`)
+│   └── layout/                AppShell, BrandHeader, BottomNav, SideNav (presentacionales)
+├── features/<feature>/        auth · statements · subscriptions · profile
+│   ├── domain/                tipos `readonly`, funciones puras y schemas zod; sin React ni red
+│   ├── application/           hooks de caso de uso (`useSummary`, `useRegister`) y puertos (gateways)
+│   ├── infrastructure/        implementa los puertos con `lib/api`; mappers DTO → dominio
+│   └── presentation/
+│       ├── components/        presentacionales
+│       └── screens/           contenedores: llaman hooks y pasan props
 └── lib/
     ├── api/                   client.ts, types.ts
+    ├── gateways/              `GatewaysProvider`, `useGateways`, `renderWithGateways` (pruebas)
     ├── format.ts              montos y fechas (es-CL)
     └── i18n/                  es.ts (catálogo tipado de llaves) + t(key, params)
 ```
+
+- **Componente presentacional:** recibe datos y callbacks por props; puede usar `t()` y `react`, nada más.
+  No usa `useQuery`, router, `fetch` ni importa `application` o `infrastructure`. Con las mismas props
+  pinta lo mismo, así que se prueba sin servidor y se extrae copiando su carpeta.
+- **Contenedor (`screens`):** único lugar que llama hooks de `application`; sin lógica inline en el JSX.
+- **Puertos:** se entregan por Context (`useGateways`). Aunque cada puerto tenga una sola implementación
+  real, las pruebas usan un doble en memoria, así que se permiten (como en el back).
+- **Guardia:** Biome con `noRestrictedImports` por carpeta rompe el lint al cruzar un límite
+  (ideas `FOKKO-0085C-SUBS` y `FOKKO-0085D-SUBS`).
 
 ### Mobile first
 

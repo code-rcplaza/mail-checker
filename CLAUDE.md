@@ -21,7 +21,8 @@ la contradice, se pregunta antes de cambiarla.
 ### KISS
 - Lo más simple que funcione.
 - Sin interfaces con una sola implementación; solo los puertos definidos en
-  `docs/ARCHITECTURE.md` (parsers por banco, repos, lector de correo).
+  `docs/ARCHITECTURE.md` (parsers por banco, repos, lector de correo; en el front, los gateways
+  de `application`, que tienen un doble en las pruebas).
 - Sin generics, reflection ni librerías fuera de las aprobadas sin preguntar.
 - Go: errores con contexto (`fmt.Errorf("...: %w", err)`); nunca `panic` en flujo normal.
 - Front: los datos del servidor viven solo en TanStack Query; nada de estado global
@@ -143,8 +144,10 @@ la contradice, se pregunta antes de cambiarla.
 - Cada fase de `docs/ARCHITECTURE.md` se trabaja como una idea.
 - Ideas `FOKKO-XXXX-SUBS` (4 dígitos) y tareas `TASK-XXX-NOMBRE` (3 dígitos, reinician
   en cada idea). Se citan como `FOKKO-XXXX-SUBS/TASK-XXX` en las tareas y en los commits.
-  Una idea o tarea es unitaria: un resultado verificable, una capa, ~300 líneas; si el
-  título lleva una "y", se parte.
+  Una idea es unitaria: un resultado verificable y una capa. Una tarea es **una sola operación**
+  (función, método de repo, ruta o componente), con un test de tabla, hasta 3 criterios y título sin
+  "y" ni comas; si no cumple, se parte con sufijo de letra (`TASK-001A`, `FOKKO-0072A-SUBS`) sin
+  renumerar.
 
 ### Organización de los `.md`
 - Solo en tres lugares: raíz (`README.md`, `CLAUDE.md`), `docs/ARCHITECTURE.md` y
@@ -205,7 +208,10 @@ la contradice, se pregunta antes de cambiarla.
 ## Frontend (React + TS)
 - Tailwind v4 con componentes propios (sin librería de UI), mobile first (base 390 px; desde `lg:`, 1024 px, el diseño de escritorio con barra lateral).
 - TanStack Router + TanStack Query; formularios con react-hook-form + zod.
-- Estructura por features, reflejando el backend.
+- Estructura por features, reflejando el backend, con clean architecture:
+  `domain / application / infrastructure / presentation` (ver `docs/ARCHITECTURE.md`).
+- Los componentes son presentacionales: solo props y `t()`; sin `useQuery`, router ni `fetch`.
+  Los contenedores de `screens` llaman los hooks; los gateways se entregan por Context.
 - Formato con Biome (hook en `.claude/settings.json`, activo cuando exista `frontend/`).
 
 ## Comandos
