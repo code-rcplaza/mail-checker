@@ -13,7 +13,7 @@ import (
 
 func reconcile(reader *fakeChargeReader, months int) (domain.Reconciliation, error) {
 	useCase := NewReconcileCharges(reader, fakeCatalog{}, func() time.Time { return testNow })
-	return useCase.Execute(context.Background(), months)
+	return useCase.Execute(context.Background(), userOne, months)
 }
 
 func idsOf(charges []shared.Charge) []string {

@@ -20,5 +20,5 @@ El total del mes va en CLP: un cobro en USD se muestra con su monto original y e
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Convertir dólares a pesos](TASK-001-USD-TO-CLP.md)
-- [ ] [TASK-002 Un monto en pesos no se toca](TASK-002-CLP-UNCHANGED.md)
+- [x] [TASK-001 Convertir dólares a pesos](TASK-001-USD-TO-CLP.md)
+- [x] [TASK-002 Un monto en pesos no se toca](TASK-002-CLP-UNCHANGED.md)

@@ -10,8 +10,8 @@ import (
 )
 
 // readChargesSince is shared by both views so they fail the same way.
-func readChargesSince(ctx context.Context, reader ports.ChargeReader, since time.Time) ([]shared.Charge, error) {
-	charges, err := reader.ListSince(ctx, since)
+func readChargesSince(ctx context.Context, userID int64, reader ports.ChargeReader, since time.Time) ([]shared.Charge, error) {
+	charges, err := reader.ListSince(ctx, userID, since)
 	if err != nil {
 		return nil, fmt.Errorf("read charges since %s: %w", since.Format(time.DateOnly), err)
 	}

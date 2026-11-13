@@ -25,11 +25,11 @@ func newRecordingAliases() *recordingAliases {
 	return &recordingAliases{saved: make(map[domain.GroupKey]string)}
 }
 
-func (r *recordingAliases) List(context.Context) (map[domain.GroupKey]string, error) {
+func (r *recordingAliases) List(context.Context, int64) (map[domain.GroupKey]string, error) {
 	return r.aliases, r.listErr
 }
 
-func (r *recordingAliases) Save(_ context.Context, key domain.GroupKey, alias string) error {
+func (r *recordingAliases) Save(_ context.Context, _ int64, key domain.GroupKey, alias string) error {
 	if r.saveErr != nil {
 		return r.saveErr
 	}
@@ -37,7 +37,7 @@ func (r *recordingAliases) Save(_ context.Context, key domain.GroupKey, alias st
 	return nil
 }
 
-func (r *recordingAliases) Delete(_ context.Context, key domain.GroupKey) error {
+func (r *recordingAliases) Delete(_ context.Context, _ int64, key domain.GroupKey) error {
 	if r.deleteErr != nil {
 		return r.deleteErr
 	}
@@ -62,7 +62,7 @@ func chargesWithEveryKindOfLine() *fakeChargeReader {
 
 func nameLine(aliases *recordingAliases, key domain.GroupKey, alias string) error {
 	useCase := NewNameLine(chargesWithEveryKindOfLine(), fakeCatalog{}, aliases, func() time.Time { return testNow })
-	return useCase.Execute(context.Background(), key, alias)
+	return useCase.Execute(context.Background(), userOne, key, alias)
 }
 
 func TestNameLine_SavesTheTrimmedAliasOfAnyLine(t *testing.T) {
@@ -148,9 +148,9 @@ func TestNameLine_WrapsAliasErrors(t *testing.T) {
 func TestGetSummary_SubscriptionsCarryTheAliasOfTheirLine(t *testing.T) {
 	aliases := newRecordingAliases()
 	aliases.aliases = map[domain.GroupKey]string{activeLineKey: "Padres"}
-	useCase := NewGetSummary(chargesWithPossibleAndActive(), fakeCatalog{}, fakeDecisions{}, aliases, func() time.Time { return testNow })
+	useCase := NewGetSummary(SummarySources{Charges: chargesWithPossibleAndActive(), Catalog: fakeCatalog{}, Decisions: fakeDecisions{}, Aliases: aliases, Rates: ratesByUser{}, KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overridesByUser{}}, func() time.Time { return testNow })
 
-	got, err := useCase.Execute(context.Background(), 6)
+	got, err := useCase.Execute(context.Background(), userOne, 6)
 
 	if err != nil {
 		t.Fatalf("Execute error = %v, want nil", err)
@@ -167,9 +167,9 @@ func TestGetSummary_WrapsAliasReadError(t *testing.T) {
 	errDatabase := errors.New("database is locked")
 	aliases := newRecordingAliases()
 	aliases.listErr = errDatabase
-	useCase := NewGetSummary(chargesWithPossibleAndActive(), fakeCatalog{}, fakeDecisions{}, aliases, func() time.Time { return testNow })
+	useCase := NewGetSummary(SummarySources{Charges: chargesWithPossibleAndActive(), Catalog: fakeCatalog{}, Decisions: fakeDecisions{}, Aliases: aliases, Rates: ratesByUser{}, KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overridesByUser{}}, func() time.Time { return testNow })
 
-	_, err := useCase.Execute(context.Background(), 6)
+	_, err := useCase.Execute(context.Background(), userOne, 6)
 
 	if !errors.Is(err, errDatabase) {
 		t.Fatalf("errors.Is(err, errDatabase) = false (err = %v), want true", err)

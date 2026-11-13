@@ -19,8 +19,8 @@ El usuario puede reemplazar el monto o el día de cobro detectados de una línea
 - Cómo se quita un override: se propone que guardar uno con monto y día vacíos lo borre, igual que el alias.
 
 ## Tareas
-- [ ] [TASK-001A Aceptar un override válido](TASK-001A-OVERRIDE-VALID.md)
-- [ ] [TASK-001B Rechazar un override inválido](TASK-001B-OVERRIDE-INVALID.md)
-- [ ] [TASK-001C Reconocer un override vacío](TASK-001C-OVERRIDE-EMPTY.md)
-- [ ] [TASK-002 Guardar o quitar un override](TASK-002-SAVE-OVERRIDE.md)
-- [ ] [TASK-003 El override cambia lo que se muestra](TASK-003-OVERRIDE-IN-SUMMARY.md)
+- [x] [TASK-001A Aceptar un override válido](TASK-001A-OVERRIDE-VALID.md)
+- [x] [TASK-001B Rechazar un override inválido](TASK-001B-OVERRIDE-INVALID.md)
+- [x] [TASK-001C Reconocer un override vacío](TASK-001C-OVERRIDE-EMPTY.md)
+- [x] [TASK-002 Guardar o quitar un override](TASK-002-SAVE-OVERRIDE.md)
+- [x] [TASK-003 El override cambia lo que se muestra](TASK-003-OVERRIDE-IN-SUMMARY.md)

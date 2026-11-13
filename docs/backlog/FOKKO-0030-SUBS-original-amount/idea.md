@@ -19,5 +19,5 @@ Un cobro en USD se muestra "USD 20 · ≈ $19.000": el monto original y su equiv
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Mostrar un monto en dólares con su equivalente](TASK-001A-LINE-AMOUNT-USD.md)
-- [ ] [TASK-001B Mostrar un monto en pesos](TASK-001B-LINE-AMOUNT-CLP.md)
+- [x] [TASK-001A Mostrar un monto en dólares con su equivalente](TASK-001A-LINE-AMOUNT-USD.md)
+- [x] [TASK-001B Mostrar un monto en pesos](TASK-001B-LINE-AMOUNT-CLP.md)

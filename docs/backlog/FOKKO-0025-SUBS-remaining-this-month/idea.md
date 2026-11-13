@@ -19,5 +19,5 @@
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Contar los restantes del mes](TASK-001-COUNT-REMAINING-THIS-MONTH.md)
-- [ ] [TASK-002 El resumen trae los restantes](TASK-002-SUMMARY-REMAINING-COUNT.md)
+- [x] [TASK-001 Contar los restantes del mes](TASK-001-COUNT-REMAINING-THIS-MONTH.md)
+- [x] [TASK-002 El resumen trae los restantes](TASK-002-SUMMARY-REMAINING-COUNT.md)

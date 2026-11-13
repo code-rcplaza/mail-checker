@@ -18,7 +18,7 @@ type fakeChargeReader struct {
 	askedSince time.Time
 }
 
-func (f *fakeChargeReader) ListSince(_ context.Context, since time.Time) ([]shared.Charge, error) {
+func (f *fakeChargeReader) ListSince(_ context.Context, _ int64, since time.Time) ([]shared.Charge, error) {
 	f.askedSince = since
 	return f.charges, f.err
 }
@@ -42,12 +42,15 @@ type fakeDecisions struct {
 	err       error
 }
 
-func (f fakeDecisions) List(context.Context) (map[domain.GroupKey]domain.Decision, error) {
+func (f fakeDecisions) List(context.Context, int64) (map[domain.GroupKey]domain.Decision, error) {
 	return f.decisions, f.err
 }
 
 // Save is unused by GetSummary; it is here to satisfy the port.
-func (fakeDecisions) Save(context.Context, domain.GroupKey, domain.Decision) error { return nil }
+func (fakeDecisions) Save(context.Context, int64, domain.GroupKey, domain.Decision) error { return nil }
+
+// Delete is unused by GetSummary; it is here to satisfy the port.
+func (fakeDecisions) Delete(context.Context, int64, domain.GroupKey) error { return nil }
 
 func chargeDaysAgo(externalID, merchant string, source shared.Source, amount shared.Money, daysAgo int) shared.Charge {
 	return shared.Charge{
@@ -63,8 +66,8 @@ func chargeDaysAgo(externalID, merchant string, source shared.Source, amount sha
 }
 
 func getSummary(reader *fakeChargeReader, decisions fakeDecisions, months int) (domain.Summary, error) {
-	useCase := NewGetSummary(reader, fakeCatalog{}, decisions, newRecordingAliases(), func() time.Time { return testNow })
-	return useCase.Execute(context.Background(), months)
+	useCase := NewGetSummary(SummarySources{Charges: reader, Catalog: fakeCatalog{}, Decisions: decisions, Aliases: newRecordingAliases(), Rates: ratesByUser{}, KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overridesByUser{}}, func() time.Time { return testNow })
+	return useCase.Execute(context.Background(), userOne, months)
 }
 
 func TestGetSummary_ChargeInEmailAndStatementCountsOnce(t *testing.T) {

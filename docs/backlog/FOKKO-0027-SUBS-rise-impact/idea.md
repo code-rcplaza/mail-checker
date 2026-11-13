@@ -19,5 +19,5 @@ La alerta muestra cuánto cuesta el alza al mes y al año.
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Impacto en una línea mensual](TASK-001-RISE-IMPACT-MONTHLY-LINE.md)
-- [ ] [TASK-002 Impacto en una línea anual](TASK-002-RISE-IMPACT-YEARLY-LINE.md)
+- [x] [TASK-001 Impacto en una línea mensual](TASK-001-RISE-IMPACT-MONTHLY-LINE.md)
+- [x] [TASK-002 Impacto en una línea anual](TASK-002-RISE-IMPACT-YEARLY-LINE.md)

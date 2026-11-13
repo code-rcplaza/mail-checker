@@ -12,6 +12,11 @@ type Summary struct {
 	Inactive      []Subscription
 	OtherCharges  []shared.Charge // not a subscription + dismissed possible
 	MonthlySpend  map[shared.Currency]shared.Money
+	// Charges of the calendar month of "now", in the time zone "now" carries.
+	ChargedThisMonth   int    // subscriptions already charged
+	RemainingThisMonth int    // subscriptions whose next charge is still to come
+	Rises              []Rise // subscriptions whose last charge went up
+	Total              Total  // the monthly spend in pesos; set with ApplyExchangeRates
 }
 
 // BuildSummary puts each line in its section, honoring the user's decisions
@@ -28,6 +33,9 @@ func BuildSummary(
 	summary := sortIntoSections(subscriptions)
 	summary.OtherCharges = append(summary.OtherCharges, chargesOfGroups(oneOff)...)
 	summary.MonthlySpend = MonthlySpend(summary.Subscriptions)
+	summary.ChargedThisMonth = CountChargedThisMonth(summary.Subscriptions, now)
+	summary.RemainingThisMonth = CountRemainingThisMonth(summary.Subscriptions, now)
+	summary.Rises = risesOf(summary.Subscriptions)
 	return summary
 }
 
@@ -80,7 +88,21 @@ func buildSubscription(
 		Currency: currency,
 		Charges:  group.Charges,
 	}
-	return applyDecision(subscription, decisions)
+	return withNextCharge(applyDecision(subscription, decisions))
+}
+
+// withNextCharge runs after the decision: a confirmed possible only then has
+// the cadence the user picked. An inactive line is not expected to charge again.
+func withNextCharge(s Subscription) Subscription {
+	if s.Status == StatusInactive || len(s.Charges) == 0 {
+		return s
+	}
+	lastCharge := lastOf(s.Charges).OccurredAt
+	nextCharge, hasNextCharge := NextCharge(lastCharge, medianDayOfMonth(s.Charges), s.Cadence)
+	if hasNextCharge {
+		s.NextCharge = nextCharge
+	}
+	return s
 }
 
 func currentAmount(group ChargeGroup) (shared.Money, shared.Currency) {

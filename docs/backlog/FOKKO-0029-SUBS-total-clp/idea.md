@@ -21,7 +21,7 @@ El total del mes va en CLP: los cobros en USD se convierten con el último tipo 
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Sumar el gasto convertido a pesos](TASK-001A-TOTAL-SUM.md)
-- [ ] [TASK-001B Marcar el total aproximado](TASK-001B-TOTAL-APPROX-FLAG.md)
-- [ ] [TASK-002 Total sin tipo de cambio](TASK-002-TOTAL-INCOMPLETE.md)
-- [ ] [TASK-003 `GetSummary` lee el tipo de cambio](TASK-003-SUMMARY-READS-RATE.md)
+- [x] [TASK-001A Sumar el gasto convertido a pesos](TASK-001A-TOTAL-SUM.md)
+- [x] [TASK-001B Marcar el total aproximado](TASK-001B-TOTAL-APPROX-FLAG.md)
+- [x] [TASK-002 Total sin tipo de cambio](TASK-002-TOTAL-INCOMPLETE.md)
+- [x] [TASK-003 `GetSummary` lee el tipo de cambio](TASK-003-SUMMARY-READS-RATE.md)

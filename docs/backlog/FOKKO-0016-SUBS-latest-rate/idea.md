@@ -19,5 +19,5 @@ No todos los meses trae traspaso. Se guarda el último derivado con su fecha y s
 - ¿Se descarta un tipo de cambio demasiado viejo? Se propone que no (YAGNI): se muestra con su fecha.
 
 ## Tareas
-- [ ] [TASK-001 Elegir el más reciente](TASK-001-PICK-LATEST-RATE.md)
-- [ ] [TASK-002 Sin tipo de cambio](TASK-002-RATE-MISSING.md)
+- [x] [TASK-001 Elegir el más reciente](TASK-001-PICK-LATEST-RATE.md)
+- [x] [TASK-002 Sin tipo de cambio](TASK-002-RATE-MISSING.md)

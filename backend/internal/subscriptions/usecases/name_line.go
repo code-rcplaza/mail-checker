@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/ports"
 )
@@ -28,42 +27,33 @@ func NewNameLine(
 	return NameLine{charges: charges, catalog: catalog, aliases: aliases, now: now}
 }
 
-func (u NameLine) Execute(ctx context.Context, key domain.GroupKey, rawAlias string) error {
+func (u NameLine) Execute(ctx context.Context, userID int64, key domain.GroupKey, rawAlias string) error {
 	alias, err := domain.ParseLineAlias(rawAlias)
 	if err != nil {
 		return err
 	}
-	if err := u.ensureLine(ctx, key); err != nil {
+	if err := u.ensureLine(ctx, userID, key); err != nil {
 		return err
 	}
-	return u.storeAlias(ctx, key, alias)
+	return u.storeAlias(ctx, userID, key, alias)
 }
 
-// ensureLine looks over the widest period, so any line the user sees in the
-// period they picked can be named.
-func (u NameLine) ensureLine(ctx context.Context, key domain.GroupKey) error {
-	groups, err := readGroupsSince(ctx, u.charges, u.catalog, domain.PeriodStart(u.now(), domain.MaxPeriodMonths))
-	if err != nil {
-		return err
-	}
-	if !domain.IsLine(groups, key) {
-		return shared.NotFound(domain.KeyLineNotFound)
-	}
-	return nil
+func (u NameLine) ensureLine(ctx context.Context, userID int64, key domain.GroupKey) error {
+	return ensureLineExists(ctx, userID, u.charges, u.catalog, u.now(), key)
 }
 
-func (u NameLine) storeAlias(ctx context.Context, key domain.GroupKey, alias string) error {
+func (u NameLine) storeAlias(ctx context.Context, userID int64, key domain.GroupKey, alias string) error {
 	if alias == "" {
-		return u.deleteAlias(ctx, key)
+		return u.deleteAlias(ctx, userID, key)
 	}
-	if err := u.aliases.Save(ctx, key, alias); err != nil {
+	if err := u.aliases.Save(ctx, userID, key, alias); err != nil {
 		return fmt.Errorf("save alias for %s: %w", key, err)
 	}
 	return nil
 }
 
-func (u NameLine) deleteAlias(ctx context.Context, key domain.GroupKey) error {
-	if err := u.aliases.Delete(ctx, key); err != nil {
+func (u NameLine) deleteAlias(ctx context.Context, userID int64, key domain.GroupKey) error {
+	if err := u.aliases.Delete(ctx, userID, key); err != nil {
 		return fmt.Errorf("delete alias for %s: %w", key, err)
 	}
 	return nil

@@ -19,5 +19,5 @@
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Contar los cobrados del mes](TASK-001-COUNT-CHARGED-THIS-MONTH.md)
-- [ ] [TASK-002 El resumen trae los cobrados](TASK-002-SUMMARY-CHARGED-COUNT.md)
+- [x] [TASK-001 Contar los cobrados del mes](TASK-001-COUNT-CHARGED-THIS-MONTH.md)
+- [x] [TASK-002 El resumen trae los cobrados](TASK-002-SUMMARY-CHARGED-COUNT.md)

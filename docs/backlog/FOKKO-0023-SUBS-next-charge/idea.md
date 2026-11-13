@@ -18,7 +18,7 @@
 - Si la fecha calculada ya pasó (cobro atrasado hasta 45 días), se muestra tal cual, sin saltar al siguiente. ¿Se acepta?
 
 ## Tareas
-- [ ] [TASK-001 Próximo cobro mensual](TASK-001-NEXT-CHARGE-MONTHLY.md)
-- [ ] [TASK-002 Próximo cobro anual](TASK-002-NEXT-CHARGE-YEARLY.md)
-- [ ] [TASK-003 Día 31 en meses cortos](TASK-003-NEXT-CHARGE-SHORT-MONTH.md)
-- [ ] [TASK-004 `Subscription` trae su próximo cobro](TASK-004-SUMMARY-NEXT-CHARGE.md)
+- [x] [TASK-001 Próximo cobro mensual](TASK-001-NEXT-CHARGE-MONTHLY.md)
+- [x] [TASK-002 Próximo cobro anual](TASK-002-NEXT-CHARGE-YEARLY.md)
+- [x] [TASK-003 Día 31 en meses cortos](TASK-003-NEXT-CHARGE-SHORT-MONTH.md)
+- [x] [TASK-004 `Subscription` trae su próximo cobro](TASK-004-SUMMARY-NEXT-CHARGE.md)

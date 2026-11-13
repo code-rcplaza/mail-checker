@@ -22,5 +22,5 @@ La pantalla "Cómo cancelar" necesita llevar al usuario al sitio del servicio. E
 - Para un servicio umbrella (App Store, Google, Microsoft) el enlace es el de administrar suscripciones de la tienda, no el de un servicio concreto. ¿Se acepta?
 
 ## Tareas
-- [ ] [TASK-001 `Service` con enlace de cancelación](TASK-001-CANCEL-URL-FIELD.md)
+- [x] [TASK-001 `Service` con enlace de cancelación](TASK-001-CANCEL-URL-FIELD.md)
 - [ ] [TASK-002 Enlaces de los servicios del catálogo](TASK-002-CATALOG-CANCEL-URLS.md)

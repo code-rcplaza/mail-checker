@@ -15,7 +15,7 @@ Loop: `/idea` → `/stories NNN` → `/story NNN-MM` (TDD). Reglas en `CLAUDE.md
 | FOKKO-0003-SUBS | [Núcleo de sincronización de correos (fase 2, parte 2)](FOKKO-0003-SUBS-emailsync-core/idea.md) | done |
 | FOKKO-0004-SUBS | [Núcleo de cartolas (fase 2, parte 3)](FOKKO-0004-SUBS-statements-core/idea.md) | done |
 | FOKKO-0005-SUBS | [Núcleo de cuentas (fase 2, parte 4)](FOKKO-0005-SUBS-accounts-core/idea.md) | done |
-| FOKKO-0006-SUBS | [Catálogo de servicios (fase 3, parte 1)](FOKKO-0006-SUBS-service-catalog/idea.md) | doing |
+| FOKKO-0006-SUBS | [Catálogo de servicios (fase 3, parte 1)](FOKKO-0006-SUBS-service-catalog/idea.md) | done |
 | FOKKO-0007-SUBS | [Líneas de suscripción (corrección de la detección)](FOKKO-0007-SUBS-subscription-lines/idea.md) | done |
 
 ## Plan del MVP (ideas por hacer)
@@ -28,40 +28,40 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 
 | # | Idea | Estado |
 |---|---|---|
-| FOKKO-0008-SUBS | [Enlace de cancelación en el catálogo](FOKKO-0008-SUBS-cancel-link/idea.md) | todo |
-| FOKKO-0009-SUBS | [`extract`: texto de un PDF](FOKKO-0009-SUBS-pdf-extract/idea.md) | todo |
-| FOKKO-0010-SUBS | [Meses leídos de una cartola](FOKKO-0010-SUBS-months-read/idea.md) | todo |
-| FOKKO-0011A-SUBS | [Parser BCI: reconocer la cartola](FOKKO-0011A-SUBS-bci-detect/idea.md) | todo |
-| FOKKO-0011B-SUBS | [Parser BCI: leer los cobros del estado nacional](FOKKO-0011B-SUBS-bci-national-lines/idea.md) | todo |
-| FOKKO-0012-SUBS | [Decidir si un cobro internacional es en pesos](FOKKO-0012-SUBS-pesos-or-usd/idea.md) | todo |
-| FOKKO-0013-SUBS | [Parser BCI: cobros del estado internacional (origen y US$)](FOKKO-0013-SUBS-bci-international/idea.md) | todo |
-| FOKKO-0014-SUBS | [Parser BCI: par de traspasos](FOKKO-0014-SUBS-bci-transfer-pair/idea.md) | todo |
-| FOKKO-0015-SUBS | [Derivar el tipo de cambio de los traspasos](FOKKO-0015-SUBS-derive-rate/idea.md) | todo |
-| FOKKO-0016-SUBS | [Último tipo de cambio o total incompleto](FOKKO-0016-SUBS-latest-rate/idea.md) | todo |
-| FOKKO-0017-SUBS | [Convertir un cobro en US$ a CLP](FOKKO-0017-SUBS-convert-usd/idea.md) | todo |
-| FOKKO-0018A-SUBS | [Puerto `BillingDate` en `BankStatementParser`](FOKKO-0018A-SUBS-billing-date-port/idea.md) | todo |
-| FOKKO-0018B-SUBS | [`ImportStatement` toma la fecha del archivo](FOKKO-0018B-SUBS-import-file-date/idea.md) | todo |
-| FOKKO-0019-SUBS | [Parser BCI: fecha de facturación](FOKKO-0019-SUBS-bci-billing-date/idea.md) | todo |
+| FOKKO-0008-SUBS | [Enlace de cancelación en el catálogo](FOKKO-0008-SUBS-cancel-link/idea.md) | doing |
+| FOKKO-0009-SUBS | [`extract`: texto de un PDF](FOKKO-0009-SUBS-pdf-extract/idea.md) | done |
+| FOKKO-0010-SUBS | [Meses leídos de una cartola](FOKKO-0010-SUBS-months-read/idea.md) | done |
+| FOKKO-0011A-SUBS | [Parser BCI: reconocer la cartola](FOKKO-0011A-SUBS-bci-detect/idea.md) | done |
+| FOKKO-0011B-SUBS | [Parser BCI: leer los cobros del estado nacional](FOKKO-0011B-SUBS-bci-national-lines/idea.md) | done |
+| FOKKO-0012-SUBS | [Decidir si un cobro internacional es en pesos](FOKKO-0012-SUBS-pesos-or-usd/idea.md) | done |
+| FOKKO-0013-SUBS | [Parser BCI: cobros del estado internacional (origen y US$)](FOKKO-0013-SUBS-bci-international/idea.md) | done |
+| FOKKO-0014-SUBS | [Parser BCI: par de traspasos](FOKKO-0014-SUBS-bci-transfer-pair/idea.md) | done |
+| FOKKO-0015-SUBS | [Derivar el tipo de cambio de los traspasos](FOKKO-0015-SUBS-derive-rate/idea.md) | done |
+| FOKKO-0016-SUBS | [Último tipo de cambio o total incompleto](FOKKO-0016-SUBS-latest-rate/idea.md) | done |
+| FOKKO-0017-SUBS | [Convertir un cobro en US$ a CLP](FOKKO-0017-SUBS-convert-usd/idea.md) | done |
+| FOKKO-0018A-SUBS | [Puerto `BillingDate` en `BankStatementParser`](FOKKO-0018A-SUBS-billing-date-port/idea.md) | done |
+| FOKKO-0018B-SUBS | [`ImportStatement` toma la fecha del archivo](FOKKO-0018B-SUBS-import-file-date/idea.md) | done |
+| FOKKO-0019-SUBS | [Parser BCI: fecha de facturación](FOKKO-0019-SUBS-bci-billing-date/idea.md) | done |
 
 ### B. Detección
 
 | # | Idea | Estado |
 |---|---|---|
-| FOKKO-0020A-SUBS | [`UserID` en `Charge`](FOKKO-0020A-SUBS-charge-user-id/idea.md) | todo |
-| FOKKO-0020B-SUBS | [`statements` filtra por usuario](FOKKO-0020B-SUBS-statements-by-user/idea.md) | todo |
-| FOKKO-0021-SUBS | [`UserID` en los puertos de `subscriptions`](FOKKO-0021-SUBS-user-id-subscriptions/idea.md) | todo |
-| FOKKO-0022-SUBS | [Deshacer una decisión](FOKKO-0022-SUBS-undo-decision/idea.md) | todo |
-| FOKKO-0023-SUBS | [Próximo cobro por línea](FOKKO-0023-SUBS-next-charge/idea.md) | todo |
-| FOKKO-0024-SUBS | [Cobros ya cobrados del mes](FOKKO-0024-SUBS-charged-this-month/idea.md) | todo |
-| FOKKO-0025-SUBS | [Cobros restantes del mes](FOKKO-0025-SUBS-remaining-this-month/idea.md) | todo |
-| FOKKO-0026-SUBS | [Detectar un alza](FOKKO-0026-SUBS-detect-rise/idea.md) | todo |
-| FOKKO-0027-SUBS | [Impacto mensual y anual del alza](FOKKO-0027-SUBS-rise-impact/idea.md) | todo |
-| FOKKO-0028-SUBS | [Descartar el aviso de alza](FOKKO-0028-SUBS-dismiss-rise-notice/idea.md) | todo |
-| FOKKO-0029-SUBS | [Total del mes en CLP](FOKKO-0029-SUBS-total-clp/idea.md) | todo |
-| FOKKO-0030-SUBS | [Monto original junto al equivalente ("≈")](FOKKO-0030-SUBS-original-amount/idea.md) | todo |
-| FOKKO-0031-SUBS | [Crear suscripción manual](FOKKO-0031-SUBS-create-manual/idea.md) | todo |
-| FOKKO-0032-SUBS | [Editar o quitar una manual](FOKKO-0032-SUBS-edit-manual/idea.md) | todo |
-| FOKKO-0033-SUBS | [Override de monto y día](FOKKO-0033-SUBS-line-override/idea.md) | todo |
+| FOKKO-0020A-SUBS | [`UserID` en `Charge`](FOKKO-0020A-SUBS-charge-user-id/idea.md) | done |
+| FOKKO-0020B-SUBS | [`statements` filtra por usuario](FOKKO-0020B-SUBS-statements-by-user/idea.md) | done |
+| FOKKO-0021-SUBS | [`UserID` en los puertos de `subscriptions`](FOKKO-0021-SUBS-user-id-subscriptions/idea.md) | done |
+| FOKKO-0022-SUBS | [Deshacer una decisión](FOKKO-0022-SUBS-undo-decision/idea.md) | done |
+| FOKKO-0023-SUBS | [Próximo cobro por línea](FOKKO-0023-SUBS-next-charge/idea.md) | done |
+| FOKKO-0024-SUBS | [Cobros ya cobrados del mes](FOKKO-0024-SUBS-charged-this-month/idea.md) | done |
+| FOKKO-0025-SUBS | [Cobros restantes del mes](FOKKO-0025-SUBS-remaining-this-month/idea.md) | done |
+| FOKKO-0026-SUBS | [Detectar un alza](FOKKO-0026-SUBS-detect-rise/idea.md) | done |
+| FOKKO-0027-SUBS | [Impacto mensual y anual del alza](FOKKO-0027-SUBS-rise-impact/idea.md) | done |
+| FOKKO-0028-SUBS | [Descartar el aviso de alza](FOKKO-0028-SUBS-dismiss-rise-notice/idea.md) | done |
+| FOKKO-0029-SUBS | [Total del mes en CLP](FOKKO-0029-SUBS-total-clp/idea.md) | done |
+| FOKKO-0030-SUBS | [Monto original junto al equivalente ("≈")](FOKKO-0030-SUBS-original-amount/idea.md) | done |
+| FOKKO-0031-SUBS | [Crear suscripción manual](FOKKO-0031-SUBS-create-manual/idea.md) | done |
+| FOKKO-0032-SUBS | [Editar o quitar una manual](FOKKO-0032-SUBS-edit-manual/idea.md) | done |
+| FOKKO-0033-SUBS | [Override de monto y día](FOKKO-0033-SUBS-line-override/idea.md) | done |
 | FOKKO-0034-SUBS | ["Dejar de seguir" una línea](FOKKO-0034-SUBS-stop-following/idea.md) | todo |
 | FOKKO-0035-SUBS | [Marcar "por cancelar"](FOKKO-0035-SUBS-mark-for-cancel/idea.md) | todo |
 | FOKKO-0036-SUBS | [`Summary`: reparto por servicio](FOKKO-0036-SUBS-summary-spend/idea.md) | todo |
@@ -220,7 +220,7 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 
 | # | Idea | Estado |
 |---|---|---|
-| FOKKO-0118-SUBS | [Guardar el tipo de cambio derivado al importar una cartola](FOKKO-0118-SUBS-record-exchange-rate/idea.md) | todo |
+| FOKKO-0118-SUBS | [Guardar el tipo de cambio derivado al importar una cartola](FOKKO-0118-SUBS-record-exchange-rate/idea.md) | done |
 
 ### Post-MVP (sin número aún)
 

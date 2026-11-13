@@ -46,6 +46,7 @@ func TestBuildSummary_ActiveKnownServiceInSubscriptionsAndInactiveInInactive(t *
 	want := []Subscription{{
 		Key: activeStreaming.Key, Status: StatusActive, Cadence: CadenceMonthly,
 		Amount: 599000, Currency: shared.CurrencyCLP, Charges: activeStreaming.Charges,
+		NextCharge: day(2026, 12, 3),
 	}}
 	if !reflect.DeepEqual(got.Subscriptions, want) {
 		t.Errorf("subscriptions = %+v, want %+v", got.Subscriptions, want)

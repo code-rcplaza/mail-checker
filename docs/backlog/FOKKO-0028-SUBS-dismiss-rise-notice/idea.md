@@ -21,6 +21,6 @@ El usuario revisa un alza y decide "mantener". En el MVP solo existe esa respues
 - La tabla `price_alert_decisions` guarda una columna `decision` (`keep`/`later`). Con solo `keep` se propone no guardarla; se confirma al escribir FOKKO-0059-SUBS.
 
 ## Tareas
-- [ ] [TASK-001 Puerto de decisiones de alza](TASK-001-PRICE-ALERT-PORT.md)
-- [ ] [TASK-002 Descartar el aviso de un alza](TASK-002-KEEP-PRICE-ALERT.md)
-- [ ] [TASK-003 El resumen oculta el alza descartada](TASK-003-SUMMARY-HIDES-KEPT-RISE.md)
+- [x] [TASK-001 Puerto de decisiones de alza](TASK-001-PRICE-ALERT-PORT.md)
+- [x] [TASK-002 Descartar el aviso de un alza](TASK-002-KEEP-PRICE-ALERT.md)
+- [x] [TASK-003 El resumen oculta el alza descartada](TASK-003-SUMMARY-HIDES-KEPT-RISE.md)

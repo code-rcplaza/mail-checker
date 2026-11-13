@@ -18,7 +18,7 @@ Sin correo de aviso, el alza se detecta cuando llega el cobro mayor, con la cart
 - Los Seguros CLC suben cerca de 0,5 % al mes y alertarán cada mes. Se acepta y se revisa con usuarios reales (decisión 17).
 
 ## Tareas
-- [ ] [TASK-001 Detectar el alza entre dos cobros](TASK-001-DETECT-RISE.md)
-- [ ] [TASK-002 El cambio de moneda no es alza](TASK-002-RISE-IGNORES-CURRENCY-CHANGE.md)
-- [ ] [TASK-003 Salto de más de 25 %](TASK-003-RISE-PLAN-CHANGE.md)
-- [ ] [TASK-004 El resumen trae las alzas](TASK-004-SUMMARY-RISES.md)
+- [x] [TASK-001 Detectar el alza entre dos cobros](TASK-001-DETECT-RISE.md)
+- [x] [TASK-002 El cambio de moneda no es alza](TASK-002-RISE-IGNORES-CURRENCY-CHANGE.md)
+- [x] [TASK-003 Salto de más de 25 %](TASK-003-RISE-PLAN-CHANGE.md)
+- [x] [TASK-004 El resumen trae las alzas](TASK-004-SUMMARY-RISES.md)

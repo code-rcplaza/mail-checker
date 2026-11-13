@@ -19,6 +19,6 @@ El usuario puede confirmar o descartar una posible por error. Está en el diseñ
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 `Delete` en el puerto de decisiones](TASK-001-DECISIONS-DELETE.md)
-- [ ] [TASK-002A Deshacer una decisión](TASK-002A-UNDO-DECISION.md)
-- [ ] [TASK-002B No tocar decisiones ajenas](TASK-002B-UNDO-OTHER-USER.md)
+- [x] [TASK-001 `Delete` en el puerto de decisiones](TASK-001-DECISIONS-DELETE.md)
+- [x] [TASK-002A Deshacer una decisión](TASK-002A-UNDO-DECISION.md)
+- [x] [TASK-002B No tocar decisiones ajenas](TASK-002B-UNDO-OTHER-USER.md)

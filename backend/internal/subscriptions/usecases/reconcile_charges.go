@@ -20,11 +20,11 @@ func NewReconcileCharges(charges ports.ChargeReader, catalog ports.ServiceCatalo
 	return ReconcileCharges{charges: charges, catalog: catalog, now: now}
 }
 
-func (u ReconcileCharges) Execute(ctx context.Context, months int) (domain.Reconciliation, error) {
+func (u ReconcileCharges) Execute(ctx context.Context, userID int64, months int) (domain.Reconciliation, error) {
 	if err := domain.ValidatePeriodMonths(months); err != nil {
 		return domain.Reconciliation{}, err
 	}
-	charges, err := readChargesSince(ctx, u.charges, domain.PeriodStart(u.now(), months))
+	charges, err := readChargesSince(ctx, userID, u.charges, domain.PeriodStart(u.now(), months))
 	if err != nil {
 		return domain.Reconciliation{}, err
 	}

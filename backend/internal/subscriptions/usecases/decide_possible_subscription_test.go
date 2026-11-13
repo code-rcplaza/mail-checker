@@ -22,15 +22,20 @@ func newRecordingDecisions() *recordingDecisions {
 	return &recordingDecisions{saved: make(map[domain.GroupKey]domain.Decision)}
 }
 
-func (r *recordingDecisions) List(context.Context) (map[domain.GroupKey]domain.Decision, error) {
+func (r *recordingDecisions) List(context.Context, int64) (map[domain.GroupKey]domain.Decision, error) {
 	return r.saved, nil
 }
 
-func (r *recordingDecisions) Save(_ context.Context, key domain.GroupKey, decision domain.Decision) error {
+func (r *recordingDecisions) Save(_ context.Context, _ int64, key domain.GroupKey, decision domain.Decision) error {
 	if r.saveErr != nil {
 		return r.saveErr
 	}
 	r.saved[key] = decision
+	return nil
+}
+
+func (r *recordingDecisions) Delete(_ context.Context, _ int64, key domain.GroupKey) error {
+	delete(r.saved, key)
 	return nil
 }
 
@@ -46,7 +51,7 @@ func chargesWithPossibleAndActive() *fakeChargeReader {
 
 func decide(decisions *recordingDecisions, key domain.GroupKey, action, cadence string) error {
 	useCase := NewDecidePossibleSubscription(chargesWithPossibleAndActive(), fakeCatalog{}, decisions, func() time.Time { return testNow })
-	return useCase.Execute(context.Background(), key, action, cadence)
+	return useCase.Execute(context.Background(), userOne, key, action, cadence)
 }
 
 func assertKeyedError(t *testing.T, err error, sentinel error, want shared.MessageKey) {

@@ -21,9 +21,9 @@ El usuario puede agregar a mano una suscripción que no aparece en sus cartolas.
 - Moneda permitida y largo máximo del nombre: el handoff las deja abiertas. Se propone CLP y USD, y 40 caracteres como el alias.
 
 ## Tareas
-- [ ] [TASK-001A Aceptar una manual válida](TASK-001A-MANUAL-VALID.md)
-- [ ] [TASK-001B Rechazar nombre o monto inválidos](TASK-001B-MANUAL-NAME-AMOUNT.md)
-- [ ] [TASK-001C Rechazar día o moneda inválidos](TASK-001C-MANUAL-DAY-CURRENCY.md)
-- [ ] [TASK-002 Próximo cobro de una manual](TASK-002-MANUAL-NEXT-CHARGE.md)
-- [ ] [TASK-003 Crear una suscripción manual](TASK-003-CREATE-MANUAL.md)
-- [ ] [TASK-004 La manual aparece en el resumen](TASK-004-MANUAL-IN-SUMMARY.md)
+- [x] [TASK-001A Aceptar una manual válida](TASK-001A-MANUAL-VALID.md)
+- [x] [TASK-001B Rechazar nombre o monto inválidos](TASK-001B-MANUAL-NAME-AMOUNT.md)
+- [x] [TASK-001C Rechazar día o moneda inválidos](TASK-001C-MANUAL-DAY-CURRENCY.md)
+- [x] [TASK-002 Próximo cobro de una manual](TASK-002-MANUAL-NEXT-CHARGE.md)
+- [x] [TASK-003 Crear una suscripción manual](TASK-003-CREATE-MANUAL.md)
+- [x] [TASK-004 La manual aparece en el resumen](TASK-004-MANUAL-IN-SUMMARY.md)

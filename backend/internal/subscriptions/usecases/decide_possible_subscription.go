@@ -28,22 +28,22 @@ func NewDecidePossibleSubscription(
 	return DecidePossibleSubscription{charges: charges, catalog: catalog, decisions: decisions, now: now}
 }
 
-func (u DecidePossibleSubscription) Execute(ctx context.Context, key domain.GroupKey, action, cadence string) error {
+func (u DecidePossibleSubscription) Execute(ctx context.Context, userID int64, key domain.GroupKey, action, cadence string) error {
 	decision, err := domain.NewDecision(action, cadence)
 	if err != nil {
 		return err
 	}
-	if err := u.ensureCurrentPossible(ctx, key); err != nil {
+	if err := u.ensureCurrentPossible(ctx, userID, key); err != nil {
 		return err
 	}
-	return u.saveDecision(ctx, key, decision)
+	return u.saveDecision(ctx, userID, key, decision)
 }
 
 // ensureCurrentPossible looks over the widest period, so a possible visible
 // in any period the user picked can be decided.
-func (u DecidePossibleSubscription) ensureCurrentPossible(ctx context.Context, key domain.GroupKey) error {
+func (u DecidePossibleSubscription) ensureCurrentPossible(ctx context.Context, userID int64, key domain.GroupKey) error {
 	now := u.now()
-	groups, err := readGroupsSince(ctx, u.charges, u.catalog, domain.PeriodStart(now, domain.MaxPeriodMonths))
+	groups, err := readGroupsSince(ctx, userID, u.charges, u.catalog, domain.PeriodStart(now, domain.MaxPeriodMonths))
 	if err != nil {
 		return err
 	}
@@ -53,8 +53,8 @@ func (u DecidePossibleSubscription) ensureCurrentPossible(ctx context.Context, k
 	return nil
 }
 
-func (u DecidePossibleSubscription) saveDecision(ctx context.Context, key domain.GroupKey, decision domain.Decision) error {
-	if err := u.decisions.Save(ctx, key, decision); err != nil {
+func (u DecidePossibleSubscription) saveDecision(ctx context.Context, userID int64, key domain.GroupKey, decision domain.Decision) error {
+	if err := u.decisions.Save(ctx, userID, key, decision); err != nil {
 		return fmt.Errorf("save decision for %s: %w", key, err)
 	}
 	return nil

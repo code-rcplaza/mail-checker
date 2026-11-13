@@ -20,5 +20,5 @@ Lo mismo en `subscriptions`: sus puertos de lectura y escritura no filtran por u
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Puertos de `subscriptions` por usuario](TASK-001-SUBSCRIPTION-PORTS-USER.md)
-- [ ] [TASK-002 Casos de uso con usuario](TASK-002-SUBSCRIPTION-USECASES-USER.md)
+- [x] [TASK-001 Puertos de `subscriptions` por usuario](TASK-001-SUBSCRIPTION-PORTS-USER.md)
+- [x] [TASK-002 Casos de uso con usuario](TASK-002-SUBSCRIPTION-USECASES-USER.md)

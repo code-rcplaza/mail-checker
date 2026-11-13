@@ -19,5 +19,5 @@ Una manual se puede editar o quitar.
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Editar una manual](TASK-001-EDIT-MANUAL.md)
-- [ ] [TASK-002 Quitar una manual](TASK-002-REMOVE-MANUAL.md)
+- [x] [TASK-001 Editar una manual](TASK-001-EDIT-MANUAL.md)
+- [x] [TASK-002 Quitar una manual](TASK-002-REMOVE-MANUAL.md)
