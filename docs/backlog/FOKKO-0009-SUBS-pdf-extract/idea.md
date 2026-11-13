@@ -19,6 +19,6 @@
 - Hace falta un PDF real anonimizado para el fixture; no se inventa uno.
 
 ## Tareas
-- [ ] [TASK-001 Extraer el texto de un PDF](TASK-001-PDF-TEXT.md)
-- [ ] [TASK-002 Rechazar lo que no es un PDF](TASK-002-PDF-NOT-A-PDF.md)
-- [ ] [TASK-003 PDF dañado sin panic](TASK-003-PDF-CORRUPT-NO-PANIC.md)
+- [x] [TASK-001 Extraer el texto de un PDF](TASK-001-PDF-TEXT.md)
+- [x] [TASK-002 Rechazar lo que no es un PDF](TASK-002-PDF-NOT-A-PDF.md)
+- [x] [TASK-003 PDF dañado sin panic](TASK-003-PDF-CORRUPT-NO-PANIC.md)

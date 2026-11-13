@@ -4,6 +4,7 @@ go 1.27
 
 require (
 	github.com/go-chi/chi/v5 v5.5.0
+	github.com/ledongthuc/pdf v0.0.0-20261020125853-5e46805f718e
 	github.com/pressly/goose/v3 v3.30.0
 	modernc.org/sqlite v1.62.0
 )
