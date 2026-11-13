@@ -3,6 +3,7 @@ package usecases
 import (
 	"context"
 	"reflect"
+	"slices"
 	"testing"
 	"time"
 
@@ -34,12 +35,14 @@ func (f *fakeExtractor) Extract(filename string, data []byte) (string, domain.Fi
 
 // fakeStatementParser returns fixed lines and records the text it parsed.
 type fakeStatementParser struct {
-	bank        shared.Bank
-	detects     bool
-	lines       []domain.StatementLine
-	bad         []int
-	parsedTexts []string
-	detectCalls int
+	bank         shared.Bank
+	detects      bool
+	lines        []domain.StatementLine
+	bad          []int
+	parsedTexts  []string
+	detectCalls  int
+	billingDate  time.Time            // zero: the file shows no billing date
+	transferPair *domain.TransferPair // nil: the file shows no pair
 }
 
 func (f *fakeStatementParser) Bank() shared.Bank { return f.bank }
@@ -52,6 +55,17 @@ func (f *fakeStatementParser) Detect(string) bool {
 func (f *fakeStatementParser) Parse(text string) ([]domain.StatementLine, []int) {
 	f.parsedTexts = append(f.parsedTexts, text)
 	return f.lines, f.bad
+}
+
+func (f *fakeStatementParser) BillingDate(string) (time.Time, bool) {
+	return f.billingDate, !f.billingDate.IsZero()
+}
+
+func (f *fakeStatementParser) TransferPair(string) (domain.TransferPair, bool) {
+	if f.transferPair == nil {
+		return domain.TransferPair{}, false
+	}
+	return *f.transferPair, true
 }
 
 type createdStatement struct {
@@ -69,22 +83,54 @@ type fakeStatements struct {
 	deleteErr error
 }
 
-func (f *fakeStatements) Create(_ context.Context, statement *domain.Statement, charges []shared.Charge) error {
+func (f *fakeStatements) Create(_ context.Context, userID int64, statement *domain.Statement, charges []shared.Charge) error {
 	if f.createErr != nil {
 		return f.createErr
+	}
+	if f.hasStatement(userID, statement.Bank, statement.BillingDate) {
+		return shared.Conflict(domain.KeyAlreadyImported)
 	}
 	statement.ID = int64(len(f.created) + 1)
 	f.created = append(f.created, createdStatement{statement: *statement, charges: charges})
 	return nil
 }
 
-func (f *fakeStatements) List(context.Context) ([]domain.Statement, error) {
-	return f.listed, f.listErr
+// hasStatement mirrors the real uniqueness: user, bank and billing date.
+func (f *fakeStatements) hasStatement(userID int64, bank shared.Bank, billingDate time.Time) bool {
+	return slices.ContainsFunc(f.created, func(c createdStatement) bool {
+		return c.statement.UserID == userID && c.statement.Bank == bank && c.statement.BillingDate.Equal(billingDate)
+	})
 }
 
-func (f *fakeStatements) Delete(_ context.Context, publicID string) error {
+// List returns the fixed list when a test sets one; otherwise what the user created.
+func (f *fakeStatements) List(_ context.Context, userID int64) ([]domain.Statement, error) {
+	if f.listed != nil || f.listErr != nil {
+		return f.listed, f.listErr
+	}
+	var mine []domain.Statement
+	for _, c := range f.created {
+		if c.statement.UserID == userID {
+			mine = append(mine, c.statement)
+		}
+	}
+	return mine, nil
+}
+
+func (f *fakeStatements) Delete(_ context.Context, userID int64, publicID string) error {
 	f.deleted = append(f.deleted, publicID)
-	return f.deleteErr
+	if f.deleteErr != nil {
+		return f.deleteErr
+	}
+	if f.belongsToAnotherUser(userID, publicID) {
+		return shared.ErrNotFound
+	}
+	return nil
+}
+
+func (f *fakeStatements) belongsToAnotherUser(userID int64, publicID string) bool {
+	return slices.ContainsFunc(f.created, func(c createdStatement) bool {
+		return c.statement.PublicID == publicID && c.statement.UserID != userID
+	})
 }
 
 func statementLine(number int, merchant string) domain.StatementLine {
@@ -99,6 +145,7 @@ type importFixture struct {
 	bci        *fakeStatementParser
 	other      *fakeStatementParser
 	statements *fakeStatements
+	rates      *fakeExchangeRates
 	useCase    ImportStatement
 }
 
@@ -113,9 +160,10 @@ func newImportFixture() importFixture {
 	}
 	other := &fakeStatementParser{bank: "other-bank"}
 	statements := &fakeStatements{}
-	useCase := NewImportStatement(extractor, []ports.BankStatementParser{other, bci}, statements,
-		func() string { return "stmt-1" }, func() time.Time { return testNow })
-	return importFixture{extractor: extractor, bci: bci, other: other, statements: statements, useCase: useCase}
+	rates := &fakeExchangeRates{}
+	useCase := NewImportStatement(extractor, []ports.BankStatementParser{other, bci}, statements, rates,
+		func() string { return "stmt-1" }, func() time.Time { return testNow }, time.UTC)
+	return importFixture{extractor: extractor, bci: bci, other: other, statements: statements, rates: rates, useCase: useCase}
 }
 
 func bciInput() ImportStatementInput {
@@ -125,7 +173,7 @@ func bciInput() ImportStatementInput {
 func TestImportStatement_ExtractsParsesWithChosenBankAndCreatesOnce(t *testing.T) {
 	fixture := newImportFixture()
 
-	if _, err := fixture.useCase.Execute(context.Background(), bciInput()); err != nil {
+	if _, err := fixture.useCase.Execute(context.Background(), userOne, bciInput()); err != nil {
 		t.Fatalf("Execute error = %v, want nil", err)
 	}
 
@@ -150,7 +198,7 @@ func TestImportStatement_ExtractsParsesWithChosenBankAndCreatesOnce(t *testing.T
 func TestImportStatement_SavedStatementHasAllItsData(t *testing.T) {
 	fixture := newImportFixture()
 
-	if _, err := fixture.useCase.Execute(context.Background(), bciInput()); err != nil {
+	if _, err := fixture.useCase.Execute(context.Background(), userOne, bciInput()); err != nil {
 		t.Fatalf("Execute error = %v, want nil", err)
 	}
 
@@ -160,6 +208,7 @@ func TestImportStatement_SavedStatementHasAllItsData(t *testing.T) {
 	want := domain.Statement{
 		ID:          1,
 		PublicID:    "stmt-1",
+		UserID:      userOne,
 		Bank:        "bci",
 		Filename:    "cartola-octubre.pdf",
 		Kind:        domain.FileKindPDF,
@@ -176,7 +225,7 @@ func TestImportStatement_SavedStatementHasAllItsData(t *testing.T) {
 func TestImportStatement_ReturnsTheSavedStatement(t *testing.T) {
 	fixture := newImportFixture()
 
-	got, err := fixture.useCase.Execute(context.Background(), bciInput())
+	got, err := fixture.useCase.Execute(context.Background(), userOne, bciInput())
 
 	if err != nil {
 		t.Fatalf("Execute error = %v, want nil", err)
@@ -184,7 +233,7 @@ func TestImportStatement_ReturnsTheSavedStatement(t *testing.T) {
 	if len(fixture.statements.created) != 1 {
 		t.Fatalf("Create called %d times, want 1", len(fixture.statements.created))
 	}
-	if saved := fixture.statements.created[0].statement; !reflect.DeepEqual(got, saved) {
+	if saved := fixture.statements.created[0].statement; !reflect.DeepEqual(got.Statement, saved) {
 		t.Errorf("returned %+v, want the saved %+v", got, saved)
 	}
 }

@@ -131,7 +131,7 @@ var (
 )
 
 func credential(id int64, email string) domain.Credential {
-	return domain.Credential{AccountID: id, AccountPublicID: "account-" + email, Email: email, Password: "app-password"}
+	return domain.Credential{UserID: 1, AccountID: id, AccountPublicID: "account-" + email, Email: email, Password: "app-password"}
 }
 
 func purchase(messageID, sender, merchant string) domain.RawEmail {

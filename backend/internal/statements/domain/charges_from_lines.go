@@ -18,9 +18,9 @@ type StatementLine struct {
 // ChargesFromLines turns the parsed lines of a statement into charges. A line
 // that is not a valid charge is reported by its number (the front words it)
 // and the others still convert.
-func ChargesFromLines(lines []StatementLine, bank shared.Bank, publicID string, billingDate time.Time) (charges []shared.Charge, badLines []int) {
+func ChargesFromLines(lines []StatementLine, userID int64, bank shared.Bank, publicID string, billingDate time.Time) (charges []shared.Charge, badLines []int) {
 	for _, line := range lines {
-		charge, err := line.Charge.ToCharge(statementOrigin(bank, publicID, line.Number, billingDate))
+		charge, err := line.Charge.ToCharge(statementOrigin(userID, bank, publicID, line.Number, billingDate))
 		if err != nil {
 			badLines = append(badLines, line.Number)
 			continue
@@ -32,8 +32,9 @@ func ChargesFromLines(lines []StatementLine, bank shared.Bank, publicID string, 
 
 // statementOrigin builds the external id from the public id, because the
 // internal id does not exist until the statement is saved.
-func statementOrigin(bank shared.Bank, publicID string, lineNumber int, billingDate time.Time) shared.ChargeOrigin {
+func statementOrigin(userID int64, bank shared.Bank, publicID string, lineNumber int, billingDate time.Time) shared.ChargeOrigin {
 	return shared.ChargeOrigin{
+		UserID:       userID,
 		Bank:         bank,
 		Source:       shared.SourceStatement,
 		ExternalID:   fmt.Sprintf("%s:%d", publicID, lineNumber),

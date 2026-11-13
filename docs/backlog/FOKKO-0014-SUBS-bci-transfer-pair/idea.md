@@ -21,5 +21,5 @@ El tipo de cambio sale del par de traspasos: `TRASPASO DEUDA INTERNACIONAL` (CLP
 - No todos los meses trae traspaso (en uno el monto era US$ 0,00).
 
 ## Tareas
-- [ ] [TASK-001 Entregar el par desde el puerto](TASK-001-TRANSFER-PAIR-PORT.md)
-- [ ] [TASK-002 Leer el par de traspasos en BCI](TASK-002-BCI-READ-TRANSFER-PAIR.md)
+- [x] [TASK-001 Entregar el par desde el puerto](TASK-001-TRANSFER-PAIR-PORT.md)
+- [x] [TASK-002 Leer el par de traspasos en BCI](TASK-002-BCI-READ-TRANSFER-PAIR.md)

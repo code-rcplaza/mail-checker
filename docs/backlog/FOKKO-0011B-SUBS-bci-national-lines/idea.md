@@ -27,6 +27,6 @@ Esta idea cubre solo: Parser BCI: leer los cobros del estado nacional. El resto 
 - Compras en cuotas: no hay ejemplo real; hace falta uno para decidir si cada cuota es un cargo.
 
 ## Tareas
-- [ ] [TASK-001 Leer los cobros del estado nacional](TASK-001-BCI-NATIONAL-LINES.md)
-- [ ] [TASK-002 Ignorar lo que no es compra](TASK-002-BCI-SKIP-NON-PURCHASES.md)
-- [ ] [TASK-003 Líneas que no se pudieron leer](TASK-003-BCI-BAD-LINES.md)
+- [x] [TASK-001 Leer los cobros del estado nacional](TASK-001-BCI-NATIONAL-LINES.md)
+- [x] [TASK-002 Ignorar lo que no es compra](TASK-002-BCI-SKIP-NON-PURCHASES.md)
+- [x] [TASK-003 Líneas que no se pudieron leer](TASK-003-BCI-BAD-LINES.md)

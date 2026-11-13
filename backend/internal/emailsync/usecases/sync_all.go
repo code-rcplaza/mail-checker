@@ -190,7 +190,7 @@ func (u SyncAll) saveEmail(ctx context.Context, credential domain.Credential, pa
 	if !isRecognized {
 		return u.saveUnparsed(ctx, credential, parser, email)
 	}
-	charge, err := domain.ChargeFromEmail(parsed, email, credential.AccountID, parser.Bank())
+	charge, err := domain.ChargeFromEmail(parsed, email, credential.UserID, credential.AccountID, parser.Bank())
 	if errors.Is(err, shared.ErrInvalid) {
 		return u.saveUnparsed(ctx, credential, parser, email)
 	}

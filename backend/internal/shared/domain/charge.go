@@ -20,6 +20,7 @@ const (
 // account and statement links are pointers.
 type Charge struct {
 	ID          int64
+	UserID      int64 // the owner; every read filters by it
 	Bank        Bank
 	Source      Source
 	ExternalID  string // email: Message-ID; statement: "<statementPublicID>:<line>"
@@ -36,6 +37,9 @@ type Charge struct {
 // NewCharge returns c only if it holds the charge invariants, so no other
 // layer has to revalidate amounts, dates or merchants.
 func NewCharge(c Charge) (Charge, error) {
+	if err := validateUserPresent(c.UserID); err != nil {
+		return Charge{}, err
+	}
 	if err := validateAmountNotNegative(c.Amount); err != nil {
 		return Charge{}, err
 	}
@@ -49,6 +53,14 @@ func NewCharge(c Charge) (Charge, error) {
 		return Charge{}, err
 	}
 	return c, nil
+}
+
+// validateUserPresent: a charge without an owner could be shown to anyone.
+func validateUserPresent(userID int64) error {
+	if userID <= 0 {
+		return Invalid(KeyUserMissing, nil)
+	}
+	return nil
 }
 
 func validateAmountNotNegative(amount Money) error {

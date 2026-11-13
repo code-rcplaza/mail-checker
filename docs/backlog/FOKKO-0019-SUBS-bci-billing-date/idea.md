@@ -19,5 +19,5 @@ BCI imprime la fecha en `FECHA ESTADO DE CUENTA` y el período en `PERÍODO FACT
 - Formato exacto de las fechas en el texto: se confirma con las cartolas reales anonimizadas.
 
 ## Tareas
-- [ ] [TASK-001 Leer la fecha del estado de cuenta](TASK-001-BCI-READ-STATEMENT-DATE.md)
-- [ ] [TASK-002 Sin fecha en el archivo](TASK-002-BCI-BILLING-DATE-MISSING.md)
+- [x] [TASK-001 Leer la fecha del estado de cuenta](TASK-001-BCI-READ-STATEMENT-DATE.md)
+- [x] [TASK-002 Sin fecha en el archivo](TASK-002-BCI-BILLING-DATE-MISSING.md)

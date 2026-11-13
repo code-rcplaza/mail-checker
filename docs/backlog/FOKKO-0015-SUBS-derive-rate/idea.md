@@ -19,5 +19,5 @@ Con el par de traspasos se calcula el tipo de cambio vendedor del banco, que es 
 - Dónde vive el tipo `ExchangeRate`: lo usan `statements` (lo deriva) y `subscriptions` (lo lee). Se propone `shared/domain`, igual que `Money`.
 
 ## Tareas
-- [ ] [TASK-001A Calcular el tipo de cambio](TASK-001A-DERIVE-RATE.md)
-- [ ] [TASK-001B Rechazar montos inválidos](TASK-001B-DERIVE-RATE-GUARDS.md)
+- [x] [TASK-001A Calcular el tipo de cambio](TASK-001A-DERIVE-RATE.md)
+- [x] [TASK-001B Rechazar montos inválidos](TASK-001B-DERIVE-RATE-GUARDS.md)

@@ -18,4 +18,4 @@ Esta idea cubre solo: Puerto `BillingDate` en `BankStatementParser`. El resto de
 - Si el usuario manda una fecha y el archivo trae otra, gana la del archivo. ¿Se acepta?
 
 ## Tareas
-- [ ] [TASK-001 `BillingDate` en el puerto del parser](TASK-001-PORT-BILLING-DATE.md)
+- [x] [TASK-001 `BillingDate` en el puerto del parser](TASK-001-PORT-BILLING-DATE.md)

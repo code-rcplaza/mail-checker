@@ -25,4 +25,4 @@ Esta idea cubre solo: Parser BCI: reconocer la cartola. El resto del trabajo ori
 - Compras en cuotas: no hay ejemplo real; hace falta uno para decidir si cada cuota es un cargo.
 
 ## Tareas
-- [ ] [TASK-001 Reconocer una cartola BCI](TASK-001-BCI-DETECT.md)
+- [x] [TASK-001 Reconocer una cartola BCI](TASK-001-BCI-DETECT.md)

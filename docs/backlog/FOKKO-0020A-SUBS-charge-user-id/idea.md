@@ -21,4 +21,4 @@ Esta idea cubre solo: `UserID` en `Charge`. El resto del trabajo original está 
 - `emailsync` y `accounts` (post-MVP) también usan `Charge`: solo se adapta lo que deja de compilar; sus puertos no ganan `userID` hasta el post-MVP.
 
 ## Tareas
-- [ ] [TASK-001 `UserID` en `Charge`](TASK-001-CHARGE-USER-ID.md)
+- [x] [TASK-001 `UserID` en `Charge`](TASK-001-CHARGE-USER-ID.md)

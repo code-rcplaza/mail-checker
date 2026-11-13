@@ -17,7 +17,7 @@ func TestListStatements_ReturnsTheRepositoryStatements(t *testing.T) {
 	}
 	statements := &fakeStatements{listed: saved}
 
-	got, err := NewListStatements(statements).Execute(context.Background())
+	got, err := NewListStatements(statements).Execute(context.Background(), userOne)
 
 	if err != nil {
 		t.Fatalf("Execute error = %v, want nil", err)
@@ -31,7 +31,7 @@ func TestListStatements_RepositoryErrorIsWrapped(t *testing.T) {
 	cause := errors.New("boom")
 	statements := &fakeStatements{listErr: cause}
 
-	_, err := NewListStatements(statements).Execute(context.Background())
+	_, err := NewListStatements(statements).Execute(context.Background(), userOne)
 
 	if !errors.Is(err, cause) || !strings.HasPrefix(err.Error(), "list statements: ") {
 		t.Errorf("error = %v, want \"list statements\" wrapping %v", err, cause)

@@ -23,6 +23,6 @@ Las compras en el extranjero van en el estado internacional de la cartola BCI. S
 - Fixtures reales anonimizados (hay dos cartolas con estado internacional).
 
 ## Tareas
-- [ ] [TASK-001 Leer las líneas del estado internacional](TASK-001-BCI-INTERNATIONAL-LINES.md)
-- [ ] [TASK-002 Guardar en pesos o en dólares](TASK-002-BCI-CURRENCY-BY-RATIO.md)
-- [ ] [TASK-003 Ignorar lo que no es compra internacional](TASK-003-BCI-INTERNATIONAL-NON-PURCHASES.md)
+- [x] [TASK-001 Leer las líneas del estado internacional](TASK-001-BCI-INTERNATIONAL-LINES.md)
+- [x] [TASK-002 Guardar en pesos o en dólares](TASK-002-BCI-CURRENCY-BY-RATIO.md)
+- [x] [TASK-003 Ignorar lo que no es compra internacional](TASK-003-BCI-INTERNATIONAL-NON-PURCHASES.md)

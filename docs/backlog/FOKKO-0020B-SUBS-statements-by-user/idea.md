@@ -25,5 +25,5 @@ Esta idea cubre solo: `statements` filtra por usuario. El resto del trabajo orig
 - `emailsync` y `accounts` (post-MVP) también usan `Charge`: solo se adapta lo que deja de compilar; sus puertos no ganan `userID` hasta el post-MVP.
 
 ## Tareas
-- [ ] [TASK-001 Puertos de `statements` por usuario](TASK-001-STATEMENT-PORTS-USER.md)
-- [ ] [TASK-002 Casos de uso de `statements` con usuario](TASK-002-STATEMENT-USECASES-USER.md)
+- [x] [TASK-001 Puertos de `statements` por usuario](TASK-001-STATEMENT-PORTS-USER.md)
+- [x] [TASK-002 Casos de uso de `statements` con usuario](TASK-002-STATEMENT-USECASES-USER.md)

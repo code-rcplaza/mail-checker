@@ -47,7 +47,7 @@ func TestStatementKeys(t *testing.T) {
 		{KeyBankUnknown, "statements.bank_unknown"},
 		{KeyAlreadyImported, "statements.already_imported"},
 		{KeyNoCharges, "statements.no_charges"},
-		{KeyBillingDateMissing, "statements.billing_date_missing"},
+		{KeyBillingDateRequired, "statements.billing_date_required"},
 		{KeyFileEmpty, "statements.file_empty"},
 		{KeyNotFound, "statements.not_found"},
 		{KeyFileKindUnknown, "statements.file_kind_unknown"},

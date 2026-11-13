@@ -9,6 +9,7 @@ import (
 func validCharge() Charge {
 	accountID := int64(7)
 	return Charge{
+		UserID:     1,
 		Bank:       "bci",
 		Source:     SourceEmail,
 		ExternalID: "<msg-1@example.com>",

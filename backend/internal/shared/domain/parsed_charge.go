@@ -18,6 +18,7 @@ type ParsedCharge struct {
 
 // ChargeOrigin is where a parsed charge came from.
 type ChargeOrigin struct {
+	UserID       int64
 	Bank         Bank
 	Source       Source
 	ExternalID   string
@@ -32,6 +33,7 @@ func (p ParsedCharge) ToCharge(origin ChargeOrigin) (Charge, error) {
 		return Charge{}, err
 	}
 	return NewCharge(Charge{
+		UserID:     origin.UserID,
 		Bank:       origin.Bank,
 		Source:     origin.Source,
 		ExternalID: origin.ExternalID,

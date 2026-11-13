@@ -21,5 +21,5 @@ Esta idea cubre solo: `ImportStatement` toma la fecha del archivo. El resto del 
 - Si el usuario manda una fecha y el archivo trae otra, gana la del archivo. ¿Se acepta?
 
 ## Tareas
-- [ ] [TASK-001A Usar la fecha del archivo](TASK-001A-FILE-DATE-WINS.md)
-- [ ] [TASK-001B Usar la fecha del usuario o rechazar](TASK-001B-USER-DATE-FALLBACK.md)
+- [x] [TASK-001A Usar la fecha del archivo](TASK-001A-FILE-DATE-WINS.md)
+- [x] [TASK-001B Usar la fecha del usuario o rechazar](TASK-001B-USER-DATE-FALLBACK.md)

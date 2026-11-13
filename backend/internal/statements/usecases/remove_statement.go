@@ -22,8 +22,8 @@ func NewRemoveStatement(statements ports.StatementRepository) RemoveStatement {
 
 // Execute adds the i18n key to the repository's plain ErrNotFound, so adapters
 // stay free of user-facing keys.
-func (u RemoveStatement) Execute(ctx context.Context, publicID string) error {
-	err := u.statements.Delete(ctx, publicID)
+func (u RemoveStatement) Execute(ctx context.Context, userID int64, publicID string) error {
+	err := u.statements.Delete(ctx, userID, publicID)
 	if errors.Is(err, shared.ErrNotFound) {
 		return shared.NotFound(domain.KeyNotFound)
 	}

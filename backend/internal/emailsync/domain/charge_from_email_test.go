@@ -27,7 +27,7 @@ func parsedPurchase(date time.Time) shared.ParsedCharge {
 }
 
 func TestChargeFromEmail_WithoutParsedDateUsesEmailValues(t *testing.T) {
-	got, err := ChargeFromEmail(parsedPurchase(time.Time{}), purchaseEmail(), 7, "bci")
+	got, err := ChargeFromEmail(parsedPurchase(time.Time{}), purchaseEmail(), 1, 7, "bci")
 
 	if err != nil {
 		t.Fatalf("ChargeFromEmail error = %v, want nil", err)
@@ -50,7 +50,7 @@ func TestChargeFromEmail_WithoutParsedDateUsesEmailValues(t *testing.T) {
 }
 
 func TestChargeFromEmail_KeepsParsedDate(t *testing.T) {
-	got, err := ChargeFromEmail(parsedPurchase(parsedDate), purchaseEmail(), 7, "bci")
+	got, err := ChargeFromEmail(parsedPurchase(parsedDate), purchaseEmail(), 1, 7, "bci")
 
 	if err != nil {
 		t.Fatalf("ChargeFromEmail error = %v, want nil", err)

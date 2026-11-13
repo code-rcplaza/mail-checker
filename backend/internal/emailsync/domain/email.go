@@ -23,6 +23,7 @@ type MailQuery struct {
 
 // Credential holds a decrypted app password; it must never be logged.
 type Credential struct {
+	UserID          int64 // the owner of the account; its charges are theirs
 	AccountID       int64
 	AccountPublicID string
 	Email           string

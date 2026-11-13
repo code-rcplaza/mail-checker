@@ -16,6 +16,6 @@ La cartola internacional no trae el código de la moneda de origen: trae el mont
 - Valor de la constante: se propone 100. Hay que validarlo con las cartolas reales antes de fijarlo.
 
 ## Tareas
-- [ ] [TASK-001A Decidir por la razón origen sobre US$](TASK-001A-PESOS-RATIO-CASES.md)
-- [ ] [TASK-001B Límite exacto de la razón](TASK-001B-PESOS-RATIO-BOUNDARY.md)
-- [ ] [TASK-002 US$ en cero](TASK-002-ZERO-USD-AMOUNT.md)
+- [x] [TASK-001A Decidir por la razón origen sobre US$](TASK-001A-PESOS-RATIO-CASES.md)
+- [x] [TASK-001B Límite exacto de la razón](TASK-001B-PESOS-RATIO-BOUNDARY.md)
+- [x] [TASK-002 US$ en cero](TASK-002-ZERO-USD-AMOUNT.md)

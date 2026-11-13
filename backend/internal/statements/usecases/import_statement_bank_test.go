@@ -45,7 +45,7 @@ func TestImportStatement_UnregisteredChosenBankIsUnknownAndNotParsed(t *testing.
 	input := bciInput()
 	input.Bank = "santander"
 
-	_, err := fixture.useCase.Execute(context.Background(), input)
+	_, err := fixture.useCase.Execute(context.Background(), userOne, input)
 
 	assertKeyedError(t, err, shared.ErrInvalid, domain.KeyBankUnknown, nil)
 	assertNothingParsedOrSaved(t, fixture)
@@ -55,13 +55,13 @@ func TestImportStatement_WithoutBankUsesTheOnlyParserThatDetectsIt(t *testing.T)
 	fixture := newImportFixture()
 	fixture.bci.detects = true
 
-	got, err := fixture.useCase.Execute(context.Background(), detectInput())
+	got, err := fixture.useCase.Execute(context.Background(), userOne, detectInput())
 
 	if err != nil {
 		t.Fatalf("Execute error = %v, want nil", err)
 	}
-	if got.Bank != "bci" {
-		t.Errorf("statement bank = %q, want bci", got.Bank)
+	if got.Statement.Bank != "bci" {
+		t.Errorf("statement bank = %q, want bci", got.Statement.Bank)
 	}
 	if !reflect.DeepEqual(fixture.bci.parsedTexts, []string{"statement text"}) || len(fixture.other.parsedTexts) != 0 {
 		t.Errorf("bci parsed %v, other parsed %v; want only bci", fixture.bci.parsedTexts, fixture.other.parsedTexts)
@@ -71,7 +71,7 @@ func TestImportStatement_WithoutBankUsesTheOnlyParserThatDetectsIt(t *testing.T)
 func TestImportStatement_WithoutBankNoParserDetectsIt(t *testing.T) {
 	fixture := newImportFixture()
 
-	_, err := fixture.useCase.Execute(context.Background(), detectInput())
+	_, err := fixture.useCase.Execute(context.Background(), userOne, detectInput())
 
 	assertKeyedError(t, err, shared.ErrInvalid, domain.KeyBankNotDetected, map[string]any{"count": 0})
 	assertNothingParsedOrSaved(t, fixture)
@@ -82,7 +82,7 @@ func TestImportStatement_WithoutBankTwoParsersDetectIt(t *testing.T) {
 	fixture.bci.detects = true
 	fixture.other.detects = true
 
-	_, err := fixture.useCase.Execute(context.Background(), detectInput())
+	_, err := fixture.useCase.Execute(context.Background(), userOne, detectInput())
 
 	assertKeyedError(t, err, shared.ErrInvalid, domain.KeyBankNotDetected, map[string]any{"count": 2})
 	assertNothingParsedOrSaved(t, fixture)
@@ -92,7 +92,7 @@ func TestImportStatement_ChosenRegisteredBankSkipsDetect(t *testing.T) {
 	fixture := newImportFixture()
 	fixture.bci.detects = true
 
-	if _, err := fixture.useCase.Execute(context.Background(), bciInput()); err != nil {
+	if _, err := fixture.useCase.Execute(context.Background(), userOne, bciInput()); err != nil {
 		t.Fatalf("Execute error = %v, want nil", err)
 	}
 

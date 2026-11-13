@@ -19,5 +19,5 @@ La cartola trae el tipo de cambio, pero nadie lo guarda. Sin guardarlo, el total
 - Dueño de la tabla y del puerto: `statements` lo escribe y `subscriptions` lo lee con su propio puerto `ExchangeRates`, sin importarse entre features. ¿Se acepta, o la tabla va a `shared`?
 
 ## Tareas
-- [ ] [TASK-001 Puerto para guardar el tipo de cambio](TASK-001-EXCHANGE-RATE-RECORDER-PORT.md)
-- [ ] [TASK-002 Importar guarda el tipo de cambio](TASK-002-IMPORT-RECORDS-RATE.md)
+- [x] [TASK-001 Puerto para guardar el tipo de cambio](TASK-001-EXCHANGE-RATE-RECORDER-PORT.md)
+- [x] [TASK-002 Importar guarda el tipo de cambio](TASK-002-IMPORT-RECORDS-RATE.md)

@@ -17,4 +17,5 @@ const (
 	KeyMerchantMissing       MessageKey = "common.merchant_missing"
 	KeyExternalIDMissing     MessageKey = "common.external_id_missing"
 	KeyCardLastDigitsInvalid MessageKey = "common.card_last_digits_invalid"
+	KeyUserMissing           MessageKey = "common.user_missing"
 )

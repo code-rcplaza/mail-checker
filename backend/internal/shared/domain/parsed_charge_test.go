@@ -19,6 +19,7 @@ func validParsedCharge() ParsedCharge {
 func validOrigin() ChargeOrigin {
 	accountID := int64(7)
 	return ChargeOrigin{
+		UserID:       1,
 		Bank:         "bci",
 		Source:       SourceEmail,
 		ExternalID:   "<msg-1@example.com>",
@@ -36,6 +37,7 @@ func TestParsedChargeToCharge_CombinesParsedValuesAndOrigin(t *testing.T) {
 		t.Fatalf("ToCharge error = %v, want nil", err)
 	}
 	want := Charge{
+		UserID:     origin.UserID,
 		Bank:       origin.Bank,
 		Source:     origin.Source,
 		ExternalID: origin.ExternalID,

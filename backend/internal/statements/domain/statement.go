@@ -10,6 +10,7 @@ import (
 type Statement struct {
 	ID          int64  // internal
 	PublicID    string // UUID v7, the one exposed
+	UserID      int64  // the owner
 	Bank        shared.Bank
 	Filename    string
 	Kind        FileKind
