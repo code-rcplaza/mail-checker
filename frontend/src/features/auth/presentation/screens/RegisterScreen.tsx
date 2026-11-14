@@ -1,6 +1,7 @@
-import { useNavigate, useRouter } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { AppShell } from "../../../../components/layout/AppShell";
 import { BrandHeader } from "../../../../components/layout/BrandHeader";
+import { useNavigateTo } from "../../../../lib/router/useNavigateTo";
 import { useThemeToggle } from "../../../../lib/theme/useThemeToggle";
 import { useRegister } from "../../application/useRegister";
 import { AccessRing } from "../components/AccessRing";
@@ -8,7 +9,7 @@ import { RegisterForm } from "../components/RegisterForm";
 
 /** Registro: the container joins the hook, the theme and the router with the form. */
 export function RegisterScreen() {
-  const router = useRouter();
+  const navigateTo = useNavigateTo();
   const navigate = useNavigate();
   const theme = useThemeToggle();
   const registration = useRegister({
@@ -23,7 +24,7 @@ export function RegisterScreen() {
         formError={registration.formError}
         isSubmitting={registration.isSubmitting}
         onSubmit={registration.submit}
-        onNavigate={(to) => router.history.push(to)}
+        onNavigate={navigateTo}
       />
     </AppShell>
   );

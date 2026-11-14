@@ -50,4 +50,26 @@ describe("http auth gateway", () => {
       fields: "fields" in body.error ? body.error.fields : {},
     });
   });
+
+  it("asks for a login code with POST /api/auth/login and resolves empty on 204", async () => {
+    const fetchFunction = fetchAnswering(204);
+
+    await expect(
+      createHttpAuthGateway(createApiClient(fetchFunction)).login("ana@example.com"),
+    ).resolves.toBeUndefined();
+    expect(fetchFunction).toHaveBeenCalledWith(
+      "/api/auth/login",
+      expect.objectContaining({ method: "POST", body: JSON.stringify({ email: "ana@example.com" }) }),
+    );
+  });
+
+  it("throws ApiError with the key when login gets a 400", async () => {
+    const body = { error: { key: "common.validation_failed", fields: { email: "auth.email_invalid" } } };
+    const gateway = createHttpAuthGateway(createApiClient(fetchAnswering(400, body)));
+
+    await expect(gateway.login("ana@")).rejects.toMatchObject({
+      status: 400,
+      key: "common.validation_failed",
+    });
+  });
 });

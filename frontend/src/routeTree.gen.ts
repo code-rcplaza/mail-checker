@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CodigoRouteImport } from './routes/codigo'
+import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as RegistroRouteImport } from './routes/registro'
 
 const IndexRoute = IndexRouteImport.update({
@@ -23,6 +24,11 @@ const CodigoRoute = CodigoRouteImport.update({
   path: '/codigo',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const RegistroRoute = RegistroRouteImport.update({
   id: '/registro',
   path: '/registro',
@@ -32,30 +38,34 @@ const RegistroRoute = RegistroRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/codigo': typeof CodigoRoute
+  '/entrar': typeof EntrarRoute
   '/registro': typeof RegistroRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/codigo': typeof CodigoRoute
+  '/entrar': typeof EntrarRoute
   '/registro': typeof RegistroRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/codigo': typeof CodigoRoute
+  '/entrar': typeof EntrarRoute
   '/registro': typeof RegistroRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/codigo' | '/registro'
+  fullPaths: '/' | '/codigo' | '/entrar' | '/registro'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/codigo' | '/registro'
-  id: '__root__' | '/' | '/codigo' | '/registro'
+  to: '/' | '/codigo' | '/entrar' | '/registro'
+  id: '__root__' | '/' | '/codigo' | '/entrar' | '/registro'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CodigoRoute: typeof CodigoRoute
+  EntrarRoute: typeof EntrarRoute
   RegistroRoute: typeof RegistroRoute
 }
 
@@ -75,6 +85,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CodigoRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/registro': {
       id: '/registro'
       path: '/registro'
@@ -88,6 +105,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CodigoRoute: CodigoRoute,
+  EntrarRoute: EntrarRoute,
   RegistroRoute: RegistroRoute,
 }
 export const routeTree = rootRouteImport

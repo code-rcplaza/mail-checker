@@ -820,7 +820,8 @@ frontend/src/
   pinta lo mismo, así que se prueba sin servidor y se extrae copiando su carpeta.
 - **Navegación en componentes:** los componentes no usan el router. Los enlaces son `AppLink`: un
   `<a href>` real cuyo clic simple llama `onNavigate(to)` (la pantalla le pasa `navigate` del router);
-  un clic con Cmd/Ctrl/Shift o el botón del medio queda para el navegador. Las secciones viven en
+  un clic con Cmd/Ctrl/Shift o el botón del medio queda para el navegador. La pantalla lo conecta
+  con `useNavigateTo` (`lib/router`), que empuja la ruta al historial del router. Las secciones viven en
   `sectionPaths`: `/resumen`, `/subs`, `/perfil`. Acceso: `/registro`, `/entrar`, `/codigo?email=`.
 - **Formularios:** react-hook-form con `zodResolver` (`@hookform/resolvers`) en el hook de
   `application`; los mensajes del esquema son llaves i18n, igual que las del back. Un 400 con

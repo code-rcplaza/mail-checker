@@ -99,4 +99,12 @@ describe("Register screen", () => {
     expect(await screen.findByRole("button", { name: /Cambiar a tema/ })).toBeInTheDocument();
     expect(screen.queryByRole("link", { name: "Perfil" })).not.toBeInTheDocument();
   });
+
+  it("goes to Login for people who already have an account", async () => {
+    const { router } = renderApp("/registro");
+
+    await userEvent.click(await screen.findByRole("link", { name: "¿Ya tienes cuenta? Entra" }));
+
+    await waitFor(() => expect(router.state.location.pathname).toBe("/entrar"));
+  });
 });

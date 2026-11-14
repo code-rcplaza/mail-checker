@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { emailField } from "./email";
 
 /** The same limit as the back (`auth/domain.NameMaxLength`). */
 export const nameMaxLength = 60;
@@ -6,7 +7,7 @@ export const nameMaxLength = 60;
 /** The messages are i18n keys: the screen translates them. */
 export const registrationSchema = z.object({
   name: z.string().trim().min(1, "auth.name_required").max(nameMaxLength, "auth.name_too_long"),
-  email: z.string().trim().pipe(z.email("auth.email_invalid")),
+  email: emailField,
   acceptedTerms: z.boolean().refine((accepted) => accepted, "auth.terms_required"),
 });
 

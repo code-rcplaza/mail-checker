@@ -8,5 +8,8 @@ export function createHttpAuthGateway(api: ApiClient): AuthGateway {
     register: async (registration) => {
       await api.send({ method: "POST", path: "/api/auth/register", body: registration });
     },
+    login: async (email) => {
+      await api.send({ method: "POST", path: "/api/auth/login", body: { email } });
+    },
   };
 }

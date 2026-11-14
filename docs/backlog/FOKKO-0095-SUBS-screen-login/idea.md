@@ -20,13 +20,14 @@ clean architecture por feature (`features/auth/{domain,application,infrastructur
 - `frontend` (`features/auth`)
 
 ## Dudas abiertas
-- Ninguna.
+- TASK-001C queda abierta: no hay navegador en la máquina para revisar a 390, 768 y 1280 px.
+- Resuelta: sin "¿Ya no tienes acceso a ese correo?" (Recuperar es post-MVP) ni la nota de Google y Apple.
 
 ## Tareas
-- [ ] [TASK-001A Enviar el login](TASK-001A-LOGIN-SUBMIT.md)
-- [ ] [TASK-001B Mostrar los errores del servidor](TASK-001B-LOGIN-SERVER-ERRORS.md)
+- [x] [TASK-001A Enviar el login](TASK-001A-LOGIN-SUBMIT.md)
+- [x] [TASK-001B Mostrar los errores del servidor](TASK-001B-LOGIN-SERVER-ERRORS.md)
 - [ ] [TASK-001C Revisión visual en tres anchos](TASK-001C-LOGIN-LAYOUT.md)
-- [ ] [TASK-002A Ir de Login a Registro](TASK-002A-LOGIN-TO-REGISTER.md)
-- [ ] [TASK-002B Ir de Registro a Login](TASK-002B-REGISTER-TO-LOGIN.md)
-- [ ] [TASK-003 Iniciar sesión por HTTP](TASK-003-GATEWAY-LOGIN.md)
-- [ ] [TASK-004 Conectar el hook con los componentes](TASK-004-CONTAINER-LOGIN.md)
+- [x] [TASK-002A Ir de Login a Registro](TASK-002A-LOGIN-TO-REGISTER.md)
+- [x] [TASK-002B Ir de Registro a Login](TASK-002B-REGISTER-TO-LOGIN.md)
+- [x] [TASK-003 Iniciar sesión por HTTP](TASK-003-GATEWAY-LOGIN.md)
+- [x] [TASK-004 Conectar el hook con los componentes](TASK-004-CONTAINER-LOGIN.md)
