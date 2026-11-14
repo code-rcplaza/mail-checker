@@ -78,6 +78,29 @@ export const uploadResultSchema = z.object({
 
 export type UploadResult = Readonly<z.infer<typeof uploadResultSchema>>;
 
+/**
+ * What Análisis needs from `GET /api/summary`: how many subscriptions are sure,
+ * how many need a look and the monthly total. Read here on purpose, so this
+ * feature does not import subscriptions (duplicating beats coupling).
+ */
+export const foundSchema = z
+  .object({
+    subscriptions: z.array(z.unknown()),
+    possible: z.array(z.unknown()),
+    total: z.object({ amount: z.number(), currency: z.string(), isApproximate: z.boolean() }),
+  })
+  .transform((summary) => ({
+    sure: summary.subscriptions.length,
+    possible: summary.possible.length,
+    monthly: {
+      amount: summary.total.amount,
+      currency: summary.total.currency,
+      isApproximate: summary.total.isApproximate,
+    },
+  }));
+
+export type Found = Readonly<z.output<typeof foundSchema>>;
+
 export const banksSchema = z.array(z.object({ id: z.string() }));
 
 export type Bank = Readonly<z.infer<typeof banksSchema>[number]>;

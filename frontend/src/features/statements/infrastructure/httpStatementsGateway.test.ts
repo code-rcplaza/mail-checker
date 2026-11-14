@@ -47,4 +47,20 @@ describe("http statements gateway", () => {
 
     await expect(gateway.listBanks()).resolves.toEqual([{ id: "bci" }]);
   });
+
+  it("counts the sure and the possible subscriptions of /api/summary", async () => {
+    const summary = {
+      subscriptions: [{ lineKey: "a" }, { lineKey: "b" }, { lineKey: "c" }],
+      possible: [{ lineKey: "d" }, { lineKey: "e" }],
+      total: { amount: 8_406_000, currency: "CLP", isApproximate: false, isIncomplete: false },
+    };
+    const fetchFunction = fetchAnswering(200, summary);
+
+    await expect(createHttpStatementsGateway(createApiClient(fetchFunction)).readFound()).resolves.toEqual({
+      sure: 3,
+      possible: 2,
+      monthly: { amount: 8_406_000, currency: "CLP", isApproximate: false },
+    });
+    expect(fetchFunction.mock.calls[0]?.[0]).toBe("/api/summary");
+  });
 });

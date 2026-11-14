@@ -841,7 +841,10 @@ frontend/src/
 - **Subida:** `/fuente` valida el PDF en el front (tipo y 10 MB, `fileProblemOf`) y manda
   `multipart` con `file` y solo los campos presentes; la fecha de facturación aparece solo tras
   `statements.billing_date_required` y va en unix segundos al mediodía UTC, para que ningún huso
-  mueva el día. Si `GET /api/banks` falla, el selector queda en automático.
+  mueva el día. Si `GET /api/banks` falla, el selector queda en automático. Mientras sube, la
+  misma pantalla muestra Cargando; al responder, el resultado queda en la caché y se abre
+  `/analisis/<id>`, que suma los conteos de `GET /api/summary` (seguras y por confirmar) leídos
+  por el gateway de statements con su propio esquema, para no importar subscriptions.
 - **Formularios:** react-hook-form con `zodResolver` (`@hookform/resolvers`) en el hook de
   `application`; los mensajes del esquema son llaves i18n, igual que las del back. Un 400 con
   `fields` pone cada llave en su campo (`serverFieldErrors`); cualquier otro error va arriba del

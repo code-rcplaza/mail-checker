@@ -23,6 +23,7 @@ const missingAuth: AuthGateway = {
 const missingStatements: StatementsGateway = {
   listBanks: () => notGiven("statements"),
   upload: () => notGiven("statements"),
+  readFound: () => notGiven("statements"),
 };
 
 export function gatewaysWith(given: Partial<Gateways>): Gateways {

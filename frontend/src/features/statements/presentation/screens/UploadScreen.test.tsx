@@ -11,7 +11,16 @@ const pdf = new File(["%PDF"], "cartola.pdf", { type: "application/pdf" });
 const uploaded = { id: "s1", filename: "cartola.pdf", months: ["2026-10"], charges: 12, badLines: 0 };
 
 function statementsWith(overrides: Partial<StatementsGateway>): StatementsGateway {
-  return { listBanks: vi.fn(async () => [{ id: "bci" }]), upload: vi.fn(async () => uploaded), ...overrides };
+  return {
+    listBanks: vi.fn(async () => [{ id: "bci" }]),
+    upload: vi.fn(async () => uploaded),
+    readFound: vi.fn(async () => ({
+      sure: 0,
+      possible: 0,
+      monthly: { amount: 0, currency: "CLP", isApproximate: false },
+    })),
+    ...overrides,
+  };
 }
 
 function renderUpload(statements: StatementsGateway) {

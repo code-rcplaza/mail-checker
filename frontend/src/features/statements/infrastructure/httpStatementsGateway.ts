@@ -1,6 +1,6 @@
 import type { ApiClient } from "../../../lib/api/client";
 import type { StatementsGateway } from "../application/ports";
-import { banksSchema, uploadFormOf, uploadResultSchema } from "../domain/upload";
+import { banksSchema, foundSchema, uploadFormOf, uploadResultSchema } from "../domain/upload";
 
 export function createHttpStatementsGateway(api: ApiClient): StatementsGateway {
   return {
@@ -9,5 +9,6 @@ export function createHttpStatementsGateway(api: ApiClient): StatementsGateway {
       uploadResultSchema.parse(
         await api.send({ method: "POST", path: "/api/statements", body: uploadFormOf(input) }),
       ),
+    readFound: async () => foundSchema.parse(await api.get("/api/summary")),
   };
 }

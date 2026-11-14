@@ -11,6 +11,9 @@ export function uploadedStatementKey(id: string) {
   return ["statements", "uploaded", id] as const;
 }
 
+/** The counts Análisis reads; a new statement makes them old. */
+export const foundQueryKey = ["statements", "found"] as const;
+
 const billingDateRequired = "statements.billing_date_required";
 
 export interface UseUploadStatementOptions {
@@ -44,6 +47,7 @@ export function useUploadStatement({ onUploaded }: UseUploadStatementOptions) {
     mutationFn: (input: UploadInput) => statements.upload(input),
     onSuccess: (result) => {
       queryClient.setQueryData(uploadedStatementKey(result.id), result);
+      void queryClient.invalidateQueries({ queryKey: foundQueryKey });
       onUploaded(result);
     },
     onError: (caught) => {

@@ -18,6 +18,7 @@ import { Route as GuestRegistroRouteImport } from './routes/_guest/registro'
 import { Route as SessionBienvenidaRouteImport } from './routes/_session/bienvenida'
 import { Route as SessionFuenteRouteImport } from './routes/_session/fuente'
 import { Route as SessionResumenRouteImport } from './routes/_session/resumen'
+import { Route as SessionAnalisisIdRouteImport } from './routes/_session/analisis/$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -62,6 +63,11 @@ const SessionResumenRoute = SessionResumenRouteImport.update({
   path: '/resumen',
   getParentRoute: () => SessionRoute,
 } as any)
+const SessionAnalisisIdRoute = SessionAnalisisIdRouteImport.update({
+  id: '/analisis/$id',
+  path: '/analisis/$id',
+  getParentRoute: () => SessionRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -71,6 +77,7 @@ export interface FileRoutesByFullPath {
   '/bienvenida': typeof SessionBienvenidaRoute
   '/fuente': typeof SessionFuenteRoute
   '/resumen': typeof SessionResumenRoute
+  '/analisis/$id': typeof SessionAnalisisIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -80,6 +87,7 @@ export interface FileRoutesByTo {
   '/bienvenida': typeof SessionBienvenidaRoute
   '/fuente': typeof SessionFuenteRoute
   '/resumen': typeof SessionResumenRoute
+  '/analisis/$id': typeof SessionAnalisisIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -92,6 +100,7 @@ export interface FileRoutesById {
   '/_session/bienvenida': typeof SessionBienvenidaRoute
   '/_session/fuente': typeof SessionFuenteRoute
   '/_session/resumen': typeof SessionResumenRoute
+  '/_session/analisis/$id': typeof SessionAnalisisIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
     | '/bienvenida'
     | '/fuente'
     | '/resumen'
+    | '/analisis/$id'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -112,6 +122,7 @@ export interface FileRouteTypes {
     | '/bienvenida'
     | '/fuente'
     | '/resumen'
+    | '/analisis/$id'
   id:
     | '__root__'
     | '/'
@@ -123,6 +134,7 @@ export interface FileRouteTypes {
     | '/_session/bienvenida'
     | '/_session/fuente'
     | '/_session/resumen'
+    | '/_session/analisis/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,6 +209,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SessionResumenRouteImport
       parentRoute: typeof SessionRoute
     }
+    '/_session/analisis/$id': {
+      id: '/_session/analisis/$id'
+      path: '/analisis/$id'
+      fullPath: '/analisis/$id'
+      preLoaderRoute: typeof SessionAnalisisIdRouteImport
+      parentRoute: typeof SessionRoute
+    }
   }
 }
 
@@ -216,12 +235,14 @@ interface SessionRouteChildren {
   SessionBienvenidaRoute: typeof SessionBienvenidaRoute
   SessionFuenteRoute: typeof SessionFuenteRoute
   SessionResumenRoute: typeof SessionResumenRoute
+  SessionAnalisisIdRoute: typeof SessionAnalisisIdRoute
 }
 
 const SessionRouteChildren: SessionRouteChildren = {
   SessionBienvenidaRoute: SessionBienvenidaRoute,
   SessionFuenteRoute: SessionFuenteRoute,
   SessionResumenRoute: SessionResumenRoute,
+  SessionAnalisisIdRoute: SessionAnalisisIdRoute,
 }
 
 const SessionRouteWithChildren =
