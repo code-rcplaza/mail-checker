@@ -8,6 +8,7 @@ type errorResponse struct {
 }
 
 type errorPayload struct {
-	Key    domain.MessageKey `json:"key"`
-	Params map[string]any    `json:"params,omitempty"`
+	Key    domain.MessageKey            `json:"key"`
+	Params map[string]any               `json:"params,omitempty"`
+	Fields map[string]domain.MessageKey `json:"fields,omitempty"`
 }

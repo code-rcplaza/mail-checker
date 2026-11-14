@@ -19,5 +19,5 @@
 - Convenciones de la respuesta: montos en centésimas (entero) con su moneda, fechas en unix segundos y `lineKey` como cadena opaca.
 
 ## Tareas
-- [ ] [TASK-001 Parámetro `months`](TASK-001-SUMMARY-QUERY-PARAMS.md)
-- [ ] [TASK-002 Usuario sin datos](TASK-002-SUMMARY-EMPTY-USER.md)
+- [x] [TASK-001 Parámetro `months`](TASK-001-SUMMARY-QUERY-PARAMS.md)
+- [x] [TASK-002 Usuario sin datos](TASK-002-SUMMARY-EMPTY-USER.md)

@@ -82,3 +82,29 @@ func TestOpen_FailsWithPathWhenNotWritable(t *testing.T) {
 		t.Errorf("error %q does not include path %q", err, path)
 	}
 }
+
+// A path is a file name, not part of a URI: "#", "?" or "%" in it must not
+// cut it short nor open another file.
+func TestOpen_PathWithURICharactersOpensThatExactFile(t *testing.T) {
+	for _, name := range []string{"a#b.db", "a?b.db", "a%23b.db", "a b.db"} {
+		t.Run(name, func(t *testing.T) {
+			path := filepath.Join(t.TempDir(), name)
+			db, err := Open(context.Background(), path)
+			if err != nil {
+				t.Fatalf("Open(%q) error = %v, want nil", path, err)
+			}
+			t.Cleanup(func() { db.Close() })
+			if _, err := db.Exec(`CREATE TABLE marker (id INTEGER)`); err != nil {
+				t.Fatalf("create table: %v", err)
+			}
+
+			var file string
+			if err := db.QueryRow(`SELECT file FROM pragma_database_list WHERE name = 'main'`).Scan(&file); err != nil {
+				t.Fatalf("database list: %v", err)
+			}
+			if resolved, _ := filepath.EvalSymlinks(path); file != path && file != resolved {
+				t.Errorf("opened %q, want %q", file, path)
+			}
+		})
+	}
+}

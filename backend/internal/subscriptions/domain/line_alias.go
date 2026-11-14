@@ -34,15 +34,27 @@ func ParseLineAlias(raw string) (string, error) {
 // IsLine tells whether key names a line of the groups; one-off charges are
 // not a line.
 func IsLine(groups []ChargeGroup, key GroupKey) bool {
+	_, isLine := FindLine(groups, key)
+	return isLine
+}
+
+// FindLine is the group of the line key names; one-off charges are not a line.
+func FindLine(groups []ChargeGroup, key GroupKey) (ChargeGroup, bool) {
 	group, isFound := findGroup(groups, key)
-	return isFound && !group.IsOneOff
+	if !isFound || group.IsOneOff {
+		return ChargeGroup{}, false
+	}
+	return group, true
 }
 
 // ApplyLineAliases returns the summary with each line carrying the alias of
-// its key; the given summary is left untouched.
+// its key; a line without one keeps its own (a manual's name). The given
+// summary is left untouched.
 func ApplyLineAliases(summary Summary, aliases map[GroupKey]string) Summary {
 	return changeEveryLine(summary, func(line Subscription) Subscription {
-		line.Alias = aliases[line.Key]
+		if alias, hasAlias := aliases[line.Key]; hasAlias {
+			line.Alias = alias
+		}
 		return line
 	})
 }

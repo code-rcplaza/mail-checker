@@ -5,6 +5,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
@@ -87,5 +88,17 @@ func TestApplyLineAliases_EverySectionGetsTheAliasOfItsKey(t *testing.T) {
 	}
 	if summary.Subscriptions[1].Alias != "" {
 		t.Errorf("ApplyLineAliases changed its input")
+	}
+}
+
+// A manual line carries its name as alias: a line without alias keeps what it has.
+func TestApplyLineAliases_ManualKeepsItsName(t *testing.T) {
+	manual := manualLine(ManualSubscription{PublicID: "m1", Name: "Gimnasio", Amount: 100, Currency: "CLP", BillingDay: 5}, time.Date(2026, 11, 13, 0, 0, 0, 0, time.UTC))
+	summary := Summary{Subscriptions: []Subscription{manual}}
+
+	got := ApplyLineAliases(summary, map[GroupKey]string{"service:Netflix||d03": "Padres"})
+
+	if got.Subscriptions[0].Alias != "Gimnasio" {
+		t.Errorf("manual alias = %q, want its name Gimnasio", got.Subscriptions[0].Alias)
 	}
 }

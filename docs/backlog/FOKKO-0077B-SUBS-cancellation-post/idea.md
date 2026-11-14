@@ -21,4 +21,4 @@ Esta idea cubre solo: `POST /api/subscriptions/cancellations`. El resto del trab
 - Una línea de un comercio desconocido no tiene enlace: se responde `200` con `url` vacío y el front muestra los pasos genéricos.
 
 ## Tareas
-- [ ] [TASK-001 `POST /api/subscriptions/cancellations`](TASK-001-CANCELLATION-HANDLER.md)
+- [x] [TASK-001 `POST /api/subscriptions/cancellations`](TASK-001-CANCELLATION-HANDLER.md)

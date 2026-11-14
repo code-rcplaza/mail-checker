@@ -22,5 +22,5 @@ Esta idea cubre solo: Guía de cancelación: caso de uso y `GET`. El resto del t
 - Una línea de un comercio desconocido no tiene enlace: se responde `200` con `url` vacío y el front muestra los pasos genéricos.
 
 ## Tareas
-- [ ] [TASK-001 Buscar el enlace de una línea](TASK-001-CANCEL-GUIDE-USECASE.md)
-- [ ] [TASK-002 `GET /api/subscriptions/cancel-guide`](TASK-002-CANCEL-GUIDE-HANDLER.md)
+- [x] [TASK-001 Buscar el enlace de una línea](TASK-001-CANCEL-GUIDE-USECASE.md)
+- [x] [TASK-002 `GET /api/subscriptions/cancel-guide`](TASK-002-CANCEL-GUIDE-HANDLER.md)

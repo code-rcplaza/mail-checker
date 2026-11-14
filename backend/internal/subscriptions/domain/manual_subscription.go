@@ -52,11 +52,11 @@ func NewManualSubscription(publicID string, input ManualSubscriptionInput) (Manu
 	if err := validateManualName(name); err != nil {
 		return ManualSubscription{}, err
 	}
-	if input.Amount <= 0 {
-		return ManualSubscription{}, shared.Invalid(KeyManualAmountNotPositive, nil)
+	if err := validateManualAmount(input.Amount); err != nil {
+		return ManualSubscription{}, err
 	}
-	if input.BillingDay < firstBillingDay || input.BillingDay > lastBillingDay {
-		return ManualSubscription{}, shared.Invalid(KeyManualDayOutOfRange, nil)
+	if err := validateManualDay(input.BillingDay); err != nil {
+		return ManualSubscription{}, err
 	}
 	currency, err := shared.ParseCurrency(input.Currency)
 	if err != nil {
@@ -109,4 +109,30 @@ func manualLine(manual ManualSubscription, now time.Time) Subscription {
 		Currency:   manual.Currency,
 		NextCharge: NextManualCharge(manual.BillingDay, now),
 	}
+}
+
+func validateManualAmount(amount shared.Money) error {
+	if amount <= 0 {
+		return shared.Invalid(KeyManualAmountNotPositive, nil)
+	}
+	return nil
+}
+
+func validateManualDay(day int) error {
+	if day < firstBillingDay || day > lastBillingDay {
+		return shared.Invalid(KeyManualDayOutOfRange, nil)
+	}
+	return nil
+}
+
+// ValidateManualFields checks every field at once, so the form shows each
+// error next to its field; NewManualSubscription stops at the first.
+func ValidateManualFields(input ManualSubscriptionInput) error {
+	_, currencyErr := shared.ParseCurrency(input.Currency)
+	return shared.FieldErrors(map[string]error{
+		"name":       validateManualName(strings.TrimSpace(input.Name)),
+		"amount":     validateManualAmount(input.Amount),
+		"billingDay": validateManualDay(input.BillingDay),
+		"currency":   currencyErr,
+	})
 }

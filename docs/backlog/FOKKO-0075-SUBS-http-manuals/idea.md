@@ -19,5 +19,5 @@ Agregar permite crear, editar y quitar suscripciones manuales.
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 `POST /api/subscriptions/manual`](TASK-001-MANUAL-CREATE-HANDLER.md)
-- [ ] [TASK-002 `PUT`/`DELETE` de una manual](TASK-002-MANUAL-EDIT-DELETE-HANDLERS.md)
+- [x] [TASK-001 `POST /api/subscriptions/manual`](TASK-001-MANUAL-CREATE-HANDLER.md)
+- [x] [TASK-002 `PUT`/`DELETE` de una manual](TASK-002-MANUAL-EDIT-DELETE-HANDLERS.md)

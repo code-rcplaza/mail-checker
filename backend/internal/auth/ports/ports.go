@@ -14,6 +14,9 @@ type UserRepository interface {
 	FindByEmail(ctx context.Context, email string) (domain.User, error)
 	// FindByID returns ErrNotFound when no user has that ID.
 	FindByID(ctx context.Context, id int64) (domain.User, error)
+	// Delete removes the user and everything of theirs in one transaction;
+	// ErrNotFound when no user has that ID.
+	Delete(ctx context.Context, id int64) error
 }
 
 // LoginCodes keeps one code per user.

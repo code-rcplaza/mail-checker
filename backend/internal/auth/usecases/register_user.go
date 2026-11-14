@@ -13,6 +13,7 @@ import (
 
 type RegisterUserDependencies struct {
 	Users       ports.UserRepository
+	Delivery    CodeDelivery
 	NewPublicID func() string
 	Now         func() time.Time
 }
@@ -26,13 +27,21 @@ func NewRegisterUser(dependencies RegisterUserDependencies) RegisterUser {
 }
 
 // Execute answers the same for a new email and a registered one: the
-// registered one keeps its user and nothing else is saved.
+// registered one keeps its user, nothing else is saved, and its owner gets the
+// code. If sending fails the user stays, so login can send another code.
 func (u RegisterUser) Execute(ctx context.Context, form domain.RegistrationForm) (domain.User, error) {
 	registration, err := domain.ParseRegistration(form)
 	if err != nil {
 		return domain.User{}, err
 	}
-	return u.ensureUser(ctx, registration)
+	if err := u.dependencies.Delivery.admitRequest(ctx, registration.Email); err != nil {
+		return domain.User{}, err
+	}
+	user, err := u.ensureUser(ctx, registration)
+	if err != nil {
+		return domain.User{}, err
+	}
+	return user, u.dependencies.Delivery.sendCode(ctx, user)
 }
 
 func (u RegisterUser) ensureUser(ctx context.Context, registration domain.Registration) (domain.User, error) {

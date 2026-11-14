@@ -15,12 +15,13 @@ import (
 )
 
 type Users struct {
+	db      *sql.DB
 	queries *queries.Queries
 	now     func() time.Time
 }
 
 func NewUsers(db *sql.DB, now func() time.Time) Users {
-	return Users{queries: queries.New(db), now: now}
+	return Users{db: db, queries: queries.New(db), now: now}
 }
 
 // Create answers ErrConflict for a taken email, whatever its casing.
@@ -51,6 +52,25 @@ func (u Users) FindByEmail(ctx context.Context, email string) (domain.User, erro
 func (u Users) FindByID(ctx context.Context, id int64) (domain.User, error) {
 	row, err := u.queries.FindUserByID(ctx, id)
 	return userFromRow(row, err)
+}
+
+// Delete removes the user's code sends, keyed by email, and then the user;
+// every other table of theirs goes with it by ON DELETE CASCADE.
+func (u Users) Delete(ctx context.Context, id int64) error {
+	return sharedsqlite.WithTx(ctx, u.db, func(tx *sql.Tx) error {
+		q := u.queries.WithTx(tx)
+		if err := q.DeleteCodeSendsOfUser(ctx, id); err != nil {
+			return fmt.Errorf("delete code sends of user: %w", err)
+		}
+		deleted, err := q.DeleteUser(ctx, id)
+		if err != nil {
+			return fmt.Errorf("delete user: %w", err)
+		}
+		if deleted == 0 {
+			return fmt.Errorf("delete user: %w", shared.ErrNotFound)
+		}
+		return nil
+	})
 }
 
 func userFromRow(row queries.User, err error) (domain.User, error) {

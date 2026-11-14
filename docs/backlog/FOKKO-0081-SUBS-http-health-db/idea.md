@@ -16,5 +16,5 @@ El contenedor necesita saber si la app está sana, y eso incluye poder hablar co
 - Hace falta un status 503 mapeado (`common.unavailable`).
 
 ## Tareas
-- [ ] [TASK-001 La salud comprueba la base](TASK-001-HEALTH-DB-PING.md)
-- [ ] [TASK-002 La salud no pide sesión](TASK-002-HEALTH-PUBLIC.md)
+- [x] [TASK-001 La salud comprueba la base](TASK-001-HEALTH-DB-PING.md)
+- [x] [TASK-002 La salud no pide sesión](TASK-002-HEALTH-PUBLIC.md)

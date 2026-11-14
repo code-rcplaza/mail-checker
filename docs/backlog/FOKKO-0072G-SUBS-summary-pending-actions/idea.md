@@ -19,4 +19,4 @@ El Resumen lista lo que el usuario debe resolver, en orden.
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Acciones pendientes](TASK-001-SUMMARY-DTO-PENDING-ACTIONS.md)
+- [x] [TASK-001 Acciones pendientes](TASK-001-SUMMARY-DTO-PENDING-ACTIONS.md)

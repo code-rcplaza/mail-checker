@@ -62,6 +62,16 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (int64, 
 	return id, err
 }
 
+const deleteCodeSendsOfUser = `-- name: DeleteCodeSendsOfUser :exec
+DELETE FROM code_sends
+WHERE email = (SELECT users.email FROM users WHERE users.id = ?1)
+`
+
+func (q *Queries) DeleteCodeSendsOfUser(ctx context.Context, userID int64) error {
+	_, err := q.db.ExecContext(ctx, deleteCodeSendsOfUser, userID)
+	return err
+}
+
 const deleteExpiredLoginCodes = `-- name: DeleteExpiredLoginCodes :exec
 DELETE FROM login_codes WHERE expires_at <= ?
 `
@@ -105,6 +115,19 @@ DELETE FROM sessions WHERE token_hash = ?
 func (q *Queries) DeleteSession(ctx context.Context, tokenHash string) error {
 	_, err := q.db.ExecContext(ctx, deleteSession, tokenHash)
 	return err
+}
+
+const deleteUser = `-- name: DeleteUser :execrows
+DELETE FROM users
+WHERE id = ?
+`
+
+func (q *Queries) DeleteUser(ctx context.Context, id int64) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteUser, id)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 const findLoginCode = `-- name: FindLoginCode :one

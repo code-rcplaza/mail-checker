@@ -21,6 +21,6 @@ Esta idea cubre solo: Cookie de sesión. El resto del trabajo original está en 
 - Se propone `SameSite=Lax` más una comprobación del encabezado `Origin` en `POST`, `PUT` y `DELETE`. Hace falta un error 403 para el origen no permitido (`common.forbidden`): ¿se agrega a `shared`?
 
 ## Tareas
-- [ ] [TASK-001A Fijar los atributos de la cookie](TASK-001A-COOKIE-FLAGS.md)
-- [ ] [TASK-001B Marcar `Secure` según el modo](TASK-001B-COOKIE-SECURE.md)
-- [ ] [TASK-001C Borrar la cookie](TASK-001C-COOKIE-CLEAR.md)
+- [x] [TASK-001A Fijar los atributos de la cookie](TASK-001A-COOKIE-FLAGS.md)
+- [x] [TASK-001B Marcar `Secure` según el modo](TASK-001B-COOKIE-SECURE.md)
+- [x] [TASK-001C Borrar la cookie](TASK-001C-COOKIE-CLEAR.md)

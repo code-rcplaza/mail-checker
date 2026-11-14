@@ -37,6 +37,8 @@ func TestKeyedErrors_WrapTheirSentinelAndKeepKey(t *testing.T) {
 		{"Conflict", Conflict("accounts.email_taken"), ErrConflict, "accounts.email_taken"},
 		{"TooMany", TooMany("auth.too_many_sends", nil), ErrTooMany, "auth.too_many_sends"},
 		{"Unauthorized", Unauthorized(KeyUnauthorized), ErrUnauthorized, "common.unauthorized"},
+		{"Forbidden", Forbidden(KeyForbidden), ErrForbidden, "common.forbidden"},
+		{"Unavailable", Unavailable(KeyUnavailable), ErrUnavailable, "common.unavailable"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -76,6 +78,7 @@ func TestSentinels_AreDistinct(t *testing.T) {
 		"ErrConflict":     ErrConflict,
 		"ErrTooMany":      ErrTooMany,
 		"ErrUnauthorized": ErrUnauthorized,
+		"ErrForbidden":    ErrForbidden,
 	}
 	for nameA, a := range sentinels {
 		for nameB, b := range sentinels {
@@ -113,5 +116,46 @@ func TestTooMany_KeepsAndCopiesParams(t *testing.T) {
 	var keyed KeyedError
 	if !errors.As(err, &keyed) || keyed.Params["minutes"] != 60 {
 		t.Errorf("keyed = %+v, want params with minutes 60", keyed)
+	}
+}
+
+func TestInvalidFields_IsAValidationErrorWithItsFields(t *testing.T) {
+	fields := map[string]MessageKey{"email": "auth.email_invalid"}
+	err := InvalidFields(fields)
+
+	fields["email"] = "changed"
+
+	var keyed KeyedError
+	if !errors.Is(err, ErrInvalid) || !errors.As(err, &keyed) || keyed.Key != KeyValidationFailed || keyed.Fields["email"] != "auth.email_invalid" {
+		t.Errorf("InvalidFields = %+v, want ErrInvalid with common.validation_failed and its own copy of the fields", keyed)
+	}
+}
+
+func TestFieldErrors(t *testing.T) {
+	cases := []struct {
+		name   string
+		fields map[string]error
+		want   map[string]MessageKey
+	}{
+		{"every field ok is no error", map[string]error{"email": nil, "name": nil}, nil},
+		{"each failing field keeps its key", map[string]error{"email": Invalid("auth.email_invalid", nil), "name": nil, "terms": Invalid("auth.terms_required", nil)},
+			map[string]MessageKey{"email": "auth.email_invalid", "terms": "auth.terms_required"}},
+		{"an error without key is a plain validation failure", map[string]error{"code": errors.New("odd")}, map[string]MessageKey{"code": KeyValidationFailed}},
+	}
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			err := FieldErrors(tc.fields)
+
+			if tc.want == nil {
+				if err != nil {
+					t.Errorf("FieldErrors = %v, want nil", err)
+				}
+				return
+			}
+			var keyed KeyedError
+			if !errors.As(err, &keyed) || keyed.Key != KeyValidationFailed || fmt.Sprint(keyed.Fields) != fmt.Sprint(tc.want) {
+				t.Errorf("FieldErrors = %+v, want validation_failed with %v", keyed, tc.want)
+			}
+		})
 	}
 }

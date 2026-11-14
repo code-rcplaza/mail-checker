@@ -16,6 +16,6 @@ La subida recibe archivos de usuarios: sin tope de tamaño ni de tiempo, un arch
 - Tamaño máximo: se propone 10 MB (una cartola en PDF pesa unos pocos MB). El rechazo usa `ErrInvalid` (400) con `statements.file_too_large`, sin agregar un error 413.
 
 ## Tareas
-- [ ] [TASK-001 Tamaño máximo](TASK-001-UPLOAD-SIZE-LIMIT.md)
-- [ ] [TASK-002 Formato de la subida](TASK-002-UPLOAD-MULTIPART.md)
-- [ ] [TASK-003 Tiempo máximo](TASK-003-UPLOAD-TIMEOUT.md)
+- [x] [TASK-001 Tamaño máximo](TASK-001-UPLOAD-SIZE-LIMIT.md)
+- [x] [TASK-002 Formato de la subida](TASK-002-UPLOAD-MULTIPART.md)
+- [x] [TASK-003 Tiempo máximo](TASK-003-UPLOAD-TIMEOUT.md)

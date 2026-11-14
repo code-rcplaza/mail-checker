@@ -19,4 +19,4 @@ Esta idea cubre solo: Log de peticiones sin datos personales. El resto del traba
 - Antes de escribir las tareas se revisa qué de esto ya existe en `router.go` y `run.go`, para no duplicarlo.
 
 ## Tareas
-- [ ] [TASK-001 Log de peticiones sin datos personales](TASK-001-REQUEST-LOGGING.md)
+- [x] [TASK-001 Log de peticiones sin datos personales](TASK-001-REQUEST-LOGGING.md)

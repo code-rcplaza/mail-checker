@@ -38,14 +38,20 @@ func (l ChargeLines) readAllGroups(ctx context.Context, userID int64) ([]domain.
 // ensureLine fails with not found for a key that is not a line of the user;
 // a line of another user is not among their groups.
 func (l ChargeLines) ensureLine(ctx context.Context, userID int64, key domain.GroupKey) error {
+	_, err := l.findLine(ctx, userID, key)
+	return err
+}
+
+func (l ChargeLines) findLine(ctx context.Context, userID int64, key domain.GroupKey) (domain.ChargeGroup, error) {
 	groups, err := l.readAllGroups(ctx, userID)
 	if err != nil {
-		return err
+		return domain.ChargeGroup{}, err
 	}
-	if !domain.IsLine(groups, key) {
-		return shared.NotFound(domain.KeyLineNotFound)
+	group, isLine := domain.FindLine(groups, key)
+	if !isLine {
+		return domain.ChargeGroup{}, shared.NotFound(domain.KeyLineNotFound)
 	}
-	return nil
+	return group, nil
 }
 
 func (l ChargeLines) readChargesSince(ctx context.Context, userID int64, since time.Time) ([]shared.Charge, error) {

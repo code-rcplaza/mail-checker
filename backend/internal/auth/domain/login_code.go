@@ -5,7 +5,10 @@ import (
 	"fmt"
 	"io"
 	"math/big"
+	"strings"
 	"time"
+
+	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
 
 const (
@@ -51,6 +54,19 @@ func randomDigits(random io.Reader) (string, error) {
 	}
 	return fmt.Sprintf("%0*d", CodeDigits, n), nil
 }
+
+// ParseCode checks the code at the edge: exactly six ASCII digits after
+// trimming. A code of the wrong shape never reaches verification, so it does
+// not use up an attempt.
+func ParseCode(raw string) (string, error) {
+	code := strings.TrimSpace(raw)
+	if len(code) != CodeDigits || strings.ContainsFunc(code, isNotASCIIDigit) {
+		return "", shared.Invalid(KeyCodeFormatInvalid, nil)
+	}
+	return code, nil
+}
+
+func isNotASCIIDigit(char rune) bool { return char < '0' || char > '9' }
 
 func (c LoginCode) Matches(entered string) bool { return secretMatches(entered, c.CodeHash) }
 

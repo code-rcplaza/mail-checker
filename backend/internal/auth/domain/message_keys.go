@@ -13,4 +13,6 @@ const (
 	KeyCodeExpired          shared.MessageKey = "auth.code_expired"
 	KeyCodeAttemptsExceeded shared.MessageKey = "auth.code_attempts_exceeded"
 	KeyTooManySends         shared.MessageKey = "auth.too_many_sends"
+	KeyCodeFormatInvalid    shared.MessageKey = "auth.code_format_invalid"
+	KeyExportFormatUnknown  shared.MessageKey = "auth.export_format_unknown"
 )

@@ -22,6 +22,6 @@ Esta idea cubre solo: `GET /api/me`. El resto del trabajo original está en las 
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Iniciales de uno o dos nombres](TASK-001A-INITIALS-BASIC.md)
-- [ ] [TASK-001B Iniciales con acentos o emoji](TASK-001B-INITIALS-UNICODE.md)
-- [ ] [TASK-002 `GET /api/me`](TASK-002-GET-ME.md)
+- [x] [TASK-001A Iniciales de uno o dos nombres](TASK-001A-INITIALS-BASIC.md)
+- [x] [TASK-001B Iniciales con acentos o emoji](TASK-001B-INITIALS-UNICODE.md)
+- [x] [TASK-002 `GET /api/me`](TASK-002-GET-ME.md)

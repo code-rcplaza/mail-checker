@@ -68,6 +68,9 @@ func (u ImportStatement) Execute(ctx context.Context, userID int64, input Import
 	if err != nil {
 		return ImportResult{}, err
 	}
+	if err := ctx.Err(); err != nil {
+		return ImportResult{}, fmt.Errorf("import statement: %w", err) // reading the file took past the deadline
+	}
 	imported := u.parseStatement(userID, read)
 	if err := rejectWithoutCharges(*imported.Statement); err != nil {
 		return ImportResult{}, err

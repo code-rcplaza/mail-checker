@@ -19,4 +19,4 @@ La alerta de alza se descarta con "mantener". `later` no existe en el MVP.
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 `POST /api/subscriptions/price-alerts/decision`](TASK-001-PRICE-ALERT-HANDLER.md)
+- [x] [TASK-001 `POST /api/subscriptions/price-alerts/decision`](TASK-001-PRICE-ALERT-HANDLER.md)

@@ -19,4 +19,4 @@ Esta idea cubre solo: Timeouts del servidor. El resto del trabajo original está
 - Antes de escribir las tareas se revisa qué de esto ya existe en `router.go` y `run.go`, para no duplicarlo.
 
 ## Tareas
-- [ ] [TASK-001 Timeouts del servidor](TASK-001-SERVER-TIMEOUTS.md)
+- [x] [TASK-001 Timeouts del servidor](TASK-001-SERVER-TIMEOUTS.md)

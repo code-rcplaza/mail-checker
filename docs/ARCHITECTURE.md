@@ -62,15 +62,18 @@ Cada feature responde a "¿quién eres y qué haces?":
 ```
 backend/
 ├── cmd/api/
-│   ├── main.go                      composition root: crea adaptadores, registra bancos, arma rutas
+│   ├── main.go                      señales del SO; todo lo demás en run
+│   ├── run.go                       config → base → migraciones → rutas → limpieza → servidor
+│   ├── wiring.go                    composition root: crea adaptadores y casos de uso, registra bancos, arma rutas
+│   ├── cleanup.go                   limpieza periódica de accesos vencidos (cada hora)
 │   └── config.go                    variables de entorno, fail fast
 └── internal/
     ├── auth/                            registro, código por correo, sesión
-    │   ├── adapters/                    http/, sqlite/, mailer/ (envío del código)
+    │   ├── adapters/                    http/, sqlite/, mailer/ (envío del código), export/ (puente: copia de los datos)
     │   ├── domain/                      User
     │   ├── ports/                       UserRepository, LoginCodes, CodeSends, Sessions, CodeSender
     │   └── usecases/                    code_delivery, register_user, login, verify_code, open_session,
-    │                                    validate_session, close_session, get_me
+    │                                    validate_session, close_session, get_me, delete_user
     │
     ├── accounts/                        (post-MVP)
     │   ├── adapters/
@@ -149,8 +152,10 @@ Máximo 2 parámetros por función (sin contar `ctx`); con más, un objeto con e
   cancelaciones) pertenece a un usuario y lleva `user_id`.
 - Todo puerto de lectura y escritura filtra por el usuario; los `UNIQUE` pasan a ser por usuario.
   Un usuario nunca ve ni toca datos de otro.
-- El `userID` sale de la sesión en el handler HTTP y viaja como parámetro (`userID int64`) por
-  casos de uso y puertos; nunca en el contexto.
+- El `userID` sale de la sesión: el middleware `RequireSession` (auth) lo deja en el contexto de la
+  petición (`httpserver.WithUserID`), el handler lo lee con `httpserver.UserIDFrom` (sin sesión es
+  401, nunca un usuario cero) y desde ahí viaja como parámetro (`userID int64`) por casos de uso y
+  puertos; el contexto solo lo lleva dentro de la capa HTTP.
 - Eliminar al usuario borra todo lo suyo en cascada.
 
 ### `shared/domain`
@@ -189,11 +194,12 @@ type Charge struct {
     CardLast4   string // vacío o exactamente 4 dígitos (common.card_last_digits_invalid)
 }
 
-var ErrInvalid, ErrNotFound, ErrConflict, ErrTooMany, ErrUnauthorized error // HTTP 400, 404, 409, 429, 401
-// Invalid(key, params), NotFound(key), Conflict(key), TooMany(key, params), Unauthorized(key):
+var ErrInvalid, ErrNotFound, ErrConflict, ErrTooMany, ErrUnauthorized, ErrForbidden, ErrUnavailable error // HTTP 400, 404, 409, 429, 401, 403, 503
+// Invalid(key, params), NotFound(key), Conflict(key), TooMany(key, params), Unauthorized(key), Forbidden(key):
 // envuelven los anteriores y llevan una llave i18n (nunca texto para el usuario). Llaves comunes:
 // common.invalid_json, common.not_found, common.conflict, common.route_not_found,
-// common.validation_failed, common.internal, common.unauthorized.
+// common.validation_failed, common.internal, common.unauthorized, common.too_many_requests, common.forbidden.
+// InvalidFields(fields) es common.validation_failed con la llave de cada campo (`fields`).
 ```
 
 ### `auth`
@@ -241,6 +247,7 @@ type UserRepository interface {
     Create(ctx, user User) (User, error)          // asigna el ID
     FindByEmail(ctx, email string) (User, error)  // ErrNotFound, sin distinguir mayúsculas
     FindByID(ctx, id int64) (User, error)         // ErrNotFound
+    Delete(ctx, id int64) error                   // ErrNotFound; una transacción: sus envíos (por correo) y el usuario, el resto por cascada
 }
 type LoginCodes interface { // un código por usuario
     Save(ctx, code LoginCode) error                       // reemplaza el anterior
@@ -270,9 +277,14 @@ type ExpiredAccess interface { // borra en una transacción
   `OpenSession` (verifica y abre la sesión; devuelve el token en claro una sola vez),
   `ValidateSession` (token → `userID`; vencida o desconocida → `ErrUnauthorized` con
   `common.unauthorized`, sin distinguir), `CloseSession` (idempotente), `CleanExpiredAccess`
-  (borra códigos, sesiones y envíos que ya no sirven; dónde y cada cuánto corre lo arma `main.go`).
-- `GET /api/export` y `DELETE /api/me` recorren datos de varias features: se resuelven con
-  adaptadores puente (ver Pendiente).
+  (borra códigos, sesiones y envíos que ya no sirven; `cmd/api` la corre cada hora y un fallo solo
+  se loguea), `DeleteUser` (borra la cuenta y todo lo suyo; sus sesiones caen con ella).
+- `DELETE /api/me` no necesita puente: toda tabla con `user_id` tiene `ON DELETE CASCADE`, y
+  `code_sends` (por correo) se borra en la misma transacción.
+- `GET /api/export` lo arma el puente `auth/adapters/export` (`UserCopies`), el único lugar de auth
+  que importa casos de uso de otras features: `GetMe`, `ListStatements`, `ListSavedChoices`
+  (subscriptions: cargos, decisiones, alias, manuales y overrides tal como se guardaron) y
+  `GetSummary` (12 meses, para el CSV).
 
 ### `accounts` (post-MVP)
 
@@ -658,32 +670,47 @@ Toda tabla de datos lleva `user_id` con `ON DELETE CASCADE` desde `users`.
 
 ### API REST
 
-Toda ruta exige sesión salvo `/api/health` y `/api/auth/*`.
+Toda ruta exige sesión salvo `/api/health` y `/api/auth/*`; una ruta que no existe responde 404 sin
+pedir sesión.
+
+- Cada petición pasa por: log (método, ruta, status y duración; nunca query ni cuerpo; 5xx como
+  error), recuperación de panics (500 `common.internal`, detalle solo al log) y comprobación de
+  origen.
+- Sesión: cookie `session` `HttpOnly`, `SameSite=Lax`, `Path=/`, 30 días; `Secure` en producción.
+- CSRF: `POST`, `PUT`, `PATCH` y `DELETE` con un `Origin` distinto del `Host` de la petición
+  responden 403 `common.forbidden`; sin `Origin` pasan (los navegadores lo mandan siempre en un POST
+  y la cookie `Lax` no viaja desde otro sitio).
+- Sin CORS: el front se sirve desde el mismo origen; no se manda `Access-Control-Allow-Origin`.
+- Servidor con tiempos máximos de lectura de cabeceras, lectura, escritura e inactividad.
+- Errores de validación por campo: `InvalidFields` → `{error:{key:"common.validation_failed", fields:{campo: llave}}}`.
+- Rutas de una línea: la clave (`lineKey` o `groupKey`) ausente o en blanco es 400 con
+  `fields:{lineKey|groupKey: "subscriptions.line_key_required"}`; una clave que no es línea del
+  usuario es 404 `subscriptions.line_not_found`.
 
 | Método | Ruta | Feature | Descripción |
 |---|---|---|---|
-| GET | `/api/health` | — | |
-| POST | `/api/auth/register` | auth | `{name, email, acceptedTerms}`; envía el código |
-| POST | `/api/auth/login` | auth | `{email}`; envía el código |
-| POST | `/api/auth/code/verify` | auth | `{email, code}`; abre la sesión |
-| POST | `/api/auth/code/resend` | auth | reenvía el código |
-| POST | `/api/auth/logout` | auth | cierra la sesión |
-| GET | `/api/me` | auth | nombre, correo e iniciales del avatar |
-| DELETE | `/api/me` | auth + puentes | elimina al usuario y todo lo suyo |
-| GET | `/api/export` | auth + puentes | copia de los datos del usuario (formato abierto, mvp.md decisión 13) |
-| GET | `/api/banks` | statements | bancos soportados (para el selector) |
-| POST | `/api/statements` | statements | multipart: `file`, `billingDate` opcional, `bank` opcional; responde archivo y meses leídos |
-| GET | `/api/summary?months=12` | subscriptions | suscripciones con próximo cobro, detalle y alza; posibles con su evidencia; total del mes en CLP; cobros del mes; alzas pendientes |
-| POST | `/api/subscriptions/decisions` | subscriptions | `{groupKey, decision, cadence?}`: confirmar (con cadencia) o descartar una posible |
-| DELETE | `/api/subscriptions/decisions?groupKey=` | subscriptions | deshace la decisión; la línea vuelve a posibles |
-| PUT | `/api/subscriptions/aliases` | subscriptions | `{lineKey, alias}`: nombra una línea; alias vacío lo borra |
-| PUT | `/api/subscriptions/overrides` | subscriptions | `{lineKey, amount?, billingDay?}`: reemplaza lo detectado |
-| POST | `/api/subscriptions/manual` | subscriptions | `{name, amount, billingDay}` |
-| PUT, DELETE | `/api/subscriptions/manual/{publicId}` | subscriptions | edita o quita una manual |
-| DELETE | `/api/subscriptions/line?lineKey=` | subscriptions | "dejar de seguir": oculta la línea (mvp.md decisión 10) |
-| POST | `/api/subscriptions/price-alerts/decision` | subscriptions | `{lineKey}`: el usuario mantiene la suscripción tras el alza |
-| GET | `/api/subscriptions/cancel-guide?lineKey=` | subscriptions | enlace al sitio del servicio (catálogo) |
-| POST | `/api/subscriptions/cancellations` | subscriptions | `{lineKey}`: marca la línea como "por cancelar" |
+| GET | `/api/health` | — | `{status:"ok"}` si la base responde en 1 s; si no, 503 `common.unavailable` (la causa solo al log) |
+| POST | `/api/auth/register` | auth | `{name, email, acceptedTerms}`; envía el código; 204 |
+| POST | `/api/auth/login` | auth | `{email}`; envía el código; 204 exista o no la cuenta |
+| POST | `/api/auth/code/verify` | auth | `{email, code}`; abre la sesión y fija la cookie; 204. Un código que no son 6 dígitos es 400 `auth.code_format_invalid` y no gasta intento |
+| POST | `/api/auth/code/resend` | auth | `{email}`; igual que login (el código nuevo reemplaza al anterior); 204 |
+| POST | `/api/auth/logout` | auth | cierra la sesión y borra la cookie; 204 siempre |
+| GET | `/api/me` | auth | `{id, name, email, initials}` (`id` = `public_id`; iniciales de las dos primeras palabras) |
+| DELETE | `/api/me` | auth | elimina al usuario y todo lo suyo en una transacción; borra la cookie; 204 |
+| GET | `/api/export?format=csv` | auth + puente | copia de los datos (mvp.md decisión 13), como adjunto `fokko-copia.csv` o `.json`. `csv` (por defecto): las suscripciones del resumen, columnas `name, alias, amount` (2 decimales)`, currency, cadence, nextCharge` (AAAA-MM-DD); un campo que empieza con `=`, `+`, `-`, `@`, tab o CR lleva `'` delante. `json`: `{profile, statements, charges, decisions, aliases, manuals, overrides}` con ids públicos, fechas unix s y montos `{amount, currency}`. Otro formato: 400 `fields:{format:"auth.export_format_unknown"}` |
+| GET | `/api/banks` | statements | `[{id}]` con los bancos registrados; el nombre visible lo pone el front con i18n |
+| POST | `/api/statements` | statements | multipart: `file` (uno), `billingDate` opcional (unix s), `bank` opcional; 201 `{id, filename, months:["AAAA-MM"], charges, badLines}` (`badLines` es la cantidad). Hasta 10 MB (`statements.file_too_large`) y 60 s para leer e importar; no multipart es `common.invalid_request` |
+| GET | `/api/summary?months=12` | subscriptions | `months` 1 a 24 (12 si falta). `{subscriptions, possible, total, charged, remaining, rises, pendingActions, upcoming}`: montos `{amount, currency}` en centésimas, fechas unix s (`null` si no hay), listas vacías como `[]`. Sin inactivas, otros cobros ni ids internos |
+| POST | `/api/subscriptions/decisions` | subscriptions | `{groupKey, decision, cadence?}` (`confirm` con `monthly`/`yearly`, o `dismiss`): confirmar o descartar una posible; 204. Una clave que no es posible hoy es 404 `subscriptions.possible_not_found` |
+| DELETE | `/api/subscriptions/decisions?groupKey=` | subscriptions | deshace la decisión; la línea vuelve a posibles; 204 aunque no hubiera decisión |
+| PUT | `/api/subscriptions/aliases` | subscriptions | `{lineKey, alias}`: nombra una línea; alias vacío lo borra; 204 |
+| PUT | `/api/subscriptions/overrides` | subscriptions | `{lineKey, amount?, billingDay?}` (monto en centésimas, en la moneda de la línea): reemplaza lo detectado; sin ninguno lo borra; 204 |
+| POST | `/api/subscriptions/manual` | subscriptions | `{name, amount, currency, billingDay}` (monto en centésimas); 201 `{id}` |
+| PUT, DELETE | `/api/subscriptions/manual/{publicId}` | subscriptions | edita (mismo cuerpo que crear) o quita una manual; 204. Ajena, inexistente o id mal formado: 404 |
+| DELETE | `/api/subscriptions/line?lineKey=` | subscriptions | "dejar de seguir": oculta la línea (mvp.md decisión 10); 204, también si ya estaba oculta |
+| POST | `/api/subscriptions/price-alerts/decision` | subscriptions | `{lineKey}`: el usuario mantiene la suscripción tras el alza; 204. Sin alza vigente: 404 `subscriptions.rise_not_found` |
+| GET | `/api/subscriptions/cancel-guide?lineKey=` | subscriptions | `{url}` del sitio del servicio (catálogo); `url` vacío si el comercio no tiene enlace |
+| POST | `/api/subscriptions/cancellations` | subscriptions | `{lineKey}`: marca la línea como "por cancelar"; 204 |
 
 **Post-MVP:**
 
@@ -846,8 +873,10 @@ Otros:
   de cambio que derive de la cartola (en BCI, el par de traspasos), y se guarda el último derivado
   con su fecha: falta una tabla en el modelo de datos. Se rediseña al abrir la idea de lectura de
   cartolas.
-- **Cruces entre features**: `GET /api/export` y `DELETE /api/me` recorren datos de varias
-  features; se resuelven con adaptadores puente, como `emailsync/adapters/accounts`.
+- **Apagado con conexiones sin usar**: un cliente (p. ej. un navegador que preconecta) puede dejar
+  una conexión abierta que nunca manda petición; `Shutdown` la espera y a los 5 s `run` termina con
+  `shutdown: context deadline exceeded` (código 1). Lo común es forzar `server.Close()` al vencer el
+  plazo y no tratarlo como falla. Lo detectaron las pruebas de humo (`cmd/api/smoke_test.go`).
 - **Sin diseño en el handoff:** tablet (768–1023 px) y las versiones de escritorio de Revisión vacía y Resumen vacío.
 - **Post-MVP:** ocultar la contraseña de `Credential` en logs (`LogValue()` que la reemplace), para que un
   `slog.Any("cred", cred)` accidental no la exponga.

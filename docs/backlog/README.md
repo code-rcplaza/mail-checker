@@ -110,47 +110,47 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 
 | # | Idea | Estado |
 |---|---|---|
-| FOKKO-0062A-SUBS | [Recuperar panics](FOKKO-0062A-SUBS-panic-recovery/idea.md) | todo |
-| FOKKO-0062B-SUBS | [Log de peticiones sin datos personales](FOKKO-0062B-SUBS-request-logging/idea.md) | todo |
-| FOKKO-0062C-SUBS | [Timeouts del servidor](FOKKO-0062C-SUBS-server-timeouts/idea.md) | todo |
-| FOKKO-0063-SUBS | [Errores con llaves i18n](FOKKO-0063-SUBS-http-errors/idea.md) | todo |
-| FOKKO-0064-SUBS | [Middleware de sesión](FOKKO-0064-SUBS-http-session-middleware/idea.md) | todo |
-| FOKKO-0065A-SUBS | [Cookie de sesión](FOKKO-0065A-SUBS-session-cookie/idea.md) | todo |
-| FOKKO-0065B-SUBS | [CSRF: comprobar el origen](FOKKO-0065B-SUBS-csrf-origin/idea.md) | todo |
-| FOKKO-0065C-SUBS | [Sin cabeceras CORS](FOKKO-0065C-SUBS-no-cors/idea.md) | todo |
-| FOKKO-0066A-SUBS | [`POST /api/auth/register`](FOKKO-0066A-SUBS-register-endpoint/idea.md) | todo |
-| FOKKO-0066B-SUBS | [`POST /api/auth/login`](FOKKO-0066B-SUBS-login-endpoint/idea.md) | todo |
-| FOKKO-0067A-SUBS | [`POST /api/auth/code/verify`](FOKKO-0067A-SUBS-verify-endpoint/idea.md) | todo |
-| FOKKO-0067B-SUBS | [`POST /api/auth/code/resend`](FOKKO-0067B-SUBS-resend-endpoint/idea.md) | todo |
-| FOKKO-0068A-SUBS | [`GET /api/me`](FOKKO-0068A-SUBS-me-endpoint/idea.md) | todo |
-| FOKKO-0068B-SUBS | [`POST /api/auth/logout`](FOKKO-0068B-SUBS-logout-endpoint/idea.md) | todo |
-| FOKKO-0069-SUBS | [Límites de la subida (tamaño, PDF, timeout)](FOKKO-0069-SUBS-http-upload-limits/idea.md) | todo |
-| FOKKO-0070-SUBS | [`POST /api/statements`](FOKKO-0070-SUBS-http-statements-upload/idea.md) | todo |
-| FOKKO-0071-SUBS | [`GET /api/banks`](FOKKO-0071-SUBS-http-banks/idea.md) | todo |
-| FOKKO-0072A-SUBS | [`GET /api/summary`: parámetro `months`](FOKKO-0072A-SUBS-summary-months-param/idea.md) | todo |
-| FOKKO-0072B-SUBS | [`GET /api/summary`: suscripciones](FOKKO-0072B-SUBS-summary-subscriptions/idea.md) | todo |
-| FOKKO-0072C-SUBS | [`GET /api/summary`: posibles con su evidencia](FOKKO-0072C-SUBS-summary-possible/idea.md) | todo |
-| FOKKO-0072D-SUBS | [`GET /api/summary`: total del mes](FOKKO-0072D-SUBS-summary-total/idea.md) | todo |
-| FOKKO-0072E-SUBS | [`GET /api/summary`: cobrados y restantes del mes](FOKKO-0072E-SUBS-summary-month-counts/idea.md) | todo |
-| FOKKO-0072F-SUBS | [`GET /api/summary`: alzas pendientes](FOKKO-0072F-SUBS-summary-price-rises/idea.md) | todo |
-| FOKKO-0072G-SUBS | [`GET /api/summary`: acciones pendientes](FOKKO-0072G-SUBS-summary-pending-actions/idea.md) | todo |
-| FOKKO-0072H-SUBS | [`GET /api/summary`: próximos cobros](FOKKO-0072H-SUBS-summary-upcoming/idea.md) | todo |
-| FOKKO-0073A-SUBS | [`POST /api/subscriptions/decisions`](FOKKO-0073A-SUBS-decision-post/idea.md) | todo |
-| FOKKO-0073B-SUBS | [`DELETE /api/subscriptions/decisions`](FOKKO-0073B-SUBS-decision-delete/idea.md) | todo |
-| FOKKO-0074A-SUBS | [`PUT /api/subscriptions/aliases`](FOKKO-0074A-SUBS-alias-put/idea.md) | todo |
-| FOKKO-0074B-SUBS | [`PUT /api/subscriptions/overrides`](FOKKO-0074B-SUBS-override-put/idea.md) | todo |
-| FOKKO-0075-SUBS | [Manuales](FOKKO-0075-SUBS-http-manuals/idea.md) | todo |
-| FOKKO-0076-SUBS | [Descartar aviso de alza](FOKKO-0076-SUBS-http-price-alert/idea.md) | todo |
-| FOKKO-0077A-SUBS | [Guía de cancelación: caso de uso y `GET`](FOKKO-0077A-SUBS-cancel-guide/idea.md) | todo |
-| FOKKO-0077B-SUBS | [`POST /api/subscriptions/cancellations`](FOKKO-0077B-SUBS-cancellation-post/idea.md) | todo |
-| FOKKO-0078-SUBS | [`DELETE /api/subscriptions/line`](FOKKO-0078-SUBS-http-stop-following/idea.md) | todo |
-| FOKKO-0079-SUBS | [Exportar copia (CSV/JSON)](FOKKO-0079-SUBS-http-export/idea.md) | todo |
-| FOKKO-0080-SUBS | [`DELETE /api/me`](FOKKO-0080-SUBS-http-delete-me/idea.md) | todo |
-| FOKKO-0081-SUBS | [`GET /api/health` también revisa la base (para el contenedor)](FOKKO-0081-SUBS-http-health-db/idea.md) | todo |
-| FOKKO-0082A-SUBS | [Armar las dependencias](FOKKO-0082A-SUBS-wire-dependencies/idea.md) | todo |
-| FOKKO-0082B-SUBS | [Registrar las rutas](FOKKO-0082B-SUBS-wire-routes/idea.md) | todo |
-| FOKKO-0082C-SUBS | [Limpieza periódica](FOKKO-0082C-SUBS-wire-cleanup/idea.md) | todo |
-| FOKKO-0082D-SUBS | [Arranque que falla rápido](FOKKO-0082D-SUBS-fail-fast-startup/idea.md) | todo |
+| FOKKO-0062A-SUBS | [Recuperar panics](FOKKO-0062A-SUBS-panic-recovery/idea.md) | done |
+| FOKKO-0062B-SUBS | [Log de peticiones sin datos personales](FOKKO-0062B-SUBS-request-logging/idea.md) | done |
+| FOKKO-0062C-SUBS | [Timeouts del servidor](FOKKO-0062C-SUBS-server-timeouts/idea.md) | done |
+| FOKKO-0063-SUBS | [Errores con llaves i18n](FOKKO-0063-SUBS-http-errors/idea.md) | done |
+| FOKKO-0064-SUBS | [Middleware de sesión](FOKKO-0064-SUBS-http-session-middleware/idea.md) | done |
+| FOKKO-0065A-SUBS | [Cookie de sesión](FOKKO-0065A-SUBS-session-cookie/idea.md) | done |
+| FOKKO-0065B-SUBS | [CSRF: comprobar el origen](FOKKO-0065B-SUBS-csrf-origin/idea.md) | done |
+| FOKKO-0065C-SUBS | [Sin cabeceras CORS](FOKKO-0065C-SUBS-no-cors/idea.md) | done |
+| FOKKO-0066A-SUBS | [`POST /api/auth/register`](FOKKO-0066A-SUBS-register-endpoint/idea.md) | done |
+| FOKKO-0066B-SUBS | [`POST /api/auth/login`](FOKKO-0066B-SUBS-login-endpoint/idea.md) | done |
+| FOKKO-0067A-SUBS | [`POST /api/auth/code/verify`](FOKKO-0067A-SUBS-verify-endpoint/idea.md) | done |
+| FOKKO-0067B-SUBS | [`POST /api/auth/code/resend`](FOKKO-0067B-SUBS-resend-endpoint/idea.md) | done |
+| FOKKO-0068A-SUBS | [`GET /api/me`](FOKKO-0068A-SUBS-me-endpoint/idea.md) | done |
+| FOKKO-0068B-SUBS | [`POST /api/auth/logout`](FOKKO-0068B-SUBS-logout-endpoint/idea.md) | done |
+| FOKKO-0069-SUBS | [Límites de la subida (tamaño, PDF, timeout)](FOKKO-0069-SUBS-http-upload-limits/idea.md) | done |
+| FOKKO-0070-SUBS | [`POST /api/statements`](FOKKO-0070-SUBS-http-statements-upload/idea.md) | done |
+| FOKKO-0071-SUBS | [`GET /api/banks`](FOKKO-0071-SUBS-http-banks/idea.md) | done |
+| FOKKO-0072A-SUBS | [`GET /api/summary`: parámetro `months`](FOKKO-0072A-SUBS-summary-months-param/idea.md) | done |
+| FOKKO-0072B-SUBS | [`GET /api/summary`: suscripciones](FOKKO-0072B-SUBS-summary-subscriptions/idea.md) | done |
+| FOKKO-0072C-SUBS | [`GET /api/summary`: posibles con su evidencia](FOKKO-0072C-SUBS-summary-possible/idea.md) | done |
+| FOKKO-0072D-SUBS | [`GET /api/summary`: total del mes](FOKKO-0072D-SUBS-summary-total/idea.md) | done |
+| FOKKO-0072E-SUBS | [`GET /api/summary`: cobrados y restantes del mes](FOKKO-0072E-SUBS-summary-month-counts/idea.md) | done |
+| FOKKO-0072F-SUBS | [`GET /api/summary`: alzas pendientes](FOKKO-0072F-SUBS-summary-price-rises/idea.md) | done |
+| FOKKO-0072G-SUBS | [`GET /api/summary`: acciones pendientes](FOKKO-0072G-SUBS-summary-pending-actions/idea.md) | done |
+| FOKKO-0072H-SUBS | [`GET /api/summary`: próximos cobros](FOKKO-0072H-SUBS-summary-upcoming/idea.md) | done |
+| FOKKO-0073A-SUBS | [`POST /api/subscriptions/decisions`](FOKKO-0073A-SUBS-decision-post/idea.md) | done |
+| FOKKO-0073B-SUBS | [`DELETE /api/subscriptions/decisions`](FOKKO-0073B-SUBS-decision-delete/idea.md) | done |
+| FOKKO-0074A-SUBS | [`PUT /api/subscriptions/aliases`](FOKKO-0074A-SUBS-alias-put/idea.md) | done |
+| FOKKO-0074B-SUBS | [`PUT /api/subscriptions/overrides`](FOKKO-0074B-SUBS-override-put/idea.md) | done |
+| FOKKO-0075-SUBS | [Manuales](FOKKO-0075-SUBS-http-manuals/idea.md) | done |
+| FOKKO-0076-SUBS | [Descartar aviso de alza](FOKKO-0076-SUBS-http-price-alert/idea.md) | done |
+| FOKKO-0077A-SUBS | [Guía de cancelación: caso de uso y `GET`](FOKKO-0077A-SUBS-cancel-guide/idea.md) | done |
+| FOKKO-0077B-SUBS | [`POST /api/subscriptions/cancellations`](FOKKO-0077B-SUBS-cancellation-post/idea.md) | done |
+| FOKKO-0078-SUBS | [`DELETE /api/subscriptions/line`](FOKKO-0078-SUBS-http-stop-following/idea.md) | done |
+| FOKKO-0079-SUBS | [Exportar copia (CSV/JSON)](FOKKO-0079-SUBS-http-export/idea.md) | done |
+| FOKKO-0080-SUBS | [`DELETE /api/me`](FOKKO-0080-SUBS-http-delete-me/idea.md) | done |
+| FOKKO-0081-SUBS | [`GET /api/health` también revisa la base (para el contenedor)](FOKKO-0081-SUBS-http-health-db/idea.md) | done |
+| FOKKO-0082A-SUBS | [Armar las dependencias](FOKKO-0082A-SUBS-wire-dependencies/idea.md) | done |
+| FOKKO-0082B-SUBS | [Registrar las rutas](FOKKO-0082B-SUBS-wire-routes/idea.md) | done |
+| FOKKO-0082C-SUBS | [Limpieza periódica](FOKKO-0082C-SUBS-wire-cleanup/idea.md) | done |
+| FOKKO-0082D-SUBS | [Arranque que falla rápido](FOKKO-0082D-SUBS-fail-fast-startup/idea.md) | done |
 
 ### F. Front
 
@@ -202,10 +202,10 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 
 | # | Idea | Estado |
 |---|---|---|
-| FOKKO-0112A-SUBS | [Smoke test: acceso](FOKKO-0112A-SUBS-smoke-auth/idea.md) | todo |
+| FOKKO-0112A-SUBS | [Smoke test: acceso](FOKKO-0112A-SUBS-smoke-auth/idea.md) | done |
 | FOKKO-0112B-SUBS | [Smoke test: de la cartola al resumen](FOKKO-0112B-SUBS-smoke-import-summary/idea.md) | todo |
-| FOKKO-0112C-SUBS | [Smoke test: aislamiento entre usuarios](FOKKO-0112C-SUBS-smoke-isolation/idea.md) | todo |
-| FOKKO-0112D-SUBS | [Smoke test: eliminar todo](FOKKO-0112D-SUBS-smoke-delete-all/idea.md) | todo |
+| FOKKO-0112C-SUBS | [Smoke test: aislamiento entre usuarios](FOKKO-0112C-SUBS-smoke-isolation/idea.md) | done |
+| FOKKO-0112D-SUBS | [Smoke test: eliminar todo](FOKKO-0112D-SUBS-smoke-delete-all/idea.md) | done |
 | FOKKO-0113A-SUBS | [Textos legales ⛔ decisión 12](FOKKO-0113A-SUBS-legal-pages/idea.md) | todo |
 | FOKKO-0113B-SUBS | [Pruebas de privacidad](FOKKO-0113B-SUBS-privacy-tests/idea.md) | todo |
 | FOKKO-0114A-SUBS | [Embeber el front en el binario](FOKKO-0114A-SUBS-embed-front/idea.md) | todo |

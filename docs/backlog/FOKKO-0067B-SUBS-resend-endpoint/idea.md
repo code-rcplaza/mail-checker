@@ -21,4 +21,4 @@ Esta idea cubre solo: `POST /api/auth/code/resend`. El resto del trabajo origina
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 `POST /api/auth/code/resend`](TASK-001-RESEND-HANDLER.md)
+- [x] [TASK-001 `POST /api/auth/code/resend`](TASK-001-RESEND-HANDLER.md)

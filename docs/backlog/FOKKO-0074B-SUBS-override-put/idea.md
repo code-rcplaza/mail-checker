@@ -21,5 +21,5 @@ Esta idea cubre solo: `PUT /api/subscriptions/overrides`. El resto del trabajo o
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Guardar o borrar el override](TASK-001A-OVERRIDE-SET.md)
-- [ ] [TASK-001B Rechazar override inválido o línea inexistente](TASK-001B-OVERRIDE-INVALID.md)
+- [x] [TASK-001A Guardar o borrar el override](TASK-001A-OVERRIDE-SET.md)
+- [x] [TASK-001B Rechazar override inválido o línea inexistente](TASK-001B-OVERRIDE-INVALID.md)

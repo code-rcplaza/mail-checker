@@ -49,8 +49,12 @@ func ensureParentDir(path string) error {
 }
 
 func dsnWithPragmas(path string) string {
-	return "file:" + path + "?_pragma=" + strings.Join(pragmas, "&_pragma=")
+	return "file:" + uriPathEscaper.Replace(path) + "?_pragma=" + strings.Join(pragmas, "&_pragma=")
 }
+
+// uriPathEscaper keeps the path a plain file name inside the "file:" URI: an
+// unescaped "?" or "#" would cut it short and open another file.
+var uriPathEscaper = strings.NewReplacer("%", "%25", "?", "%3f", "#", "%23")
 
 func limitToSingleWriter(db *sql.DB) {
 	db.SetMaxOpenConns(1)

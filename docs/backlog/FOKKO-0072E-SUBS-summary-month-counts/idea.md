@@ -19,5 +19,5 @@
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Campo de cobrados](TASK-001A-CHARGED-FIELD.md)
-- [ ] [TASK-001B Campo de restantes](TASK-001B-REMAINING-FIELD.md)
+- [x] [TASK-001A Campo de cobrados](TASK-001A-CHARGED-FIELD.md)
+- [x] [TASK-001B Campo de restantes](TASK-001B-REMAINING-FIELD.md)

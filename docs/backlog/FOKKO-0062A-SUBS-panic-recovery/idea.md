@@ -19,4 +19,4 @@ Esta idea cubre solo: Recuperar panics. El resto del trabajo original está en l
 - Antes de escribir las tareas se revisa qué de esto ya existe en `router.go` y `run.go`, para no duplicarlo.
 
 ## Tareas
-- [ ] [TASK-001 Panic convertido en 500](TASK-001-PANIC-RECOVERY.md)
+- [x] [TASK-001 Panic convertido en 500](TASK-001-PANIC-RECOVERY.md)

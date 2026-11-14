@@ -21,6 +21,6 @@ Esta idea cubre solo: `POST /api/auth/login`. El resto del trabajo original est�
 - Respuesta de éxito: se propone `204 No Content`, porque el resultado es el correo que llega.
 
 ## Tareas
-- [ ] [TASK-001A Responder 204 al entrar](TASK-001A-LOGIN-204.md)
-- [ ] [TASK-001B Rechazar correo inválido o desconocido](TASK-001B-LOGIN-REJECT.md)
-- [ ] [TASK-001C Responder 429 por límite](TASK-001C-LOGIN-429.md)
+- [x] [TASK-001A Responder 204 al entrar](TASK-001A-LOGIN-204.md)
+- [x] [TASK-001B Rechazar correo inválido o desconocido](TASK-001B-LOGIN-REJECT.md)
+- [x] [TASK-001C Responder 429 por límite](TASK-001C-LOGIN-429.md)

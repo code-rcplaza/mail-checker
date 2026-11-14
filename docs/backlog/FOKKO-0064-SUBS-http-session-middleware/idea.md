@@ -20,6 +20,6 @@ Toda ruta exige sesión salvo `/api/health` y `/api/auth/*`. El `userID` sale de
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Exigir sesión](TASK-001-SESSION-MIDDLEWARE.md)
-- [ ] [TASK-002 Rutas sin sesión](TASK-002-PUBLIC-ROUTES.md)
-- [ ] [TASK-003 El `userID` en el contexto](TASK-003-USER-ID-IN-CONTEXT.md)
+- [x] [TASK-001 Exigir sesión](TASK-001-SESSION-MIDDLEWARE.md)
+- [x] [TASK-002 Rutas sin sesión](TASK-002-PUBLIC-ROUTES.md)
+- [x] [TASK-003 El `userID` en el contexto](TASK-003-USER-ID-IN-CONTEXT.md)

@@ -21,4 +21,4 @@ Esta idea cubre solo: Arranque que falla rápido. El resto del trabajo original 
 - Esta idea se parte en las tareas listadas; si el diff pasa de ~300 líneas en una tarea, se parte más.
 
 ## Tareas
-- [ ] [TASK-001 Arranque que falla rápido](TASK-001-FAIL-FAST-STARTUP.md)
+- [x] [TASK-001 Arranque que falla rápido](TASK-001-FAIL-FAST-STARTUP.md)

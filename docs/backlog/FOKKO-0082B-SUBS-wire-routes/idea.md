@@ -21,4 +21,4 @@ Esta idea cubre solo: Registrar las rutas. El resto del trabajo original está e
 - Esta idea se parte en las tareas listadas; si el diff pasa de ~300 líneas en una tarea, se parte más.
 
 ## Tareas
-- [ ] [TASK-001 Registrar las rutas](TASK-001-WIRE-ROUTES.md)
+- [x] [TASK-001 Registrar las rutas](TASK-001-WIRE-ROUTES.md)

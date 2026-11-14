@@ -19,8 +19,8 @@
 - `billingDate` viaja como unix en segundos, igual que el resto de la API.
 
 ## Tareas
-- [ ] [TASK-001 Subir una cartola](TASK-001-STATEMENT-UPLOAD-HANDLER.md)
-- [ ] [TASK-002A Errores 400 de la subida](TASK-002A-UPLOAD-ERR-400.md)
-- [ ] [TASK-002B Error 409 de cartola repetida](TASK-002B-UPLOAD-ERR-409.md)
-- [ ] [TASK-003A Campo `billingDate`](TASK-003A-BILLING-DATE-FIELD.md)
-- [ ] [TASK-003B Campo `bank`](TASK-003B-BANK-FIELD.md)
+- [x] [TASK-001 Subir una cartola](TASK-001-STATEMENT-UPLOAD-HANDLER.md)
+- [x] [TASK-002A Errores 400 de la subida](TASK-002A-UPLOAD-ERR-400.md)
+- [x] [TASK-002B Error 409 de cartola repetida](TASK-002B-UPLOAD-ERR-409.md)
+- [x] [TASK-003A Campo `billingDate`](TASK-003A-BILLING-DATE-FIELD.md)
+- [x] [TASK-003B Campo `bank`](TASK-003B-BANK-FIELD.md)

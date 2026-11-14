@@ -19,5 +19,5 @@
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Dejar de seguir una línea](TASK-001A-STOP-OK.md)
-- [ ] [TASK-001B Rechazar clave ausente o línea inexistente](TASK-001B-STOP-ERRORS.md)
+- [x] [TASK-001A Dejar de seguir una línea](TASK-001A-STOP-OK.md)
+- [x] [TASK-001B Rechazar clave ausente o línea inexistente](TASK-001B-STOP-ERRORS.md)

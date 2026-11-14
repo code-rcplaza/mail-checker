@@ -22,6 +22,8 @@ func TestAuthKeys_FollowFeatureReasonFormat(t *testing.T) {
 		{KeyCodeExpired, "auth.code_expired"},
 		{KeyCodeAttemptsExceeded, "auth.code_attempts_exceeded"},
 		{KeyTooManySends, "auth.too_many_sends"},
+		{KeyCodeFormatInvalid, "auth.code_format_invalid"},
+		{KeyExportFormatUnknown, "auth.export_format_unknown"},
 	}
 	for _, tc := range cases {
 		t.Run(string(tc.want), func(t *testing.T) {

@@ -37,6 +37,8 @@ func TestDecodeJSON_RejectsInvalidBody(t *testing.T) {
 	oversized := `{"email":"` + strings.Repeat("a", 1<<20) + `"}`
 	cases := map[string]string{
 		"malformed":       `{"email":`,
+		"not json":        `hola`,
+		"empty":           ``,
 		"unknown field":   `{"email":"a@b.c","nope":1}`,
 		"larger than 1MB": oversized,
 		"trailing data":   `{"email":"a@b.c"}{"email":"x"}`,

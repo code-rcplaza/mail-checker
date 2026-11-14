@@ -21,5 +21,5 @@ Esta idea cubre solo: `PUT /api/subscriptions/aliases`. El resto del trabajo ori
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Guardar o borrar el alias](TASK-001A-ALIAS-SET.md)
-- [ ] [TASK-001B Rechazar alias largo o línea inexistente](TASK-001B-ALIAS-INVALID.md)
+- [x] [TASK-001A Guardar o borrar el alias](TASK-001A-ALIAS-SET.md)
+- [x] [TASK-001B Rechazar alias largo o línea inexistente](TASK-001B-ALIAS-INVALID.md)

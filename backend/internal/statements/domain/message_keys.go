@@ -13,4 +13,8 @@ const (
 	KeyNotFound            shared.MessageKey = "statements.not_found"
 	KeyFileKindUnknown     shared.MessageKey = "statements.file_kind_unknown"
 	KeyBillingDateRequired shared.MessageKey = "statements.billing_date_required"
+	KeyBillingDateInvalid  shared.MessageKey = "statements.billing_date_invalid"
+	KeyFileRequired        shared.MessageKey = "statements.file_required"
+	KeyFileTooMany         shared.MessageKey = "statements.file_too_many"
+	KeyFileTooLarge        shared.MessageKey = "statements.file_too_large"
 )

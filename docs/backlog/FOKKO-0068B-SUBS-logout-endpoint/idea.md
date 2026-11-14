@@ -21,4 +21,4 @@ Esta idea cubre solo: `POST /api/auth/logout`. El resto del trabajo original est
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 `POST /api/auth/logout`](TASK-001-LOGOUT-HANDLER.md)
+- [x] [TASK-001 `POST /api/auth/logout`](TASK-001-LOGOUT-HANDLER.md)

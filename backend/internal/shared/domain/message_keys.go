@@ -19,4 +19,8 @@ const (
 	KeyCardLastDigitsInvalid MessageKey = "common.card_last_digits_invalid"
 	KeyUserMissing           MessageKey = "common.user_missing"
 	KeyUnauthorized          MessageKey = "common.unauthorized"
+	KeyTooManyRequests       MessageKey = "common.too_many_requests"
+	KeyForbidden             MessageKey = "common.forbidden"
+	KeyInvalidRequest        MessageKey = "common.invalid_request"
+	KeyUnavailable           MessageKey = "common.unavailable"
 )

@@ -22,5 +22,5 @@ Esta idea cubre solo: `POST /api/auth/code/verify`. El resto del trabajo origina
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 `POST /api/auth/code/verify`](TASK-001-VERIFY-HANDLER.md)
-- [ ] [TASK-002 Formato del código en el borde](TASK-002-CODE-FORMAT-AT-EDGE.md)
+- [x] [TASK-001 `POST /api/auth/code/verify`](TASK-001-VERIFY-HANDLER.md)
+- [x] [TASK-002 Formato del código en el borde](TASK-002-CODE-FORMAT-AT-EDGE.md)

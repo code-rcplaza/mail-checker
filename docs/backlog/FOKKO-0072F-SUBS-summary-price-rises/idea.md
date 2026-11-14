@@ -19,4 +19,4 @@ La Alerta necesita las alzas pendientes con su monto de antes y después, desde 
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Alzas pendientes](TASK-001-SUMMARY-DTO-RISES.md)
+- [x] [TASK-001 Alzas pendientes](TASK-001-SUMMARY-DTO-RISES.md)

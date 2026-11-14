@@ -19,4 +19,4 @@ Revisión necesita las posibles con su evidencia ("Lo vimos en tu archivo: …")
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Posibles con evidencia](TASK-001-SUMMARY-DTO-POSSIBLE.md)
+- [x] [TASK-001 Posibles con evidencia](TASK-001-SUMMARY-DTO-POSSIBLE.md)

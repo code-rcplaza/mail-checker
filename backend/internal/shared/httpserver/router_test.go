@@ -16,7 +16,7 @@ func discardLogger() *slog.Logger {
 func serve(t *testing.T, method, path string) *httptest.ResponseRecorder {
 	t.Helper()
 	recorder := httptest.NewRecorder()
-	NewRouter(discardLogger()).ServeHTTP(recorder, httptest.NewRequest(method, path, nil))
+	NewRouter(discardLogger(), AlwaysHealthy).ServeHTTP(recorder, httptest.NewRequest(method, path, nil))
 	return recorder
 }
 

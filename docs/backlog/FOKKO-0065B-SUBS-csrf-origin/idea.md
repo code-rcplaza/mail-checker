@@ -21,5 +21,5 @@ Esta idea cubre solo: CSRF: comprobar el origen. El resto del trabajo original e
 - Se propone `SameSite=Lax` más una comprobación del encabezado `Origin` en `POST`, `PUT` y `DELETE`. Hace falta un error 403 para el origen no permitido (`common.forbidden`): ¿se agrega a `shared`?
 
 ## Tareas
-- [ ] [TASK-001A Rechazar otro origen](TASK-001A-ORIGIN-REJECT.md)
-- [ ] [TASK-001B Casos de lectura o sin origen](TASK-001B-ORIGIN-EXEMPT.md)
+- [x] [TASK-001A Rechazar otro origen](TASK-001A-ORIGIN-REJECT.md)
+- [x] [TASK-001B Casos de lectura o sin origen](TASK-001B-ORIGIN-EXEMPT.md)

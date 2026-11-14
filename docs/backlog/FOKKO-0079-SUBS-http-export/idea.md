@@ -18,10 +18,11 @@ Perfil ofrece "Descargar copia primero" antes de eliminar todo, en CSV (por defe
 
 ## Dudas abiertas
 - Contenido: se propone JSON con todo (perfil, cartolas, cargos, decisiones, alias, manuales, overrides) y CSV con las suscripciones del resumen (una tabla). ¿Se acepta?
+  - Resuelto: sí (opción propuesta). En el CSV, montos con 2 decimales y fechas AAAA-MM-DD para que la planilla los lea; el JSON sigue la API (centésimas, unix s).
 - Un CSV debe escaparse contra inyección de fórmulas (`=`, `+`, `-`, `@` al inicio de un campo).
 
 ## Tareas
-- [ ] [TASK-001 Juntar los datos del usuario](TASK-001-EXPORT-BRIDGE.md)
-- [ ] [TASK-002 Copia en JSON](TASK-002-EXPORT-JSON.md)
-- [ ] [TASK-003 Copia en CSV](TASK-003-EXPORT-CSV.md)
-- [ ] [TASK-004 `GET /api/export`](TASK-004-EXPORT-HANDLER.md)
+- [x] [TASK-001 Juntar los datos del usuario](TASK-001-EXPORT-BRIDGE.md)
+- [x] [TASK-002 Copia en JSON](TASK-002-EXPORT-JSON.md)
+- [x] [TASK-003 Copia en CSV](TASK-003-EXPORT-CSV.md)
+- [x] [TASK-004 `GET /api/export`](TASK-004-EXPORT-HANDLER.md)

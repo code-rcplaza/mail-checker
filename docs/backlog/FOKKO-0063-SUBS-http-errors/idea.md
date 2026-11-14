@@ -21,9 +21,9 @@ El back no devuelve textos: devuelve llaves i18n. Hoy se mapean 400, 404, 409 y 
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Responder 401 por falta de sesión](TASK-001A-MAP-401.md)
-- [ ] [TASK-001B Responder 429 por límite](TASK-001B-MAP-429.md)
-- [ ] [TASK-001C Responder 500 sin detalle](TASK-001C-MAP-500.md)
-- [ ] [TASK-002 Errores por campo](TASK-002-FIELD-ERRORS.md)
-- [ ] [TASK-003A Rechazar JSON inválido o vacío](TASK-003A-STRICT-JSON-INVALID.md)
-- [ ] [TASK-003B Rechazar campos o valores de más](TASK-003B-STRICT-JSON-EXTRA.md)
+- [x] [TASK-001A Responder 401 por falta de sesión](TASK-001A-MAP-401.md)
+- [x] [TASK-001B Responder 429 por límite](TASK-001B-MAP-429.md)
+- [x] [TASK-001C Responder 500 sin detalle](TASK-001C-MAP-500.md)
+- [x] [TASK-002 Errores por campo](TASK-002-FIELD-ERRORS.md)
+- [x] [TASK-003A Rechazar JSON inválido o vacío](TASK-003A-STRICT-JSON-INVALID.md)
+- [x] [TASK-003B Rechazar campos o valores de más](TASK-003B-STRICT-JSON-EXTRA.md)

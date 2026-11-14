@@ -22,6 +22,6 @@ Esta idea cubre solo: Smoke test: acceso. El resto del trabajo original está en
 - Las pruebas del front quedan con una revisión manual a 390, 768 y 1280 px por pantalla.
 
 ## Tareas
-- [ ] [TASK-001A Entrar con código](TASK-001A-SMOKE-LOGIN.md)
-- [ ] [TASK-001B Cerrar sesión](TASK-001B-SMOKE-LOGOUT.md)
-- [ ] [TASK-001C Cinco intentos fallidos](TASK-001C-SMOKE-ATTEMPTS.md)
+- [x] [TASK-001A Entrar con código](TASK-001A-SMOKE-LOGIN.md)
+- [x] [TASK-001B Cerrar sesión](TASK-001B-SMOKE-LOGOUT.md)
+- [x] [TASK-001C Cinco intentos fallidos](TASK-001C-SMOKE-ATTEMPTS.md)

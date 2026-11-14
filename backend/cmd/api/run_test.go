@@ -166,3 +166,27 @@ func TestRun_LogsPortAndDBPathWithoutSecrets(t *testing.T) {
 		}
 	}
 }
+
+func TestRun_FailsWhenAMigrationFails(t *testing.T) {
+	dbPath := filepath.Join(t.TempDir(), "app.db")
+	db, err := sqlite.Open(context.Background(), dbPath)
+	if err != nil {
+		t.Fatalf("open: %v", err)
+	}
+	// A users table already there makes the migration that creates it fail.
+	if _, err := db.Exec(`CREATE TABLE users (id INTEGER)`); err != nil {
+		t.Fatalf("create table: %v", err)
+	}
+	db.Close()
+	port := freePort(t)
+	env := fakeEnv(map[string]string{"MAILCHECKER_PORT": strconv.Itoa(port), "MAILCHECKER_DB_PATH": dbPath})
+
+	err = run(context.Background(), env, &bytes.Buffer{})
+
+	if err == nil || !strings.Contains(err.Error(), "migrat") {
+		t.Fatalf("run() error = %v, want the migration error", err)
+	}
+	if _, err := http.Get(fmt.Sprintf("http://127.0.0.1:%d/api/health", port)); err == nil {
+		t.Errorf("the app answered after a failed migration")
+	}
+}

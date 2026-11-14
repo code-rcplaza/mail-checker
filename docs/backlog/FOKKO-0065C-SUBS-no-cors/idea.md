@@ -21,4 +21,4 @@ Esta idea cubre solo: Sin cabeceras CORS. El resto del trabajo original está en
 - Se propone `SameSite=Lax` más una comprobación del encabezado `Origin` en `POST`, `PUT` y `DELETE`. Hace falta un error 403 para el origen no permitido (`common.forbidden`): ¿se agrega a `shared`?
 
 ## Tareas
-- [ ] [TASK-001 Sin cabeceras CORS](TASK-001-NO-CORS.md)
+- [x] [TASK-001 Sin cabeceras CORS](TASK-001-NO-CORS.md)

@@ -19,6 +19,10 @@ var errorKinds = []errorKind{
 	{domain.ErrInvalid, http.StatusBadRequest, domain.KeyValidationFailed},
 	{domain.ErrNotFound, http.StatusNotFound, domain.KeyNotFound},
 	{domain.ErrConflict, http.StatusConflict, domain.KeyConflict},
+	{domain.ErrTooMany, http.StatusTooManyRequests, domain.KeyTooManyRequests},
+	{domain.ErrUnauthorized, http.StatusUnauthorized, domain.KeyUnauthorized},
+	{domain.ErrForbidden, http.StatusForbidden, domain.KeyForbidden},
+	{domain.ErrUnavailable, http.StatusServiceUnavailable, domain.KeyUnavailable},
 }
 
 var internalErrorKind = errorKind{status: http.StatusInternalServerError, fallbackKey: domain.KeyInternal}
@@ -45,7 +49,7 @@ func matchErrorKind(err error) errorKind {
 func payloadFor(err error, kind errorKind) errorPayload {
 	var keyed domain.KeyedError
 	if kind != internalErrorKind && errors.As(err, &keyed) {
-		return errorPayload{Key: keyed.Key, Params: keyed.Params}
+		return errorPayload{Key: keyed.Key, Params: keyed.Params, Fields: keyed.Fields}
 	}
 	return errorPayload{Key: kind.fallbackKey}
 }

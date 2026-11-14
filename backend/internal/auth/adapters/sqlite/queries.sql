@@ -13,6 +13,14 @@ SELECT *
 FROM users
 WHERE id = ?;
 
+-- name: DeleteCodeSendsOfUser :exec
+DELETE FROM code_sends
+WHERE email = (SELECT users.email FROM users WHERE users.id = sqlc.arg(user_id));
+
+-- name: DeleteUser :execrows
+DELETE FROM users
+WHERE id = ?;
+
 -- name: SaveLoginCode :exec
 INSERT INTO login_codes (user_id, code_hash, expires_at, attempts)
 VALUES (?, ?, ?, ?)

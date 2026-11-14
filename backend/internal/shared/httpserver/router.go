@@ -11,15 +11,14 @@ import (
 	"github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
 
-type healthResponse struct {
-	Status string `json:"status"`
-}
-
-// NewRouter returns the base router with /api/health and JSON 404s.
-func NewRouter(logger *slog.Logger) *chi.Mux {
+// NewRouter returns the base router: request log, panic recovery and the
+// origin check on every route, /api/health (answered by check) and JSON 404s.
+// It sends no CORS headers: the front is served from the same origin.
+func NewRouter(logger *slog.Logger, check HealthCheck) *chi.Mux {
 	responder := Responder{Logger: logger}
 	router := chi.NewRouter()
-	router.Get("/api/health", responder.healthHandler())
+	router.Use(responder.LogRequests, responder.RecoverPanics, responder.CheckOrigin)
+	router.Get("/api/health", responder.healthHandler(check))
 	router.NotFound(responder.routeNotFoundHandler())
 	return router
 }
@@ -27,12 +26,6 @@ func NewRouter(logger *slog.Logger) *chi.Mux {
 // Responder writes responses and logs what cannot reach the client.
 type Responder struct {
 	Logger *slog.Logger
-}
-
-func (responder Responder) healthHandler() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		responder.Respond(Exchange{Writer: w, Request: r}, Reply{Status: http.StatusOK, Body: healthResponse{Status: "ok"}})
-	}
 }
 
 func (responder Responder) routeNotFoundHandler() http.HandlerFunc {

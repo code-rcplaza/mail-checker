@@ -21,4 +21,4 @@ Esta idea cubre solo: Limpieza periódica. El resto del trabajo original está e
 - Esta idea se parte en las tareas listadas; si el diff pasa de ~300 líneas en una tarea, se parte más.
 
 ## Tareas
-- [ ] [TASK-001 Limpieza periódica](TASK-001-WIRE-CLEANUP-SCHEDULER.md)
+- [x] [TASK-001 Limpieza periódica](TASK-001-WIRE-CLEANUP-SCHEDULER.md)

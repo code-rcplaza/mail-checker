@@ -35,8 +35,9 @@ func (f fixedRandom) Read(p []byte) (int, error) {
 var _ ports.UserRepository = (*usersByEmail)(nil)
 
 type usersByEmail struct {
-	users map[string]domain.User
-	calls int
+	users     map[string]domain.User
+	calls     int
+	deleteErr error
 }
 
 func usersWith(users ...domain.User) *usersByEmail {
@@ -71,6 +72,20 @@ func (u *usersByEmail) FindByID(_ context.Context, id int64) (domain.User, error
 		}
 	}
 	return domain.User{}, fmt.Errorf("find user: %w", shared.ErrNotFound)
+}
+
+func (u *usersByEmail) Delete(_ context.Context, id int64) error {
+	u.calls++
+	if u.deleteErr != nil {
+		return u.deleteErr
+	}
+	for email, user := range u.users {
+		if user.ID == id {
+			delete(u.users, email)
+			return nil
+		}
+	}
+	return fmt.Errorf("delete user: %w", shared.ErrNotFound)
 }
 
 var _ ports.LoginCodes = (*codesByUser)(nil)

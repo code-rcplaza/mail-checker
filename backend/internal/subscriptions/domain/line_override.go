@@ -78,3 +78,10 @@ func nextChargeOnDay(line Subscription, billingDay int) time.Time {
 	}
 	return next
 }
+
+// ValidateOverrideFields checks amount and day apart, so each error shows on its field.
+func ValidateOverrideFields(amount *shared.Money, billingDay *int) error {
+	_, amountErr := NewLineOverride(amount, nil)
+	_, dayErr := NewLineOverride(nil, billingDay)
+	return shared.FieldErrors(map[string]error{"amount": amountErr, "billingDay": dayErr})
+}

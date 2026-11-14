@@ -19,6 +19,6 @@
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Eliminar al usuario](TASK-001-DELETE-USER-USECASE.md)
-- [ ] [TASK-002 La cascada borra todo](TASK-002-USERS-REPO-DELETE-CASCADE.md)
-- [ ] [TASK-003 `DELETE /api/me`](TASK-003-DELETE-ME-HANDLER.md)
+- [x] [TASK-001 Eliminar al usuario](TASK-001-DELETE-USER-USECASE.md)
+- [x] [TASK-002 La cascada borra todo](TASK-002-USERS-REPO-DELETE-CASCADE.md)
+- [x] [TASK-003 `DELETE /api/me`](TASK-003-DELETE-ME-HANDLER.md)

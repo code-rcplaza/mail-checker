@@ -21,6 +21,6 @@ Esta idea cubre solo: Armar las dependencias. El resto del trabajo original est�
 - Esta idea se parte en las tareas listadas; si el diff pasa de ~300 líneas en una tarea, se parte más.
 
 ## Tareas
-- [ ] [TASK-001A Armar el núcleo de la app](TASK-001A-WIRE-CORE.md)
-- [ ] [TASK-001B Registrar los bancos una sola vez](TASK-001B-WIRE-BANKS.md)
-- [ ] [TASK-001C Elegir el envío de códigos por modo](TASK-001C-WIRE-SENDER.md)
+- [x] [TASK-001A Armar el núcleo de la app](TASK-001A-WIRE-CORE.md)
+- [x] [TASK-001B Registrar los bancos una sola vez](TASK-001B-WIRE-BANKS.md)
+- [x] [TASK-001C Elegir el envío de códigos por modo](TASK-001C-WIRE-SENDER.md)

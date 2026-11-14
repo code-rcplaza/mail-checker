@@ -19,4 +19,4 @@ El Resumen lista los próximos cobros por fecha.
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Próximos cobros](TASK-001-SUMMARY-DTO-UPCOMING.md)
+- [x] [TASK-001 Próximos cobros](TASK-001-SUMMARY-DTO-UPCOMING.md)

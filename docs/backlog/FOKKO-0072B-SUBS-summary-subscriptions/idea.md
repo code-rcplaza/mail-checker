@@ -19,5 +19,5 @@ El resumen debe listar las suscripciones del usuario con lo que las pantallas mu
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Suscripciones en el JSON](TASK-001-SUMMARY-DTO-SUBSCRIPTIONS.md)
-- [ ] [TASK-002 Sin datos internos](TASK-002-SUMMARY-DTO-NO-INTERNALS.md)
+- [x] [TASK-001 Suscripciones en el JSON](TASK-001-SUMMARY-DTO-SUBSCRIPTIONS.md)
+- [x] [TASK-002 Sin datos internos](TASK-002-SUMMARY-DTO-NO-INTERNALS.md)

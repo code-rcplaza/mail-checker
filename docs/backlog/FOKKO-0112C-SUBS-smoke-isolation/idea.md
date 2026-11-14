@@ -22,4 +22,4 @@ Esta idea cubre solo: Smoke test: aislamiento entre usuarios. El resto del traba
 - Las pruebas del front quedan con una revisión manual a 390, 768 y 1280 px por pantalla.
 
 ## Tareas
-- [ ] [TASK-001 Dos usuarios no se ven](TASK-001-E2E-USER-ISOLATION.md)
+- [x] [TASK-001 Dos usuarios no se ven](TASK-001-E2E-USER-ISOLATION.md)

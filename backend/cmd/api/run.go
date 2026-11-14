@@ -12,21 +12,19 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/code-rcplaza/mail-checker/backend/internal/shared/httpserver"
+	authsqlite "github.com/code-rcplaza/mail-checker/backend/internal/auth/adapters/sqlite"
+	authusecases "github.com/code-rcplaza/mail-checker/backend/internal/auth/usecases"
+	"github.com/code-rcplaza/mail-checker/backend/internal/shared/clock"
 	"github.com/code-rcplaza/mail-checker/backend/internal/shared/sqlite"
 	"github.com/code-rcplaza/mail-checker/backend/internal/shared/sqlite/migrations"
 )
 
 const (
-	listenHost        = "127.0.0.1" // personal, local app: never exposed to the network
-	readHeaderTimeout = 5 * time.Second
-	readTimeout       = 30 * time.Second
-	writeTimeout      = 5 * time.Minute // an email sync can take a while
-	idleTimeout       = 60 * time.Second
-	shutdownTimeout   = 5 * time.Second
+	listenHost      = "127.0.0.1" // personal, local app: never exposed to the network
+	shutdownTimeout = 5 * time.Second
 )
 
-// run wires config → logger → database → migrations → router → server and
+// run wires config → logger → database → migrations → router → cleanup → server and
 // blocks until ctx is canceled, then shuts down in order.
 func run(ctx context.Context, getenv func(string) string, stdout io.Writer) error {
 	config, err := LoadConfig(getenv)
@@ -42,12 +40,30 @@ func run(ctx context.Context, getenv func(string) string, stdout io.Writer) erro
 	if err := sqlite.Migrate(ctx, db, migrations.FS); err != nil {
 		return err
 	}
+	router, err := buildRouter(appDependencies{db: db, config: config, logger: logger, stdout: stdout})
+	if err != nil {
+		return err
+	}
 	listener, err := listen(config.Port)
 	if err != nil {
 		return err
 	}
-	logger.Info("server started", "port", config.Port, "db_path", config.DBPath)
-	return runningServer{server: newServer(httpserver.NewRouter(logger)), listener: listener, logger: logger}.serveUntilCanceled(ctx)
+	go cleanupEveryHour(ctx, appDependencies{db: db, logger: logger})
+	logger.Info("server started", "port", config.Port, "db_path", config.DBPath, "production", config.IsProduction, "mailer", mailerName(config.Mailer))
+	return runningServer{server: newServer(router, defaultTimeouts), listener: listener, logger: logger}.serveUntilCanceled(ctx)
+}
+
+func cleanupEveryHour(ctx context.Context, deps appDependencies) {
+	cleanup := authusecases.NewCleanExpiredAccess(authsqlite.NewExpiredAccess(deps.db), clock.Now)
+	cleanupLoop{clean: cleanup.Execute, every: cleanupInterval, logger: deps.logger}.run(ctx)
+}
+
+// mailerName says how codes leave, for the start log; never the key.
+func mailerName(mailer MailerConfig) string {
+	if mailer.UsesConsole() {
+		return "console"
+	}
+	return "resend"
 }
 
 func newLogger(stdout io.Writer) *slog.Logger {
@@ -69,13 +85,29 @@ func listen(port int) (net.Listener, error) {
 	return listener, nil
 }
 
-func newServer(handler http.Handler) *http.Server {
+// serverTimeouts bound every phase of a connection, so a slow or stuck client
+// cannot hold the server.
+type serverTimeouts struct {
+	readHeader time.Duration
+	read       time.Duration
+	write      time.Duration
+	idle       time.Duration
+}
+
+var defaultTimeouts = serverTimeouts{
+	readHeader: 5 * time.Second,
+	read:       30 * time.Second,
+	write:      5 * time.Minute, // an email sync can take a while
+	idle:       60 * time.Second,
+}
+
+func newServer(handler http.Handler, timeouts serverTimeouts) *http.Server {
 	return &http.Server{
 		Handler:           handler,
-		ReadHeaderTimeout: readHeaderTimeout,
-		ReadTimeout:       readTimeout,
-		WriteTimeout:      writeTimeout,
-		IdleTimeout:       idleTimeout,
+		ReadHeaderTimeout: timeouts.readHeader,
+		ReadTimeout:       timeouts.read,
+		WriteTimeout:      timeouts.write,
+		IdleTimeout:       timeouts.idle,
 	}
 }
 

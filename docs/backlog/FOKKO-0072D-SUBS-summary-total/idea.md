@@ -19,4 +19,4 @@ El Resumen muestra el total del mes en CLP, con su marca de aproximado e incompl
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Total del mes](TASK-001-SUMMARY-DTO-TOTAL.md)
+- [x] [TASK-001 Total del mes](TASK-001-SUMMARY-DTO-TOTAL.md)

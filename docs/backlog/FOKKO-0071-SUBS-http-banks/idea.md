@@ -19,4 +19,4 @@ El selector de banco de la pantalla de subida necesita la lista de bancos soport
 - El nombre visible del banco lo pone el front con i18n a partir del id (`bci`). ¿Se acepta?
 
 ## Tareas
-- [ ] [TASK-001 `GET /api/banks`](TASK-001-BANKS-HANDLER.md)
+- [x] [TASK-001 `GET /api/banks`](TASK-001-BANKS-HANDLER.md)

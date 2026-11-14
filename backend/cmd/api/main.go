@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	_ "time/tzdata" // America/Santiago loads even where the system has no zone files
 )
 
 func main() {

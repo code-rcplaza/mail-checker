@@ -22,4 +22,4 @@ Esta idea cubre solo: Smoke test: eliminar todo. El resto del trabajo original e
 - Las pruebas del front quedan con una revisión manual a 390, 768 y 1280 px por pantalla.
 
 ## Tareas
-- [ ] [TASK-001 Eliminar todo](TASK-001-E2E-DELETE-ALL.md)
+- [x] [TASK-001 Eliminar todo](TASK-001-E2E-DELETE-ALL.md)

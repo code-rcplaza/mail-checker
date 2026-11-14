@@ -34,7 +34,7 @@ type Registration struct {
 }
 
 func ParseRegistration(form RegistrationForm) (Registration, error) {
-	name, err := parseName(form.Name)
+	name, err := ParseName(form.Name)
 	if err != nil {
 		return Registration{}, err
 	}
@@ -42,13 +42,13 @@ func ParseRegistration(form RegistrationForm) (Registration, error) {
 	if err != nil {
 		return Registration{}, err
 	}
-	if !form.AcceptedTerms {
-		return Registration{}, shared.Invalid(KeyTermsRequired, nil)
+	if err := RequireTerms(form.AcceptedTerms); err != nil {
+		return Registration{}, err
 	}
 	return Registration{Name: name, Email: email}, nil
 }
 
-func parseName(raw string) (string, error) {
+func ParseName(raw string) (string, error) {
 	name := strings.TrimSpace(raw)
 	if name == "" {
 		return "", shared.Invalid(KeyNameRequired, nil)
@@ -75,4 +75,27 @@ func isEmailShaped(email string) bool {
 		return false
 	}
 	return !strings.ContainsFunc(email, unicode.IsSpace)
+}
+
+func RequireTerms(accepted bool) error {
+	if !accepted {
+		return shared.Invalid(KeyTermsRequired, nil)
+	}
+	return nil
+}
+
+// Initials are the first letter of the first two words, in capitals, for the
+// avatar. They work on characters, so an accent or an emoji is never split.
+func Initials(name string) string {
+	var initials strings.Builder
+	for _, word := range firstWords(name, 2) {
+		first, _ := utf8.DecodeRuneInString(word)
+		initials.WriteRune(unicode.ToUpper(first))
+	}
+	return initials.String()
+}
+
+func firstWords(text string, count int) []string {
+	words := strings.Fields(text)
+	return words[:min(count, len(words))]
 }

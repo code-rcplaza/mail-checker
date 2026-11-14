@@ -21,5 +21,5 @@ Esta idea cubre solo: `DELETE /api/subscriptions/decisions`. El resto del trabaj
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Deshacer una decisión](TASK-001A-DECISION-UNDO.md)
-- [ ] [TASK-001B Validar la clave de línea](TASK-001B-DECISION-KEY.md)
+- [x] [TASK-001A Deshacer una decisión](TASK-001A-DECISION-UNDO.md)
+- [x] [TASK-001B Validar la clave de línea](TASK-001B-DECISION-KEY.md)

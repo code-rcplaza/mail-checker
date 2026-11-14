@@ -20,6 +20,7 @@ func TestSubscriptionsKeysExist(t *testing.T) {
 		{KeyManualNotFound, "subscriptions.manual_not_found"},
 		{KeyOverrideAmountNotPositive, "subscriptions.override_amount_not_positive"},
 		{KeyOverrideDayOutOfRange, "subscriptions.override_day_out_of_range"},
+		{KeyLineKeyRequired, "subscriptions.line_key_required"},
 	}
 	for _, tc := range cases {
 		if tc.key != tc.want {

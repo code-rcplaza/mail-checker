@@ -21,6 +21,6 @@ Esta idea cubre solo: `POST /api/subscriptions/decisions`. El resto del trabajo 
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Confirmar con cadencia](TASK-001A-DECISION-CONFIRM.md)
-- [ ] [TASK-001B Descartar una posible](TASK-001B-DECISION-DISMISS.md)
-- [ ] [TASK-001C Rechazar una clave que no es posible](TASK-001C-DECISION-NOT-POSSIBLE.md)
+- [x] [TASK-001A Confirmar con cadencia](TASK-001A-DECISION-CONFIRM.md)
+- [x] [TASK-001B Descartar una posible](TASK-001B-DECISION-DISMISS.md)
+- [x] [TASK-001C Rechazar una clave que no es posible](TASK-001C-DECISION-NOT-POSSIBLE.md)
