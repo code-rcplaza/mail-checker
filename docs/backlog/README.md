@@ -62,12 +62,12 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 | FOKKO-0031-SUBS | [Crear suscripción manual](FOKKO-0031-SUBS-create-manual/idea.md) | done |
 | FOKKO-0032-SUBS | [Editar o quitar una manual](FOKKO-0032-SUBS-edit-manual/idea.md) | done |
 | FOKKO-0033-SUBS | [Override de monto y día](FOKKO-0033-SUBS-line-override/idea.md) | done |
-| FOKKO-0034-SUBS | ["Dejar de seguir" una línea](FOKKO-0034-SUBS-stop-following/idea.md) | todo |
-| FOKKO-0035-SUBS | [Marcar "por cancelar"](FOKKO-0035-SUBS-mark-for-cancel/idea.md) | todo |
-| FOKKO-0036-SUBS | [`Summary`: reparto por servicio](FOKKO-0036-SUBS-summary-spend/idea.md) | todo |
-| FOKKO-0037-SUBS | [`Summary`: acciones pendientes](FOKKO-0037-SUBS-pending-actions/idea.md) | todo |
-| FOKKO-0038-SUBS | [`Summary`: próximos cobros](FOKKO-0038-SUBS-upcoming-charges/idea.md) | todo |
-| FOKKO-0039-SUBS | [`Summary`: detalle de una línea](FOKKO-0039-SUBS-line-detail/idea.md) | todo |
+| FOKKO-0034-SUBS | ["Dejar de seguir" una línea](FOKKO-0034-SUBS-stop-following/idea.md) | done |
+| FOKKO-0035-SUBS | [Marcar "por cancelar"](FOKKO-0035-SUBS-mark-for-cancel/idea.md) | done |
+| FOKKO-0036-SUBS | [`Summary`: reparto por servicio](FOKKO-0036-SUBS-summary-spend/idea.md) | done |
+| FOKKO-0037-SUBS | [`Summary`: acciones pendientes](FOKKO-0037-SUBS-pending-actions/idea.md) | done |
+| FOKKO-0038-SUBS | [`Summary`: próximos cobros](FOKKO-0038-SUBS-upcoming-charges/idea.md) | done |
+| FOKKO-0039-SUBS | [`Summary`: detalle de una línea](FOKKO-0039-SUBS-line-detail/idea.md) | done |
 
 ### C. Acceso
 

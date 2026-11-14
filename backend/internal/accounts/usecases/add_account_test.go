@@ -25,7 +25,7 @@ type addFixture struct {
 func newAddFixture() addFixture {
 	accounts := &fakeAccounts{}
 	cipher := &fakeCipher{}
-	useCase := NewAddAccount(accounts, cipher, func() string { return "acct-1" }, func() time.Time { return testNow })
+	useCase := NewAddAccount(AddAccountDependencies{Accounts: accounts, Cipher: cipher, NewPublicID: func() string { return "acct-1" }, Now: func() time.Time { return testNow }})
 	return addFixture{accounts: accounts, cipher: cipher, useCase: useCase}
 }
 

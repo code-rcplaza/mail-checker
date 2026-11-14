@@ -50,8 +50,8 @@ func (f *fakeAccounts) List(context.Context) ([]accountsdomain.Account, error) {
 
 func (f *fakeAccounts) Delete(context.Context, string) error { return nil }
 
-func (f *fakeAccounts) MarkSynced(_ context.Context, id int64, at time.Time, syncErrKey shared.MessageKey) error {
-	f.marked = append(f.marked, syncMark{id: id, at: at, errKey: syncErrKey})
+func (f *fakeAccounts) MarkSynced(_ context.Context, record accountsdomain.SyncRecord) error {
+	f.marked = append(f.marked, syncMark{id: record.AccountID, at: record.At, errKey: record.ErrorKey})
 	return nil
 }
 
@@ -102,7 +102,7 @@ func TestAccountDirectory_CredentialsErrorKeepsKindAndKey(t *testing.T) {
 func TestAccountDirectory_RecordSyncForwardsItsValues(t *testing.T) {
 	accounts := &fakeAccounts{}
 
-	if err := newDirectory(accounts).RecordSync(context.Background(), 7, testNow, "emailsync.mail_auth_failed"); err != nil {
+	if err := newDirectory(accounts).RecordSync(context.Background(), domain.SyncRecord{AccountID: 7, At: testNow, ErrorKey: "emailsync.mail_auth_failed"}); err != nil {
 		t.Fatalf("RecordSync error = %v, want nil", err)
 	}
 

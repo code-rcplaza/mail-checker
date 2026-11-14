@@ -20,11 +20,11 @@ func (k keptRisesByUser) List(_ context.Context, userID int64) (map[domain.Group
 	return k[userID], nil
 }
 
-func (k keptRisesByUser) Save(_ context.Context, userID int64, key domain.GroupKey, newAmount shared.Money) error {
+func (k keptRisesByUser) Save(_ context.Context, userID int64, kept domain.KeptRise) error {
 	if k[userID] == nil {
 		k[userID] = make(map[domain.GroupKey]shared.Money)
 	}
-	k[userID][key] = newAmount
+	k[userID][kept.Key] = kept.NewAmount
 	return nil
 }
 
@@ -32,7 +32,7 @@ func TestKeptRisesByUser_SavingTwiceKeepsOne(t *testing.T) {
 	kept := keptRisesByUser{}
 
 	for range 2 {
-		if err := kept.Save(context.Background(), userOne, streamingLine, 1050000); err != nil {
+		if err := kept.Save(context.Background(), userOne, domain.KeptRise{Key: streamingLine, NewAmount: 1050000}); err != nil {
 			t.Fatalf("Save error = %v, want nil", err)
 		}
 	}
@@ -69,7 +69,7 @@ func TestKeepPriceRise(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			kept := keptRisesByUser{}
 
-			err := NewKeepPriceRise(tc.charges, fakeCatalog{}, kept, fixedNow).Execute(context.Background(), userOne, risingLine)
+			err := NewKeepPriceRise(linesOf(tc.charges), kept).Execute(context.Background(), userOne, risingLine)
 
 			if !errors.Is(err, tc.wantErr) {
 				t.Fatalf("Execute error = %v, want %v", err, tc.wantErr)
@@ -101,7 +101,9 @@ func TestGetSummary_HidesTheKeptRiseUntilANewOne(t *testing.T) {
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
 			kept := keptRisesByUser{userOne: {risingLine: 1050000}}
-			useCase := NewGetSummary(SummarySources{Charges: chargesByUser{userOne: tc.charges}, Catalog: fakeCatalog{}, Decisions: decisionsByUser{}, Aliases: aliasesByUser{}, Rates: ratesByUser{}, KeptRises: kept, Manuals: manualsByUser{}, Overrides: overridesByUser{}}, fixedNow)
+			sources := summarySourcesOf(chargesByUser{userOne: tc.charges})
+			sources.KeptRises = kept
+			useCase := NewGetSummary(sources)
 
 			got, err := useCase.Execute(context.Background(), userOne, 6)
 

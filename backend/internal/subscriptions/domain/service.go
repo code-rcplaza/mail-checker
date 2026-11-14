@@ -16,11 +16,11 @@ type Service struct {
 
 // NewService rejects a cancel link that is not https, so an http or odd
 // scheme link never leaves through the API.
-func NewService(name string, isUmbrella bool, cancelURL string) (Service, error) {
-	if err := validateCancelURL(cancelURL); err != nil {
+func NewService(candidate Service) (Service, error) {
+	if err := validateCancelURL(candidate.CancelURL); err != nil {
 		return Service{}, err
 	}
-	return Service{Name: name, IsUmbrella: isUmbrella, CancelURL: cancelURL}, nil
+	return candidate, nil
 }
 
 func validateCancelURL(cancelURL string) error {

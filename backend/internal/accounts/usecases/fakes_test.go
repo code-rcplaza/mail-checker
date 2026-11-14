@@ -79,8 +79,8 @@ func (f *fakeAccounts) Delete(_ context.Context, publicID string) error {
 	return f.deleteErr
 }
 
-func (f *fakeAccounts) MarkSynced(_ context.Context, id int64, at time.Time, syncErrKey shared.MessageKey) error {
-	f.marked = append(f.marked, syncMark{id: id, at: at, errKey: syncErrKey})
+func (f *fakeAccounts) MarkSynced(_ context.Context, record domain.SyncRecord) error {
+	f.marked = append(f.marked, syncMark{id: record.AccountID, at: record.At, errKey: record.ErrorKey})
 	return f.markErr
 }
 

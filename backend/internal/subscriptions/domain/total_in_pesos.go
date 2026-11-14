@@ -10,19 +10,19 @@ type Total struct {
 }
 
 // TotalInPesos adds the monthly spend of every currency in pesos. Without an
-// exchange rate the dollars are left out and the total says so, instead of
+// exchange rate (nil) the dollars are left out and the total says so, instead of
 // showing a number the user would trust.
-func TotalInPesos(spend map[shared.Currency]shared.Money, rate shared.ExchangeRate, hasRate bool) Total {
+func TotalInPesos(spend map[shared.Currency]shared.Money, rate *shared.ExchangeRate) Total {
 	total := Total{Amount: spend[shared.CurrencyCLP]}
 	dollars := spend[shared.CurrencyUSD]
 	if dollars == 0 {
 		return total
 	}
-	if !hasRate {
+	if rate == nil {
 		total.IsIncomplete = true
 		return total
 	}
-	total.Amount += dollarsToPesos(dollars, rate)
+	total.Amount += dollarsToPesos(dollars, *rate)
 	total.IsApproximate = true
 	return total
 }

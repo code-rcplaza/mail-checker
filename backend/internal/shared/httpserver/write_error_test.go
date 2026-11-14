@@ -27,7 +27,7 @@ func writeErrorWithLog(t *testing.T, err error) (*httptest.ResponseRecorder, err
 	logger := slog.New(slog.NewTextHandler(&logs, nil))
 	recorder := httptest.NewRecorder()
 
-	WriteError(recorder, httptest.NewRequest(http.MethodGet, "/api/x", nil), logger, err)
+	Responder{Logger: logger}.WriteError(Exchange{Writer: recorder, Request: httptest.NewRequest(http.MethodGet, "/api/x", nil)}, err)
 
 	var body errorBody
 	if jsonErr := json.Unmarshal(recorder.Body.Bytes(), &body); jsonErr != nil {

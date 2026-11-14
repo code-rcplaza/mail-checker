@@ -19,6 +19,6 @@ La pantalla Detalle muestra el ciclo, los últimos cobros y el alza de una líne
 - Cuántos cobros recientes se listan: se propone los últimos 6.
 
 ## Tareas
-- [ ] [TASK-001 Ciclo de la línea](TASK-001-LINE-DETAIL-CYCLE.md)
-- [ ] [TASK-002 Últimos cobros](TASK-002-LINE-DETAIL-LAST-CHARGES.md)
-- [ ] [TASK-003 Detalle sin alza](TASK-003-LINE-DETAIL-WITHOUT-RISE.md)
+- [x] [TASK-001 Ciclo de la línea](TASK-001-LINE-DETAIL-CYCLE.md)
+- [x] [TASK-002 Últimos cobros](TASK-002-LINE-DETAIL-LAST-CHARGES.md)
+- [x] [TASK-003 Detalle sin alza](TASK-003-LINE-DETAIL-WITHOUT-RISE.md)

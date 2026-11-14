@@ -139,7 +139,7 @@ func TestChargesMatch_ComparesCardsOnlyWhenBothHaveThem(t *testing.T) {
 			email := emailCharge("e1", "STREAMING CO", 599000, 3)
 			email.CardLast4 = tt.mailLast4
 
-			if got := ChargesMatch(statement, email, identifyFake, normalizeFake); got != tt.want {
+			if got := ChargesMatch(ChargePair{Statement: statement, Email: email}, catalogFake()); got != tt.want {
 				t.Errorf("ChargesMatch = %v, want %v", got, tt.want)
 			}
 		})

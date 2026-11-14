@@ -128,6 +128,20 @@ backend/
 3. Todas pueden importar `shared/domain`. Solo los adaptadores y `main.go` importan `shared/sqlite`, `shared/httpserver` y `shared/clock`.
 4. `main.go` es el único lugar que conoce todas las piezas concretas.
 
+### Objetos en vez de listas de parámetros
+
+Máximo 2 parámetros por función (sin contar `ctx`); con más, un objeto con el nombre de lo que es:
+- **Entrada** de un caso de uso: `XInput` (`DecisionInput`, `LineOverrideInput`,
+  `ManualSubscriptionInput`).
+- **Dependencias** de un constructor: `XDependencies` (`ImportStatementDependencies`,
+  `SyncAllDependencies`) o, si se leen como fuentes, `SummarySources`.
+- **Valores con clave** en los puertos: `LineDecision`, `LineAlias`, `SyncRecord`, `ImportedStatement`.
+- **Contexto de un cálculo** en `domain`: `MerchantCatalog{Identify, Normalize}`,
+  `SubscriptionDetector{LooksLikeSubscription, Now}` (con métodos), `SummaryInput`. El `Summary`
+  guarda `AsOf`, así los pasos que lo transforman no vuelven a recibir `now`.
+- **HTTP**: `httpserver.Exchange{Writer, Request}`, `Reply{Status, Body}` y
+  `Responder{Logger}` con `Respond` y `WriteError`; todos los handlers responden por ahí.
+
 ### Multiusuario
 
 - Todo dato (cargos, cartolas, decisiones, alias, manuales, overrides, decisiones de alza,
@@ -215,7 +229,7 @@ type AccountRepository interface {
     Create(ctx context.Context, a *Account) error             // asigna ID (PublicID viene generado en Go); ErrConflict si el correo ya existe
     List(ctx context.Context) ([]Account, error)
     Delete(ctx context.Context, publicID string) error        // ErrNotFound; borra también sus cargos
-    MarkSynced(ctx context.Context, id int64, at time.Time, syncErrKey shared.MessageKey) error
+    MarkSynced(ctx context.Context, r SyncRecord) error       // SyncRecord{AccountID, At, ErrorKey}; ErrNotFound
 }
 type SecretCipher interface {
     Encrypt(plain string) ([]byte, error)
@@ -253,7 +267,7 @@ type UnparsedEmail struct {
 // ports
 type AccountDirectory interface {
     Credentials(ctx context.Context) ([]Credential, error)    // {AccountID, AccountPublicID, Email, Password}
-    RecordSync(ctx context.Context, accountID int64, at time.Time, syncErrKey shared.MessageKey) error
+    RecordSync(ctx context.Context, r SyncRecord) error       // SyncRecord{AccountID, At, ErrorKey}, propio de emailsync
 }
 type MailReader interface {
     Read(ctx context.Context, cred Credential, q MailQuery) ([]RawEmail, error)
@@ -303,11 +317,15 @@ type BankStatementParser interface {
     Detect(text string) bool                                // ¿esta cartola es de mi banco?
     Parse(text string) (lines []StatementLine, bad []int)    // StatementLine{Number, Charge}; bad: números de línea, nunca el texto
     BillingDate(text string) (time.Time, bool)               // fecha de facturación que trae el archivo
+    TransferPair(text string) (TransferPair, bool)           // deuda traspasada en pesos y dólares (tipo de cambio)
+}
+type ExchangeRateRecorder interface {
+    Record(ctx context.Context, userID int64, rate ExchangeRate) error // uno por usuario y fecha
 }
 type StatementRepository interface {
-    Create(ctx context.Context, s *Statement, charges []Charge) error   // atómico; asigna ID (PublicID viene generado en Go)
-    List(ctx context.Context) ([]Statement, error)
-    Delete(ctx context.Context, publicID string) error                  // ErrNotFound; borra también sus cargos
+    Create(ctx context.Context, userID int64, imported ImportedStatement) error // ImportedStatement{Statement *Statement, Charges}; atómico; asigna ID
+    List(ctx context.Context, userID int64) ([]Statement, error)
+    Delete(ctx context.Context, userID int64, publicID string) error            // ErrNotFound; borra también sus cargos
 }
 ```
 
@@ -343,27 +361,55 @@ uso agrega `statements.not_found`; los adaptadores no conocen llaves i18n.
 ```go
 // ports
 type ChargeReader interface {
-    ListSince(ctx context.Context, since time.Time) ([]Charge, error)
+    ListSince(ctx context.Context, userID int64, since time.Time) ([]Charge, error)
 }
 type ServiceCatalog interface {
     Identify(merchant string) (Service, bool)   // "ANYSPHERE INC" -> Cursor
     Normalize(merchant string) string           // "C. Verde Mall" -> "C VERDE MALL"; "DLOCAL*SPOTIFY" -> "SPOTIFY"
     LooksLikeSubscription(merchant string) bool // "…SUBSCRIPTION", "MEMBERSHIP"
 }
+// Lo que el usuario decide sobre una línea se guarda como un valor con su clave.
 type SubscriptionDecisions interface {
-    List(ctx context.Context) (map[GroupKey]Decision, error) // Decision: confirmed (+ cadencia) | dismissed
-    Save(ctx context.Context, key GroupKey, d Decision) error
-    Delete(ctx context.Context, key GroupKey) error
+    List(ctx context.Context, userID int64) (map[GroupKey]Decision, error) // Decision: confirmed (+ cadencia) | dismissed
+    Save(ctx context.Context, userID int64, d LineDecision) error          // LineDecision{Key, Decision}
+    Delete(ctx context.Context, userID int64, key GroupKey) error
 }
 type LineAliases interface {
-    List(ctx context.Context) (map[GroupKey]string, error) // alias por clave de línea
-    Save(ctx context.Context, key GroupKey, alias string) error
-    Delete(ctx context.Context, key GroupKey) error
+    List(ctx context.Context, userID int64) (map[GroupKey]string, error)
+    Save(ctx context.Context, userID int64, a LineAlias) error             // LineAlias{Key, Alias}
+    Delete(ctx context.Context, userID int64, key GroupKey) error
+}
+type LineOverrides interface {
+    List(ctx context.Context, userID int64) (map[GroupKey]LineOverride, error)
+    Save(ctx context.Context, userID int64, o OverriddenLine) error        // OverriddenLine{Key, Override}
+    Delete(ctx context.Context, userID int64, key GroupKey) error
+}
+type PriceAlertDecisions interface {
+    List(ctx context.Context, userID int64) (map[GroupKey]Money, error)    // monto nuevo del alza mantenida
+    Save(ctx context.Context, userID int64, k KeptRise) error              // KeptRise{Key, NewAmount}; reemplaza
+}
+type HiddenLines interface {
+    List(ctx context.Context, userID int64) ([]GroupKey, error)
+    Hide(ctx context.Context, userID int64, h HiddenLine) error            // HiddenLine{Key, HiddenAt}; idempotente
+}
+type Cancellations interface {
+    List(ctx context.Context, userID int64) (map[GroupKey]time.Time, error)
+    Mark(ctx context.Context, userID int64, m CancellationMark) error      // CancellationMark{Key, MarkedAt}; conserva la primera fecha
+}
+type ManualSubscriptions interface {
+    List(ctx context.Context, userID int64) ([]ManualSubscription, error)
+    Create(ctx context.Context, userID int64, m ManualSubscription) error
+    Update(ctx context.Context, userID int64, m ManualSubscription) error  // ErrNotFound
+    Delete(ctx context.Context, userID int64, publicID string) error       // ErrNotFound
+}
+type ExchangeRates interface {
+    List(ctx context.Context, userID int64) ([]ExchangeRate, error)
 }
 ```
 
-Puertos nuevos del MVP, con su firma al escribir su historia: `ManualSubscriptions`,
-`LineOverrides`, `PriceAlertDecisions`, `Cancellations` y `ExchangeRates`. Todos filtran por usuario.
+Todos los puertos filtran por usuario. Los casos de uso que leen o verifican líneas componen
+`ChargeLines{Charges, Catalog, Now}` (lee, deduplica y agrupa), así la línea que se ve en el
+resumen es la misma que se decide, nombra, sobrescribe, oculta o marca.
 
 **`GetSummary(months)`:**
 1. Lee los cargos del período.
@@ -436,6 +482,11 @@ el grupo `|one-off`) se busca en la ventana máxima; si no existe → `ErrNotFou
 - **Por cancelar** `{lineKey}`: marca la línea; no cancela nada ni lee correos. El enlace al sitio
   del servicio sale del catálogo.
 - **Dejar de seguir** una línea: la oculta y guarda la marca por clave (`docs/mvp.md`, decisión 10).
+
+**Acciones pendientes** del Resumen: primero las alzas no mantenidas, de mayor a menor impacto
+anual **en pesos** (las de USD se convierten con el mismo tipo de cambio del total, que el
+`Summary` guarda en `ExchangeRate`; sin tipo de cambio, las alzas en USD van al final), y después
+las posibles sin decidir.
 
 **Líneas** (constantes con nombre en `subscriptions/domain`):
 1. **Origen**: dentro del padre, los cobros se separan por cuenta de correo y por últimos 4 dígitos (en el MVP no hay cuentas de correo: separan solo los dígitos)

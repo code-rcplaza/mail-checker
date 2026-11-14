@@ -3,48 +3,47 @@ package usecases
 import (
 	"context"
 	"fmt"
-	"time"
 
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/ports"
 )
 
+// LineOverrideInput is what the user sent for a line; nil means "not given".
+type LineOverrideInput struct {
+	Key        domain.GroupKey
+	Amount     *shared.Money
+	BillingDay *int
+}
+
 // SaveLineOverride stores the amount or billing day the user set for a line;
 // an empty override removes it. Real charges are never changed.
 type SaveLineOverride struct {
-	charges   ports.ChargeReader
-	catalog   ports.ServiceCatalog
+	lines     ChargeLines
 	overrides ports.LineOverrides
-	now       func() time.Time
 }
 
-func NewSaveLineOverride(
-	charges ports.ChargeReader,
-	catalog ports.ServiceCatalog,
-	overrides ports.LineOverrides,
-	now func() time.Time,
-) SaveLineOverride {
-	return SaveLineOverride{charges: charges, catalog: catalog, overrides: overrides, now: now}
+func NewSaveLineOverride(lines ChargeLines, overrides ports.LineOverrides) SaveLineOverride {
+	return SaveLineOverride{lines: lines, overrides: overrides}
 }
 
-func (u SaveLineOverride) Execute(ctx context.Context, userID int64, key domain.GroupKey, amount *shared.Money, billingDay *int) error {
-	override, err := domain.NewLineOverride(amount, billingDay)
+func (u SaveLineOverride) Execute(ctx context.Context, userID int64, input LineOverrideInput) error {
+	override, err := domain.NewLineOverride(input.Amount, input.BillingDay)
 	if err != nil {
 		return err
 	}
-	if err := ensureLineExists(ctx, userID, u.charges, u.catalog, u.now(), key); err != nil {
+	if err := u.lines.ensureLine(ctx, userID, input.Key); err != nil {
 		return err
 	}
-	return u.storeOverride(ctx, userID, key, override)
+	return u.storeOverride(ctx, userID, domain.OverriddenLine{Key: input.Key, Override: override})
 }
 
-func (u SaveLineOverride) storeOverride(ctx context.Context, userID int64, key domain.GroupKey, override domain.LineOverride) error {
-	if override.IsEmpty() {
-		return u.deleteOverride(ctx, userID, key)
+func (u SaveLineOverride) storeOverride(ctx context.Context, userID int64, overridden domain.OverriddenLine) error {
+	if overridden.Override.IsEmpty() {
+		return u.deleteOverride(ctx, userID, overridden.Key)
 	}
-	if err := u.overrides.Save(ctx, userID, key, override); err != nil {
-		return fmt.Errorf("save override for %s: %w", key, err)
+	if err := u.overrides.Save(ctx, userID, overridden); err != nil {
+		return fmt.Errorf("save override for %s: %w", overridden.Key, err)
 	}
 	return nil
 }

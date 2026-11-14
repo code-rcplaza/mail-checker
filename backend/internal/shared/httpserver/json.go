@@ -15,10 +15,23 @@ const (
 	contentType  = "application/json"
 )
 
+// Exchange is one HTTP request and the writer for its response; they always
+// travel together.
+type Exchange struct {
+	Writer  http.ResponseWriter
+	Request *http.Request
+}
+
+// Reply is a response to write: its status and the value sent as JSON.
+type Reply struct {
+	Status int
+	Body   any
+}
+
 // DecodeJSON reads a single JSON object into dst. Malformed bodies, unknown
 // fields, trailing data or bodies over 1 MB fail with common.invalid_json.
-func DecodeJSON(w http.ResponseWriter, r *http.Request, dst any) error {
-	decoder := json.NewDecoder(http.MaxBytesReader(w, r.Body, maxBodyBytes))
+func DecodeJSON(exchange Exchange, dst any) error {
+	decoder := json.NewDecoder(http.MaxBytesReader(exchange.Writer, exchange.Request.Body, maxBodyBytes))
 	decoder.DisallowUnknownFields()
 	if err := decoder.Decode(dst); err != nil {
 		return invalidJSON(err)
@@ -31,13 +44,13 @@ func DecodeJSON(w http.ResponseWriter, r *http.Request, dst any) error {
 
 // WriteJSON marshals value first, so an unencodable value never leaves a
 // half-written response, then writes status and body.
-func WriteJSON(w http.ResponseWriter, status int, value any) error {
-	body, err := json.Marshal(value)
+func WriteJSON(w http.ResponseWriter, reply Reply) error {
+	body, err := json.Marshal(reply.Body)
 	if err != nil {
 		return fmt.Errorf("encode json response: %w", err)
 	}
 	w.Header().Set("Content-Type", contentType)
-	w.WriteHeader(status)
+	w.WriteHeader(reply.Status)
 	if _, err := w.Write(body); err != nil {
 		return fmt.Errorf("write json response: %w", err)
 	}

@@ -9,7 +9,7 @@ import (
 func TestUnparsedFromEmail_KeepsEmailValues(t *testing.T) {
 	email := purchaseEmail()
 
-	got := UnparsedFromEmail(email, 7, "bci")
+	got := UnparsedFromEmail(BankEmail{Email: email, AccountID: 7, Bank: "bci"})
 
 	want := UnparsedEmail{
 		ExternalID: email.MessageID,
@@ -28,7 +28,7 @@ func TestUnparsedFromEmail_LongBodyPreviewKeepsWholeCharacters(t *testing.T) {
 	email := purchaseEmail()
 	email.Body = strings.Repeat("ñá", 150) // 300 characters, 2 bytes each
 
-	got := UnparsedFromEmail(email, 7, "bci").Preview
+	got := UnparsedFromEmail(BankEmail{Email: email, AccountID: 7, Bank: "bci"}).Preview
 
 	if count := utf8.RuneCountInString(got); count != PreviewMaxRunes {
 		t.Errorf("preview has %d characters, want %d", count, PreviewMaxRunes)
@@ -44,7 +44,7 @@ func TestUnparsedFromEmail_LongBodyPreviewKeepsWholeCharacters(t *testing.T) {
 func TestUnparsedFromEmail_ShortBodyIsWholePreview(t *testing.T) {
 	email := purchaseEmail()
 
-	got := UnparsedFromEmail(email, 7, "bci").Preview
+	got := UnparsedFromEmail(BankEmail{Email: email, AccountID: 7, Bank: "bci"}).Preview
 
 	if got != email.Body {
 		t.Errorf("preview = %q, want the whole body %q", got, email.Body)

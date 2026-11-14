@@ -3,6 +3,8 @@ package extract
 import (
 	"strings"
 	"unicode/utf8"
+
+	"github.com/ledongthuc/pdf"
 )
 
 // The bank PDFs give no glyph widths, so the space between two glyphs is
@@ -32,8 +34,8 @@ const (
 )
 
 // glyphAdvance is how far a glyph should move the pen at its font and size.
-func glyphAdvance(glyph, font string, fontSize float64) float64 {
-	return float64(widthOf(glyph)) / thousandths * fontSize * fontScale(font)
+func glyphAdvance(glyph pdf.Text) float64 {
+	return float64(widthOf(glyph.S)) / thousandths * glyph.FontSize * fontScale(glyph.Font)
 }
 
 func widthOf(glyph string) int {

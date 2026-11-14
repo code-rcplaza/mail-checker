@@ -20,5 +20,5 @@
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Ocultar una línea](TASK-001-STOP-FOLLOWING.md)
-- [ ] [TASK-002 El resumen no muestra la línea oculta](TASK-002-SUMMARY-HIDES-LINE.md)
+- [x] [TASK-001 Ocultar una línea](TASK-001-STOP-FOLLOWING.md)
+- [x] [TASK-002 El resumen no muestra la línea oculta](TASK-002-SUMMARY-HIDES-LINE.md)

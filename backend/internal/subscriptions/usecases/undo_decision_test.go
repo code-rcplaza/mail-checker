@@ -42,7 +42,9 @@ func possibleKeysAfterUndo(t *testing.T, decisions decisionsByUser) []domain.Gro
 	if err := NewUndoDecision(decisions).Execute(context.Background(), userOne, streamingLine); err != nil {
 		t.Fatalf("UndoDecision error = %v, want nil", err)
 	}
-	summary, err := NewGetSummary(SummarySources{Charges: charges, Catalog: fakeCatalog{}, Decisions: decisions, Aliases: aliasesByUser{}, Rates: ratesByUser{}, KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overridesByUser{}}, fixedNow).Execute(context.Background(), userOne, 6)
+	sources := summarySourcesOf(charges)
+	sources.Decisions = decisions
+	summary, err := NewGetSummary(sources).Execute(context.Background(), userOne, 6)
 	if err != nil {
 		t.Fatalf("GetSummary error = %v, want nil", err)
 	}
@@ -93,10 +95,16 @@ func TestUndoDecision_DoesNotTouchTheDecisionOfAnotherUser(t *testing.T) {
 	}
 }
 
+// failingDecisions fails every call with err.
 type failingDecisions struct {
-	decisionsByUser
 	err error
 }
+
+func (f failingDecisions) List(context.Context, int64) (map[domain.GroupKey]domain.Decision, error) {
+	return nil, f.err
+}
+
+func (f failingDecisions) Save(context.Context, int64, domain.LineDecision) error { return f.err }
 
 func (f failingDecisions) Delete(context.Context, int64, domain.GroupKey) error { return f.err }
 

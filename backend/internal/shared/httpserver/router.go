@@ -17,28 +17,34 @@ type healthResponse struct {
 
 // NewRouter returns the base router with /api/health and JSON 404s.
 func NewRouter(logger *slog.Logger) *chi.Mux {
+	responder := Responder{Logger: logger}
 	router := chi.NewRouter()
-	router.Get("/api/health", healthHandler(logger))
-	router.NotFound(routeNotFoundHandler(logger))
+	router.Get("/api/health", responder.healthHandler())
+	router.NotFound(responder.routeNotFoundHandler())
 	return router
 }
 
-func healthHandler(logger *slog.Logger) http.HandlerFunc {
+// Responder writes responses and logs what cannot reach the client.
+type Responder struct {
+	Logger *slog.Logger
+}
+
+func (responder Responder) healthHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		respond(w, r, logger, http.StatusOK, healthResponse{Status: "ok"})
+		responder.Respond(Exchange{Writer: w, Request: r}, Reply{Status: http.StatusOK, Body: healthResponse{Status: "ok"}})
 	}
 }
 
-func routeNotFoundHandler(logger *slog.Logger) http.HandlerFunc {
+func (responder Responder) routeNotFoundHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		WriteError(w, r, logger, domain.NotFound(domain.KeyRouteNotFound))
+		responder.WriteError(Exchange{Writer: w, Request: r}, domain.NotFound(domain.KeyRouteNotFound))
 	}
 }
 
-// respond writes JSON; if that fails (e.g. client gone), the error is logged:
+// Respond writes JSON; if that fails (e.g. client gone), the error is logged:
 // there is no one left to answer.
-func respond(w http.ResponseWriter, r *http.Request, logger *slog.Logger, status int, value any) {
-	if err := WriteJSON(w, status, value); err != nil {
-		logger.Warn("write response failed", "path", r.URL.Path, "err", err)
+func (responder Responder) Respond(exchange Exchange, reply Reply) {
+	if err := WriteJSON(exchange.Writer, reply); err != nil {
+		responder.Logger.Warn("write response failed", "path", exchange.Request.URL.Path, "err", err)
 	}
 }

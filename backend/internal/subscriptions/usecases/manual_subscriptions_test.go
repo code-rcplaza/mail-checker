@@ -24,12 +24,12 @@ func (m manualsByUser) Create(_ context.Context, userID int64, manual domain.Man
 	return nil
 }
 
-func createManual(manuals manualsByUser, userID int64, input ManualSubscriptionInput) (domain.ManualSubscription, error) {
+func createManual(manuals manualsByUser, userID int64, input domain.ManualSubscriptionInput) (domain.ManualSubscription, error) {
 	useCase := NewCreateManualSubscription(manuals, func() string { return "manual-1" })
 	return useCase.Execute(context.Background(), userID, input)
 }
 
-var gymInput = ManualSubscriptionInput{Name: "Gimnasio", Amount: 500000, Currency: "CLP", BillingDay: 15}
+var gymInput = domain.ManualSubscriptionInput{Name: "Gimnasio", Amount: 500000, Currency: "CLP", BillingDay: 15}
 
 func TestCreateManualSubscription_SavesItWithAGeneratedPublicID(t *testing.T) {
 	manuals := manualsByUser{}
@@ -62,7 +62,9 @@ func TestGetSummary_ShowsOnlyTheManualSubscriptionsOfTheUser(t *testing.T) {
 	if _, err := createManual(manuals, userTwo, gymInput); err != nil {
 		t.Fatalf("create error = %v", err)
 	}
-	useCase := NewGetSummary(SummarySources{Charges: chargesByUser{}, Catalog: fakeCatalog{}, Decisions: decisionsByUser{}, Aliases: aliasesByUser{}, Rates: ratesByUser{}, KeptRises: keptRisesByUser{}, Manuals: manuals, Overrides: overridesByUser{}}, fixedNow)
+	sources := summarySourcesOf(chargesByUser{})
+	sources.Manuals = manuals
+	useCase := NewGetSummary(sources)
 
 	mine, errMine := useCase.Execute(context.Background(), userOne, 6)
 	theirs, errTheirs := useCase.Execute(context.Background(), userTwo, 6)

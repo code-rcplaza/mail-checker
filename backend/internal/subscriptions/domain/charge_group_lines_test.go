@@ -34,7 +34,7 @@ func TestGroupCharges_UmbrellaParentHasOneLinePerSubscription(t *testing.T) {
 		monthlyCharges("large", "APP STORE", 599000, shared.CurrencyCLP, 9, time.August, time.September, time.October),
 	)
 
-	got := groupsByParent(GroupCharges(charges, identifyFake, normalizeFake))
+	got := groupsByParent(GroupCharges(charges, catalogFake()))
 
 	want := map[GroupKey][]GroupKey{"umbrella:App Store": {"umbrella:App Store||d01", "umbrella:App Store||d09"}}
 	if !reflect.DeepEqual(got, want) {
@@ -48,7 +48,7 @@ func TestGroupCharges_TwoSubscriptionsOfAServiceShareTheParent(t *testing.T) {
 		monthlyCharges("parents", "STREAMING CO", 799000, shared.CurrencyCLP, 9, time.August, time.September, time.October),
 	)
 
-	got := GroupCharges(charges, identifyFake, normalizeFake)
+	got := GroupCharges(charges, catalogFake())
 
 	want := map[GroupKey][]GroupKey{"service:Streaming Co": {"service:Streaming Co||d09", "service:Streaming Co||d25"}}
 	if byParent := groupsByParent(got); !reflect.DeepEqual(byParent, want) {
@@ -67,7 +67,7 @@ func TestGroupCharges_OneOffChargeGoesToItsParentsOtherCharges(t *testing.T) {
 	credits.AccountID = &accountA
 	charges := append(monthlyCharges("plan", "STREAMING CO", 2000, shared.CurrencyUSD, 1, time.August, time.September, time.October), credits)
 
-	got := externalIDsByKey(GroupCharges(charges, identifyFake, normalizeFake))
+	got := externalIDsByKey(GroupCharges(charges, catalogFake()))
 
 	want := map[GroupKey][]string{
 		"service:Streaming Co||d01":    {"plan-August", "plan-September", "plan-October"},
@@ -85,7 +85,7 @@ func TestGroupCharges_LinesSortedByKeyAndInputUntouched(t *testing.T) {
 	)
 	before := slices.Clone(charges)
 
-	groups := GroupCharges(charges, identifyFake, normalizeFake)
+	groups := GroupCharges(charges, catalogFake())
 
 	keys := make([]GroupKey, 0, len(groups))
 	for _, g := range groups {

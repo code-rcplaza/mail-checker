@@ -23,7 +23,7 @@ type ServiceCatalog interface {
 
 type SubscriptionDecisions interface {
 	List(ctx context.Context, userID int64) (map[domain.GroupKey]domain.Decision, error)
-	Save(ctx context.Context, userID int64, key domain.GroupKey, decision domain.Decision) error
+	Save(ctx context.Context, userID int64, decision domain.LineDecision) error
 	// Delete of a key without a decision is not an error.
 	Delete(ctx context.Context, userID int64, key domain.GroupKey) error
 }
@@ -37,7 +37,7 @@ type ExchangeRates interface {
 // chose to keep, so its notice does not show again; saving again replaces it.
 type PriceAlertDecisions interface {
 	List(ctx context.Context, userID int64) (map[domain.GroupKey]shared.Money, error)
-	Save(ctx context.Context, userID int64, key domain.GroupKey, newAmount shared.Money) error
+	Save(ctx context.Context, userID int64, kept domain.KeptRise) error
 }
 
 // ManualSubscriptions are the ones the user added by hand.
@@ -53,12 +53,28 @@ type ManualSubscriptions interface {
 // LineOverrides keep the amount or billing day the user set for a line.
 type LineOverrides interface {
 	List(ctx context.Context, userID int64) (map[domain.GroupKey]domain.LineOverride, error)
-	Save(ctx context.Context, userID int64, key domain.GroupKey, override domain.LineOverride) error
+	Save(ctx context.Context, userID int64, overridden domain.OverriddenLine) error
 	Delete(ctx context.Context, userID int64, key domain.GroupKey) error
 }
 
 type LineAliases interface {
 	List(ctx context.Context, userID int64) (map[domain.GroupKey]string, error)
-	Save(ctx context.Context, userID int64, key domain.GroupKey, alias string) error
+	Save(ctx context.Context, userID int64, alias domain.LineAlias) error
 	Delete(ctx context.Context, userID int64, key domain.GroupKey) error
+}
+
+// HiddenLines keep the lines the user stopped following, by line key, so they
+// stay hidden when the summary is rebuilt.
+type HiddenLines interface {
+	List(ctx context.Context, userID int64) ([]domain.GroupKey, error)
+	// Hiding a line that is already hidden is not an error and keeps one mark.
+	Hide(ctx context.Context, userID int64, hidden domain.HiddenLine) error
+}
+
+// Cancellations keep the lines the user marked "to cancel", with the date of
+// the mark; the app cancels nothing.
+type Cancellations interface {
+	List(ctx context.Context, userID int64) (map[domain.GroupKey]time.Time, error)
+	// Marking a line that is already marked is not an error and keeps the first date.
+	Mark(ctx context.Context, userID int64, mark domain.CancellationMark) error
 }

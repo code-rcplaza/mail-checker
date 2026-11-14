@@ -21,7 +21,7 @@ func TestNewService(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := NewService("Streaming Co", false, tc.cancelURL)
+			got, err := NewService(Service{Name: "Streaming Co", CancelURL: tc.cancelURL})
 
 			if !errors.Is(err, tc.wantErr) {
 				t.Fatalf("NewService error = %v, want %v", err, tc.wantErr)

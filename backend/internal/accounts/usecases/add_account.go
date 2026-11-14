@@ -16,14 +16,19 @@ type AddAccountInput struct {
 
 // AddAccount registers a mailbox; the app password only leaves this use case sealed.
 type AddAccount struct {
-	accounts    ports.AccountRepository
-	cipher      ports.SecretCipher
-	newPublicID func() string
-	now         func() time.Time
+	dependencies AddAccountDependencies
 }
 
-func NewAddAccount(accounts ports.AccountRepository, cipher ports.SecretCipher, newPublicID func() string, now func() time.Time) AddAccount {
-	return AddAccount{accounts: accounts, cipher: cipher, newPublicID: newPublicID, now: now}
+// AddAccountDependencies are the ports and generators adding an account needs.
+type AddAccountDependencies struct {
+	Accounts    ports.AccountRepository
+	Cipher      ports.SecretCipher
+	NewPublicID func() string
+	Now         func() time.Time
+}
+
+func NewAddAccount(dependencies AddAccountDependencies) AddAccount {
+	return AddAccount{dependencies: dependencies}
 }
 
 func (u AddAccount) Execute(ctx context.Context, input AddAccountInput) (domain.Account, error) {
@@ -55,7 +60,7 @@ func parseInput(input AddAccountInput) (email, password string, err error) {
 }
 
 func (u AddAccount) encryptPassword(password string) ([]byte, error) {
-	sealed, err := u.cipher.Encrypt(password)
+	sealed, err := u.dependencies.Cipher.Encrypt(password)
 	if err != nil {
 		return nil, fmt.Errorf("encrypt app password: %w", err)
 	}
@@ -64,15 +69,15 @@ func (u AddAccount) encryptPassword(password string) ([]byte, error) {
 
 func (u AddAccount) buildAccount(email string, sealed []byte) domain.Account {
 	return domain.Account{
-		PublicID:    u.newPublicID(),
+		PublicID:    u.dependencies.NewPublicID(),
 		Email:       email,
 		PasswordEnc: sealed,
-		CreatedAt:   u.now(),
+		CreatedAt:   u.dependencies.Now(),
 	}
 }
 
 func (u AddAccount) saveAccount(ctx context.Context, account *domain.Account) error {
-	if err := u.accounts.Create(ctx, account); err != nil {
+	if err := u.dependencies.Accounts.Create(ctx, account); err != nil {
 		return fmt.Errorf("save account: %w", err)
 	}
 	return nil

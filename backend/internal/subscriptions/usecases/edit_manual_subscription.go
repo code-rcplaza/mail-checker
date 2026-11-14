@@ -10,6 +10,12 @@ import (
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/ports"
 )
 
+// ManualSubscriptionEdit is what the user typed again for an existing manual.
+type ManualSubscriptionEdit struct {
+	PublicID string
+	Input    domain.ManualSubscriptionInput
+}
+
 // EditManualSubscription replaces what the user typed, with the same
 // validation as creating it; the public id stays.
 type EditManualSubscription struct {
@@ -20,8 +26,8 @@ func NewEditManualSubscription(manuals ports.ManualSubscriptions) EditManualSubs
 	return EditManualSubscription{manuals: manuals}
 }
 
-func (u EditManualSubscription) Execute(ctx context.Context, userID int64, publicID string, input ManualSubscriptionInput) error {
-	manual, err := newManualFromInput(publicID, input)
+func (u EditManualSubscription) Execute(ctx context.Context, userID int64, edit ManualSubscriptionEdit) error {
+	manual, err := domain.NewManualSubscription(edit.PublicID, edit.Input)
 	if err != nil {
 		return err
 	}

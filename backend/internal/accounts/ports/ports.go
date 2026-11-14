@@ -3,10 +3,8 @@ package ports
 
 import (
 	"context"
-	"time"
 
 	"github.com/code-rcplaza/mail-checker/backend/internal/accounts/domain"
-	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
 
 type AccountRepository interface {
@@ -16,7 +14,7 @@ type AccountRepository interface {
 	// Delete also removes the account's charges; an unknown publicID is shared.ErrNotFound.
 	Delete(ctx context.Context, publicID string) error
 	// MarkSynced records the last sync; an unknown id is shared.ErrNotFound.
-	MarkSynced(ctx context.Context, id int64, at time.Time, syncErrKey shared.MessageKey) error
+	MarkSynced(ctx context.Context, record domain.SyncRecord) error
 }
 
 // SecretCipher seals app passwords at rest.

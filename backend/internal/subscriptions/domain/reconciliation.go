@@ -18,8 +18,8 @@ type Reconciliation struct {
 	EmailOnly  []shared.Charge
 }
 
-func BuildReconciliation(charges []shared.Charge, identify IdentifyServiceFunc, normalize NormalizeMerchantFunc) Reconciliation {
-	emailByStatement := pairStatementsWithEmails(charges, identify, normalize)
+func BuildReconciliation(charges []shared.Charge, catalog MerchantCatalog) Reconciliation {
+	emailByStatement := pairStatementsWithEmails(charges, catalog)
 	pairedEmails := pairedEmailIndexes(emailByStatement)
 	reconciliation := Reconciliation{
 		Notified:   []ChargePair{},

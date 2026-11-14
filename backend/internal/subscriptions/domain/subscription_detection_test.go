@@ -11,6 +11,10 @@ import (
 var detectionNow = time.Date(2026, 11, 12, 12, 0, 0, 0, time.UTC)
 
 // looksLikeSubscriptionFake stands in for the catalog's descriptor check.
+func detectorFake() SubscriptionDetector {
+	return SubscriptionDetector{LooksLikeSubscription: looksLikeSubscriptionFake, Now: detectionNow}
+}
+
 func looksLikeSubscriptionFake(merchant string) bool {
 	return strings.Contains(merchant, "SUBSCRIPTION") || strings.Contains(merchant, "MEMBERSHIP")
 }
@@ -103,7 +107,7 @@ func TestDetectSubscription(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := DetectSubscription(tc.group, looksLikeSubscriptionFake, detectionNow)
+			got := detectorFake().Detect(tc.group)
 
 			if got != tc.want {
 				t.Errorf("DetectSubscription = %+v, want %+v", got, tc.want)

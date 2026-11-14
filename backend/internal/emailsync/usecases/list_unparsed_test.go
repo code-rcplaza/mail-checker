@@ -30,7 +30,7 @@ func (l *listingUnparsed) List(_ context.Context, limit int) ([]domain.UnparsedE
 
 func TestListUnparsed_ReturnsRepositoryEmailsWithTheLimit(t *testing.T) {
 	stored := []domain.UnparsedEmail{
-		domain.UnparsedFromEmail(purchase("<x1@other>", "newsletter@other.example", "OFFERS"), 1, "bank-a"),
+		domain.UnparsedFromEmail(domain.BankEmail{Email: purchase("<x1@other>", "newsletter@other.example", "OFFERS"), AccountID: 1, Bank: "bank-a"}),
 	}
 	repository := &listingUnparsed{emails: stored}
 

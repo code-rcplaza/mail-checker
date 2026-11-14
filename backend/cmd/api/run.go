@@ -47,7 +47,7 @@ func run(ctx context.Context, getenv func(string) string, stdout io.Writer) erro
 		return err
 	}
 	logger.Info("server started", "port", config.Port, "db_path", config.DBPath)
-	return serveUntilCanceled(ctx, newServer(httpserver.NewRouter(logger)), listener, logger)
+	return runningServer{server: newServer(httpserver.NewRouter(logger)), listener: listener, logger: logger}.serveUntilCanceled(ctx)
 }
 
 func newLogger(stdout io.Writer) *slog.Logger {
@@ -79,22 +79,29 @@ func newServer(handler http.Handler) *http.Server {
 	}
 }
 
-func serveUntilCanceled(ctx context.Context, server *http.Server, listener net.Listener, logger *slog.Logger) error {
+// runningServer is the HTTP server, the port it listens on and its log.
+type runningServer struct {
+	server   *http.Server
+	listener net.Listener
+	logger   *slog.Logger
+}
+
+func (s runningServer) serveUntilCanceled(ctx context.Context) error {
 	serveErr := make(chan error, 1)
-	go func() { serveErr <- server.Serve(listener) }()
+	go func() { serveErr <- s.server.Serve(s.listener) }()
 
 	select {
 	case err := <-serveErr:
 		return fmt.Errorf("serve: %w", err)
 	case <-ctx.Done():
 	}
-	if err := shutdown(server); err != nil {
+	if err := shutdown(s.server); err != nil {
 		return err
 	}
 	if err := <-serveErr; !errors.Is(err, http.ErrServerClosed) {
 		return fmt.Errorf("serve: %w", err)
 	}
-	logger.Info("server stopped")
+	s.logger.Info("server stopped")
 	return nil
 }
 

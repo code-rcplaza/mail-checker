@@ -13,13 +13,14 @@ const MatchWindow = 35 * 24 * time.Hour
 // ChargesMatch tells whether a statement charge and an email charge are the
 // same purchase: same bank, same service (the identity used for grouping),
 // same amount and currency, same card when both show it, within MatchWindow.
-func ChargesMatch(statement, email shared.Charge, identify IdentifyServiceFunc, normalize NormalizeMerchantFunc) bool {
+func ChargesMatch(pair ChargePair, catalog MerchantCatalog) bool {
+	statement, email := pair.Statement, pair.Email
 	return statement.Bank == email.Bank &&
 		statement.Amount == email.Amount &&
 		statement.Currency == email.Currency &&
 		isSameCard(statement.CardLast4, email.CardLast4) &&
 		isWithinMatchWindow(statement.OccurredAt, email.OccurredAt) &&
-		groupKeyOf(statement, identify, normalize) == groupKeyOf(email, identify, normalize)
+		catalog.parentOf(statement) == catalog.parentOf(email)
 }
 
 func isWithinMatchWindow(a, b time.Time) bool {
@@ -29,43 +30,45 @@ func isWithinMatchWindow(a, b time.Time) bool {
 // DropStatementChargesMatchingEmail removes the statement charges already
 // counted through an email, pairing one to one, so each purchase counts once.
 // It returns a new slice in the original order.
-func DropStatementChargesMatchingEmail(charges []shared.Charge, identify IdentifyServiceFunc, normalize NormalizeMerchantFunc) []shared.Charge {
-	emailByStatement := pairStatementsWithEmails(charges, identify, normalize)
+func DropStatementChargesMatchingEmail(charges []shared.Charge, catalog MerchantCatalog) []shared.Charge {
+	emailByStatement := pairStatementsWithEmails(charges, catalog)
 	return withoutIndexes(charges, emailByStatement)
 }
 
 // pairStatementsWithEmails maps the index of each statement charge to the
 // index of the email charge it pairs with; each email pairs at most once.
 // Both views (summary and reconciliation) use this one pairing.
-func pairStatementsWithEmails(charges []shared.Charge, identify IdentifyServiceFunc, normalize NormalizeMerchantFunc) map[int]int {
+func pairStatementsWithEmails(charges []shared.Charge, catalog MerchantCatalog) map[int]int {
 	emailByStatement := make(map[int]int)
-	pairedEmails := make(map[int]bool)
+	pairing := emailPairing{charges: charges, catalog: catalog, pairedEmails: make(map[int]bool)}
 	for i, statement := range charges {
 		if statement.Source != shared.SourceStatement {
 			continue
 		}
-		emailIndex, isFound := findUnpairedEmailMatch(statement, charges, pairedEmails, identify, normalize)
+		emailIndex, isFound := pairing.findUnpairedMatch(statement)
 		if !isFound {
 			continue
 		}
-		pairedEmails[emailIndex] = true
+		pairing.pairedEmails[emailIndex] = true
 		emailByStatement[i] = emailIndex
 	}
 	return emailByStatement
 }
 
-func findUnpairedEmailMatch(
-	statement shared.Charge,
-	charges []shared.Charge,
-	pairedEmails map[int]bool,
-	identify IdentifyServiceFunc,
-	normalize NormalizeMerchantFunc,
-) (int, bool) {
-	for i, email := range charges {
-		if email.Source != shared.SourceEmail || pairedEmails[i] {
+// emailPairing is the state of pairing statement charges with emails: the
+// emails already paired cannot pair again.
+type emailPairing struct {
+	charges      []shared.Charge
+	catalog      MerchantCatalog
+	pairedEmails map[int]bool
+}
+
+func (p emailPairing) findUnpairedMatch(statement shared.Charge) (int, bool) {
+	for i, email := range p.charges {
+		if email.Source != shared.SourceEmail || p.pairedEmails[i] {
 			continue
 		}
-		if ChargesMatch(statement, email, identify, normalize) {
+		if ChargesMatch(ChargePair{Statement: statement, Email: email}, p.catalog) {
 			return i, true
 		}
 	}

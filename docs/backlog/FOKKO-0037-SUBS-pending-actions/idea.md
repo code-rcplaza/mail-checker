@@ -19,5 +19,5 @@ El Resumen lista lo que el usuario debe resolver: posibles por revisar y alzas p
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Acciones pendientes](TASK-001-PENDING-ACTIONS.md)
-- [ ] [TASK-002 Orden de las acciones](TASK-002-PENDING-ACTIONS-ORDER.md)
+- [x] [TASK-001 Acciones pendientes](TASK-001-PENDING-ACTIONS.md)
+- [x] [TASK-002 Orden de las acciones](TASK-002-PENDING-ACTIONS-ORDER.md)

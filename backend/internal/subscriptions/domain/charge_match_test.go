@@ -21,7 +21,7 @@ func TestChargesMatch_SameBankServiceAndAmountWithin20Days(t *testing.T) {
 	statement := statementCharge("s", "STRMNG*CO", 599000, 21)
 	email := emailCharge("e", "STREAMING CO", 599000, 1)
 
-	if !ChargesMatch(statement, email, identifyFake, normalizeFake) {
+	if !ChargesMatch(ChargePair{Statement: statement, Email: email}, catalogFake()) {
 		t.Errorf("ChargesMatch at 20 days = false, want true")
 	}
 }
@@ -40,11 +40,11 @@ func TestChargesMatch_DoesNotMatch(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			statement := statementCharge("s", "STRMNG*CO", 599000, 21)
 			email := emailCharge("e", "STREAMING CO", 599000, 1)
-			if !ChargesMatch(statement, email, identifyFake, normalizeFake) {
+			if !ChargesMatch(ChargePair{Statement: statement, Email: email}, catalogFake()) {
 				t.Fatalf("baseline pair does not match; the case would prove nothing")
 			}
 
-			if ChargesMatch(statement, tc.modify(email), identifyFake, normalizeFake) {
+			if ChargesMatch(ChargePair{Statement: statement, Email: tc.modify(email)}, catalogFake()) {
 				t.Errorf("ChargesMatch = true, want false")
 			}
 		})
@@ -86,7 +86,7 @@ func TestDropStatementChargesMatchingEmail(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := externalIDs(DropStatementChargesMatchingEmail(tc.charges, identifyFake, normalizeFake))
+			got := externalIDs(DropStatementChargesMatchingEmail(tc.charges, catalogFake()))
 
 			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("charges = %v, want %v", got, tc.want)

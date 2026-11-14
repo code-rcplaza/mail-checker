@@ -19,11 +19,11 @@ func (o overridesByUser) List(_ context.Context, userID int64) (map[domain.Group
 	return o[userID], nil
 }
 
-func (o overridesByUser) Save(_ context.Context, userID int64, key domain.GroupKey, override domain.LineOverride) error {
+func (o overridesByUser) Save(_ context.Context, userID int64, overridden domain.OverriddenLine) error {
 	if o[userID] == nil {
 		o[userID] = make(map[domain.GroupKey]domain.LineOverride)
 	}
-	o[userID][key] = override
+	o[userID][overridden.Key] = overridden.Override
 	return nil
 }
 
@@ -53,7 +53,7 @@ func TestSaveLineOverride(t *testing.T) {
 			overrides := overridesByUser{userOne: {streamingLine: existing}}
 			charges := chargesByUser{userOne: streamingOnce()}
 
-			err := NewSaveLineOverride(charges, fakeCatalog{}, overrides, fixedNow).Execute(context.Background(), tc.userID, streamingLine, tc.amount, nil)
+			err := NewSaveLineOverride(linesOf(charges), overrides).Execute(context.Background(), tc.userID, LineOverrideInput{Key: streamingLine, Amount: tc.amount})
 
 			if !errors.Is(err, tc.wantErr) {
 				t.Fatalf("Execute error = %v, want %v", err, tc.wantErr)
@@ -70,16 +70,13 @@ func TestSaveLineOverride(t *testing.T) {
 
 func TestGetSummary_ShowsTheOverriddenAmount(t *testing.T) {
 	overrides := overridesByUser{userOne: {"service:Streaming Co||d02": {Amount: 900000}}}
-	sources := SummarySources{
-		Charges: chargesByUser{userOne: {
-			chargeDaysAgo("s1", "STREAMING CO", shared.SourceStatement, 599000, 40),
-			chargeDaysAgo("s2", "STREAMING CO", shared.SourceStatement, 599000, 10),
-		}},
-		Catalog: fakeCatalog{}, Decisions: decisionsByUser{}, Aliases: aliasesByUser{}, Rates: ratesByUser{},
-		KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overrides,
-	}
+	sources := summarySourcesOf(chargesByUser{userOne: {
+		chargeDaysAgo("s1", "STREAMING CO", shared.SourceStatement, 599000, 40),
+		chargeDaysAgo("s2", "STREAMING CO", shared.SourceStatement, 599000, 10),
+	}})
+	sources.Overrides = overrides
 
-	got, err := NewGetSummary(sources, fixedNow).Execute(context.Background(), userOne, 6)
+	got, err := NewGetSummary(sources).Execute(context.Background(), userOne, 6)
 
 	if err != nil || len(got.Subscriptions) != 1 || got.Subscriptions[0].Amount != 900000 || got.Total.Amount != 900000 {
 		t.Errorf("summary = %+v, %v; want the overridden amount in the line and the total", got, err)

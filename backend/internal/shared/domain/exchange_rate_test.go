@@ -23,7 +23,7 @@ func TestDeriveExchangeRate(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, hasRate, err := DeriveExchangeRate(tc.pesos, tc.dollars, rateDate)
+			got, hasRate, err := DeriveExchangeRate(DollarsPaidInPesos{Dollars: tc.dollars, Pesos: tc.pesos}, rateDate)
 
 			if err != nil {
 				t.Fatalf("DeriveExchangeRate error = %v, want nil", err)
@@ -53,7 +53,7 @@ func TestDeriveExchangeRate_RejectsNegativeAmounts(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, hasRate, err := DeriveExchangeRate(tc.pesos, tc.dollars, rateDate)
+			_, hasRate, err := DeriveExchangeRate(DollarsPaidInPesos{Dollars: tc.dollars, Pesos: tc.pesos}, rateDate)
 
 			if !errors.Is(err, ErrInvalid) || hasRate {
 				t.Errorf("DeriveExchangeRate = (has rate %v, error %v), want no rate and ErrInvalid", hasRate, err)

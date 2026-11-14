@@ -17,9 +17,9 @@ func splitRecurringFromOther(chronological []shared.Charge) (recurring, other []
 	if len(backed) == 0 {
 		return splitByArrivalTime(chronological)
 	}
-	cadence := DetectCadence(datesAtIndexes(chronological, backed))
+	pattern := backedPattern{charges: chronological, backed: backed, cadence: DetectCadence(datesAtIndexes(chronological, backed))}
 	for i, c := range chronological {
-		if backed[i] || isAtCadenceFromNearestBacked(i, chronological, backed, cadence) {
+		if backed[i] || pattern.isAtCadenceFromNearestBacked(i) {
 			recurring = append(recurring, c)
 			continue
 		}
@@ -58,27 +58,35 @@ func datesAtIndexes(charges []shared.Charge, indexes map[int]bool) []time.Time {
 	return dates
 }
 
+// backedPattern is a known service's charges (chronological), which of them
+// back each other and the cadence those backed ones follow.
+type backedPattern struct {
+	charges []shared.Charge
+	backed  map[int]bool
+	cadence Cadence
+}
+
 // isAtCadenceFromNearestBacked checks the nearest backed charge on each side.
-func isAtCadenceFromNearestBacked(i int, charges []shared.Charge, backed map[int]bool, cadence Cadence) bool {
-	for _, neighbor := range nearestBackedNeighbors(i, backed, len(charges)) {
-		days := daysBetween(charges[neighbor].OccurredAt, charges[i].OccurredAt)
-		if fitsCadence(days, cadence) {
+func (p backedPattern) isAtCadenceFromNearestBacked(i int) bool {
+	for _, neighbor := range p.nearestBackedNeighbors(i) {
+		days := daysBetween(p.charges[neighbor].OccurredAt, p.charges[i].OccurredAt)
+		if fitsCadence(days, p.cadence) {
 			return true
 		}
 	}
 	return false
 }
 
-func nearestBackedNeighbors(i int, backed map[int]bool, count int) []int {
+func (p backedPattern) nearestBackedNeighbors(i int) []int {
 	var neighbors []int
 	for before := i - 1; before >= 0; before-- {
-		if backed[before] {
+		if p.backed[before] {
 			neighbors = append(neighbors, before)
 			break
 		}
 	}
-	for after := i + 1; after < count; after++ {
-		if backed[after] {
+	for after := i + 1; after < len(p.charges); after++ {
+		if p.backed[after] {
 			neighbors = append(neighbors, after)
 			break
 		}

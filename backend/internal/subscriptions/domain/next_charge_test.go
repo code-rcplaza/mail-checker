@@ -30,7 +30,7 @@ func TestNextCharge(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, hasNext := NextCharge(tc.lastCharge, tc.typicalDay, tc.cadence)
+			got, hasNext := NextCharge(tc.lastCharge, LineCycle{Cadence: tc.cadence, Day: tc.typicalDay})
 
 			if !hasNext || !got.Equal(tc.want) {
 				t.Errorf("NextCharge = (%v, %v), want (%v, true)", got, hasNext, tc.want)
@@ -40,7 +40,7 @@ func TestNextCharge(t *testing.T) {
 }
 
 func TestNextCharge_WithoutCadenceThereIsNone(t *testing.T) {
-	got, hasNext := NextCharge(day(2026, time.September, 1), 1, CadenceNone)
+	got, hasNext := NextCharge(day(2026, time.September, 1), LineCycle{Cadence: CadenceNone, Day: 1})
 
 	if hasNext || !got.IsZero() {
 		t.Errorf("NextCharge = (%v, %v), want none", got, hasNext)

@@ -32,11 +32,11 @@ func (f *fakeDirectory) Credentials(context.Context) ([]domain.Credential, error
 	return f.credentials, f.credentialsErr
 }
 
-func (f *fakeDirectory) RecordSync(_ context.Context, accountID int64, at time.Time, errKey shared.MessageKey) error {
+func (f *fakeDirectory) RecordSync(_ context.Context, record domain.SyncRecord) error {
 	if f.recordErr != nil {
 		return f.recordErr
 	}
-	f.records = append(f.records, syncRecord{accountID: accountID, at: at, errKey: errKey})
+	f.records = append(f.records, syncRecord{accountID: record.AccountID, at: record.At, errKey: record.ErrorKey})
 	return nil
 }
 
@@ -151,7 +151,7 @@ func newSyncFixture(credentials []domain.Credential, emails map[string][]domain.
 	reader := &fakeMailReader{emails: emails, errs: make(map[string]error)}
 	writer := &fakeChargeWriter{}
 	unparsed := newFakeUnparsed()
-	useCase := NewSyncAll(directory, reader, parsers, writer, unparsed, func() time.Time { return testNow })
+	useCase := NewSyncAll(SyncAllDependencies{Accounts: directory, Mail: reader, Parsers: parsers, Charges: writer, Unparsed: unparsed, Now: func() time.Time { return testNow }})
 	return syncFixture{directory: directory, reader: reader, writer: writer, unparsed: unparsed, useCase: useCase}
 }
 

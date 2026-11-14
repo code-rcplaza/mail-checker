@@ -83,22 +83,22 @@ type fakeStatements struct {
 	deleteErr error
 }
 
-func (f *fakeStatements) Create(_ context.Context, userID int64, statement *domain.Statement, charges []shared.Charge) error {
+func (f *fakeStatements) Create(_ context.Context, userID int64, imported domain.ImportedStatement) error {
 	if f.createErr != nil {
 		return f.createErr
 	}
-	if f.hasStatement(userID, statement.Bank, statement.BillingDate) {
+	if f.hasStatement(userID, *imported.Statement) {
 		return shared.Conflict(domain.KeyAlreadyImported)
 	}
-	statement.ID = int64(len(f.created) + 1)
-	f.created = append(f.created, createdStatement{statement: *statement, charges: charges})
+	imported.Statement.ID = int64(len(f.created) + 1)
+	f.created = append(f.created, createdStatement{statement: *imported.Statement, charges: imported.Charges})
 	return nil
 }
 
 // hasStatement mirrors the real uniqueness: user, bank and billing date.
-func (f *fakeStatements) hasStatement(userID int64, bank shared.Bank, billingDate time.Time) bool {
+func (f *fakeStatements) hasStatement(userID int64, statement domain.Statement) bool {
 	return slices.ContainsFunc(f.created, func(c createdStatement) bool {
-		return c.statement.UserID == userID && c.statement.Bank == bank && c.statement.BillingDate.Equal(billingDate)
+		return c.statement.UserID == userID && c.statement.Bank == statement.Bank && c.statement.BillingDate.Equal(statement.BillingDate)
 	})
 }
 
@@ -161,8 +161,10 @@ func newImportFixture() importFixture {
 	other := &fakeStatementParser{bank: "other-bank"}
 	statements := &fakeStatements{}
 	rates := &fakeExchangeRates{}
-	useCase := NewImportStatement(extractor, []ports.BankStatementParser{other, bci}, statements, rates,
-		func() string { return "stmt-1" }, func() time.Time { return testNow }, time.UTC)
+	useCase := NewImportStatement(ImportStatementDependencies{
+		Extractor: extractor, Parsers: []ports.BankStatementParser{other, bci}, Statements: statements, Rates: rates,
+		NewPublicID: func() string { return "stmt-1" }, Now: func() time.Time { return testNow }, Location: time.UTC,
+	})
 	return importFixture{extractor: extractor, bci: bci, other: other, statements: statements, rates: rates, useCase: useCase}
 }
 

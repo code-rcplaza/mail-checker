@@ -32,7 +32,7 @@ func collectByAccount(chronological []shared.Charge) []origin {
 		if c.AccountID == nil {
 			continue
 		}
-		origins = addToOrigin(origins, c, func(o origin) bool { return isSameAccount(o, c) })
+		origins = addToOrigin(origins, originChoice{charge: c, fits: func(o origin) bool { return isSameAccount(o, c) }})
 	}
 	return origins
 }
@@ -42,7 +42,7 @@ func joinChargesWithoutAccount(origins []origin, chronological []shared.Charge) 
 		if c.AccountID != nil {
 			continue
 		}
-		origins = addToOrigin(origins, c, originForChargeWithoutAccount(origins, c))
+		origins = addToOrigin(origins, originChoice{charge: c, fits: originForChargeWithoutAccount(origins, c)})
 	}
 	return sortOriginsByFirstCharge(origins)
 }
@@ -64,10 +64,17 @@ func isStatementOrigin(o origin) bool {
 	return o.accountID == nil
 }
 
-// addToOrigin puts c in the first origin that fits, or opens a new one.
-func addToOrigin(origins []origin, c shared.Charge, fits func(origin) bool) []origin {
+// originChoice is a charge and the rule that says which origins it fits.
+type originChoice struct {
+	charge shared.Charge
+	fits   func(origin) bool
+}
+
+// addToOrigin puts the charge in the first origin that fits, or opens a new one.
+func addToOrigin(origins []origin, choice originChoice) []origin {
+	c := choice.charge
 	for i, o := range origins {
-		if !fits(o) || !isSameCard(o.cardLast4, c.CardLast4) {
+		if !choice.fits(o) || !isSameCard(o.cardLast4, c.CardLast4) {
 			continue
 		}
 		origins[i] = withCharge(o, c)

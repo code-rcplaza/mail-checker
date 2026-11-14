@@ -33,14 +33,14 @@ type UnparsedEmail struct {
 
 // UnparsedFromEmail keeps what is needed to recognize an email the parser
 // could not read; the body is cut down to a short preview.
-func UnparsedFromEmail(email RawEmail, accountID int64, bank shared.Bank) UnparsedEmail {
+func UnparsedFromEmail(read BankEmail) UnparsedEmail {
 	return UnparsedEmail{
-		ExternalID: email.MessageID,
-		AccountID:  accountID,
-		Bank:       bank,
-		Subject:    email.Subject,
-		ReceivedAt: email.ReceivedAt,
-		Preview:    previewOf(email.Body),
+		ExternalID: read.Email.MessageID,
+		AccountID:  read.AccountID,
+		Bank:       read.Bank,
+		Subject:    read.Email.Subject,
+		ReceivedAt: read.Email.ReceivedAt,
+		Preview:    previewOf(read.Email.Body),
 	}
 }
 

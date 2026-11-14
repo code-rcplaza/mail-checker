@@ -31,18 +31,6 @@ func isMoreRecentRate(rate, current shared.ExchangeRate) bool {
 	return rate.Date.After(current.Date)
 }
 
-// ConvertToPesos gives an amount in pesos and tells whether it is an
-// approximation: dollars are converted with the rate, pesos stay as they are.
-func ConvertToPesos(amount shared.Money, currency shared.Currency, rate shared.ExchangeRate) (pesos shared.Money, isApproximate bool, err error) {
-	switch currency {
-	case shared.CurrencyCLP:
-		return amount, false, nil
-	case shared.CurrencyUSD:
-		return dollarsToPesos(amount, rate), true, nil
-	}
-	return 0, false, shared.Invalid(shared.KeyCurrencyUnknown, nil)
-}
-
 // dollarsToPesos rounds half up to hundredths; amounts are non-negative.
 func dollarsToPesos(dollars shared.Money, rate shared.ExchangeRate) shared.Money {
 	return (dollars*rate.PesosPerDollar + hundredthsPerDollar/2) / hundredthsPerDollar

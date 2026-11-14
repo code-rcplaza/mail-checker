@@ -39,7 +39,9 @@ func chargeInCurrency(externalID, merchant string, amount shared.Money, currency
 
 func summaryWithRates(t *testing.T, rates ratesByUser) (domain.Summary, error) {
 	t.Helper()
-	useCase := NewGetSummary(SummarySources{Charges: dollarsAndPesos(), Catalog: fakeCatalog{}, Decisions: decisionsByUser{}, Aliases: aliasesByUser{}, Rates: rates, KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overridesByUser{}}, fixedNow)
+	sources := summarySourcesOf(dollarsAndPesos())
+	sources.Rates = rates
+	useCase := NewGetSummary(sources)
 	return useCase.Execute(context.Background(), userOne, 6)
 }
 

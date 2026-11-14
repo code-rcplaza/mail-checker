@@ -13,35 +13,32 @@ type PesosAmount struct {
 // the most recent rate. Without one, the total leaves the dollars out and
 // says so, and a line in dollars shows only its original amount.
 func ApplyExchangeRates(summary Summary, rates []shared.ExchangeRate) Summary {
-	rate, hasRate := LatestExchangeRate(rates)
-	summary.Total = TotalInPesos(summary.MonthlySpend, rate, hasRate)
-	summary.Subscriptions = withPesosAmounts(summary.Subscriptions, rate, hasRate)
-	summary.Possible = withPesosAmounts(summary.Possible, rate, hasRate)
-	summary.Inactive = withPesosAmounts(summary.Inactive, rate, hasRate)
-	return summary
+	rate := latestRateOrNil(rates)
+	summary.ExchangeRate = rate
+	summary.Total = TotalInPesos(summary.MonthlySpend, rate)
+	return changeEveryLine(summary, func(line Subscription) Subscription {
+		line.InPesos = pesosAmountOf(line, rate)
+		return line
+	})
 }
 
-// withPesosAmounts returns new lines; the caller's slice is left untouched.
-func withPesosAmounts(lines []Subscription, rate shared.ExchangeRate, hasRate bool) []Subscription {
-	if lines == nil {
+// latestRateOrNil is nil when the user's statements showed no rate.
+func latestRateOrNil(rates []shared.ExchangeRate) *shared.ExchangeRate {
+	rate, hasRate := LatestExchangeRate(rates)
+	if !hasRate {
 		return nil
 	}
-	converted := make([]Subscription, 0, len(lines))
-	for _, line := range lines {
-		line.InPesos = pesosAmountOf(line, rate, hasRate)
-		converted = append(converted, line)
-	}
-	return converted
+	return &rate
 }
 
 // pesosAmountOf is nil for dollars without a rate; charges are only ever
 // stored in pesos or dollars.
-func pesosAmountOf(line Subscription, rate shared.ExchangeRate, hasRate bool) *PesosAmount {
+func pesosAmountOf(line Subscription, rate *shared.ExchangeRate) *PesosAmount {
 	switch {
 	case line.Currency == shared.CurrencyCLP:
 		return &PesosAmount{Amount: line.Amount}
-	case line.Currency == shared.CurrencyUSD && hasRate:
-		return &PesosAmount{Amount: dollarsToPesos(line.Amount, rate), IsApproximate: true}
+	case line.Currency == shared.CurrencyUSD && rate != nil:
+		return &PesosAmount{Amount: dollarsToPesos(line.Amount, *rate), IsApproximate: true}
 	}
 	return nil
 }

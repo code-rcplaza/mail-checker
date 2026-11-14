@@ -18,6 +18,12 @@ type LineOverride struct {
 	BillingDay int
 }
 
+// OverriddenLine is the override the user set on one line.
+type OverriddenLine struct {
+	Key      GroupKey
+	Override LineOverride
+}
+
 // NewLineOverride takes what the user sent; nil means "not given", and
 // neither given means removing the override, like an empty alias.
 func NewLineOverride(amount *shared.Money, billingDay *int) (LineOverride, error) {
@@ -43,24 +49,11 @@ func (o LineOverride) IsEmpty() bool {
 
 // ApplyLineOverrides shows each overridden line with its amount and billing
 // day, and recounts what depends on them; the given summary is left untouched.
-func ApplyLineOverrides(summary Summary, overrides map[GroupKey]LineOverride, now time.Time) Summary {
-	summary.Subscriptions = withOverrides(summary.Subscriptions, overrides)
-	summary.Possible = withOverrides(summary.Possible, overrides)
-	summary.Inactive = withOverrides(summary.Inactive, overrides)
-	summary.MonthlySpend = MonthlySpend(summary.Subscriptions)
-	summary.RemainingThisMonth = CountRemainingThisMonth(summary.Subscriptions, now)
-	return summary
-}
-
-func withOverrides(lines []Subscription, overrides map[GroupKey]LineOverride) []Subscription {
-	if lines == nil {
-		return nil
-	}
-	overridden := make([]Subscription, 0, len(lines))
-	for _, line := range lines {
-		overridden = append(overridden, withOverride(line, overrides[line.Key]))
-	}
-	return overridden
+func ApplyLineOverrides(summary Summary, overrides map[GroupKey]LineOverride) Summary {
+	summary = changeEveryLine(summary, func(line Subscription) Subscription {
+		return withOverride(line, overrides[line.Key])
+	})
+	return recountSpend(summary)
 }
 
 func withOverride(line Subscription, override LineOverride) Subscription {
@@ -79,7 +72,7 @@ func nextChargeOnDay(line Subscription, billingDay int) time.Time {
 	if line.NextCharge.IsZero() || len(line.Charges) == 0 {
 		return line.NextCharge
 	}
-	next, hasNext := NextCharge(lastOf(line.Charges).OccurredAt, billingDay, line.Cadence)
+	next, hasNext := NextCharge(lastOf(line.Charges).OccurredAt, LineCycle{Cadence: line.Cadence, Day: billingDay})
 	if !hasNext {
 		return line.NextCharge
 	}

@@ -37,7 +37,7 @@ func merchantsOf(charges []shared.Charge) []string {
 }
 
 func buildSummaryOf(groups []ChargeGroup, decisions map[GroupKey]Decision) Summary {
-	return BuildSummary(groups, decisions, looksLikeSubscriptionFake, detectionNow)
+	return BuildSummary(SummaryInput{Groups: groups, Decisions: decisions, Detector: detectorFake()})
 }
 
 func TestBuildSummary_ActiveKnownServiceInSubscriptionsAndInactiveInInactive(t *testing.T) {

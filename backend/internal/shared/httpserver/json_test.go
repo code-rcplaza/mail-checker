@@ -18,7 +18,7 @@ type accountRequest struct {
 func decodeBody(body string) (accountRequest, error) {
 	var dst accountRequest
 	req := httptest.NewRequest(http.MethodPost, "/", strings.NewReader(body))
-	err := DecodeJSON(httptest.NewRecorder(), req, &dst)
+	err := DecodeJSON(Exchange{Writer: httptest.NewRecorder(), Request: req}, &dst)
 	return dst, err
 }
 
@@ -59,7 +59,7 @@ func TestDecodeJSON_RejectsInvalidBody(t *testing.T) {
 func TestWriteJSON_SetsStatusAndContentType(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
-	err := WriteJSON(recorder, http.StatusCreated, accountRequest{Email: "user@example.com"})
+	err := WriteJSON(recorder, Reply{Status: http.StatusCreated, Body: accountRequest{Email: "user@example.com"}})
 
 	if err != nil {
 		t.Fatalf("WriteJSON() error = %v, want nil", err)

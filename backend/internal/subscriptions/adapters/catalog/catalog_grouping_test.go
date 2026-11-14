@@ -35,7 +35,7 @@ func monthlyStatementCharges(merchant string, amount shared.Money, day int) []sh
 
 func groupWithCatalog(charges []shared.Charge) []domain.ChargeGroup {
 	catalog := Catalog{}
-	return domain.GroupCharges(charges, catalog.Identify, catalog.Normalize)
+	return domain.GroupCharges(charges, domain.MerchantCatalog{Identify: catalog.Identify, Normalize: catalog.Normalize})
 }
 
 func lineCountByParent(groups []domain.ChargeGroup) map[domain.GroupKey]int {

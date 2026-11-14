@@ -10,7 +10,7 @@ import (
 )
 
 func TestNewManualSubscription_AcceptsValidData(t *testing.T) {
-	got, err := NewManualSubscription("manual-1", "  Gimnasio  ", 500000, "CLP", 15)
+	got, err := NewManualSubscription("manual-1", ManualSubscriptionInput{Name: "  Gimnasio  ", Amount: 500000, Currency: "CLP", BillingDay: 15})
 
 	want := ManualSubscription{PublicID: "manual-1", Name: "Gimnasio", Amount: 500000, Currency: shared.CurrencyCLP, BillingDay: 15}
 	if err != nil || got != want {
@@ -37,7 +37,7 @@ func TestNewManualSubscription_RejectsInvalidData(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, err := NewManualSubscription("manual-1", tc.manualName, tc.amount, tc.currency, tc.day)
+			_, err := NewManualSubscription("manual-1", ManualSubscriptionInput{Name: tc.manualName, Amount: tc.amount, Currency: tc.currency, BillingDay: tc.day})
 
 			var keyed shared.KeyedError
 			if !errors.Is(err, shared.ErrInvalid) || !errors.As(err, &keyed) || keyed.Key != tc.want {
@@ -77,9 +77,9 @@ func TestAddManualSubscriptions(t *testing.T) {
 	gym := ManualSubscription{PublicID: "manual-1", Name: "Gimnasio", Amount: 500000, Currency: shared.CurrencyCLP, BillingDay: 20}
 	vpn := ManualSubscription{PublicID: "manual-2", Name: "VPN", Amount: 500, Currency: shared.CurrencyUSD, BillingDay: 3}
 	detected := Subscription{Key: "service:Netflix||d25", Status: StatusActive, Cadence: CadenceMonthly, Amount: 1299000, Currency: shared.CurrencyCLP}
-	summary := Summary{Subscriptions: []Subscription{detected}, MonthlySpend: MonthlySpend([]Subscription{detected})}
+	summary := Summary{Subscriptions: []Subscription{detected}, MonthlySpend: MonthlySpend([]Subscription{detected}), AsOf: now}
 
-	got := AddManualSubscriptions(summary, []ManualSubscription{gym, vpn}, now)
+	got := AddManualSubscriptions(summary, []ManualSubscription{gym, vpn})
 
 	if len(got.Subscriptions) != 3 {
 		t.Fatalf("subscriptions = %d, want the detected one and two manual", len(got.Subscriptions))

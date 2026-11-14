@@ -70,7 +70,7 @@ func TestSyncAll_PreviouslyUnparsedEmailNowRecognizedIsInsertedAndForgotten(t *t
 	email := purchase("<a1@bank-a>", bankA.sender, "STREAMING CO")
 	emails := map[string][]domain.RawEmail{accountOne + "|" + bankA.sender: {email}}
 	fixture := newSyncFixture([]domain.Credential{credential(1, accountOne)}, emails, bankA)
-	fixture.unparsed.saved[email.MessageID] = domain.UnparsedFromEmail(email, 1, "bank-a")
+	fixture.unparsed.saved[email.MessageID] = domain.UnparsedFromEmail(domain.BankEmail{Email: email, AccountID: 1, Bank: "bank-a"})
 
 	results, err := fixture.useCase.Execute(context.Background(), 3)
 

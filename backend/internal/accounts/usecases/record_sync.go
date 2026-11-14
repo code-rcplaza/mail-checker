@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"time"
 
+	"github.com/code-rcplaza/mail-checker/backend/internal/accounts/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/accounts/ports"
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
@@ -21,8 +21,8 @@ func NewRecordSync(accounts ports.AccountRepository) RecordSync {
 
 // Execute ignores an account removed while the sync ran: one missing account
 // must not stop the sync of the others.
-func (u RecordSync) Execute(ctx context.Context, accountID int64, at time.Time, syncErrKey shared.MessageKey) error {
-	err := u.accounts.MarkSynced(ctx, accountID, at, syncErrKey)
+func (u RecordSync) Execute(ctx context.Context, record domain.SyncRecord) error {
+	err := u.accounts.MarkSynced(ctx, record)
 	if errors.Is(err, shared.ErrNotFound) {
 		return nil
 	}

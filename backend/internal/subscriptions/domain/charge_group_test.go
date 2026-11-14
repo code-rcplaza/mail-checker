@@ -28,6 +28,10 @@ func identifyFake(merchant string) (Service, bool) {
 }
 
 // normalizeFake drops digits and surrounding spaces, as a stand-in for the catalog.
+func catalogFake() MerchantCatalog {
+	return MerchantCatalog{Identify: identifyFake, Normalize: normalizeFake}
+}
+
 func normalizeFake(merchant string) string {
 	withoutDigits := strings.Map(func(r rune) rune {
 		if r >= '0' && r <= '9' {
@@ -120,7 +124,7 @@ func TestGroupCharges(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := externalIDsByParent(GroupCharges(tc.charges, identifyFake, normalizeFake))
+			got := externalIDsByParent(GroupCharges(tc.charges, catalogFake()))
 
 			if !reflect.DeepEqual(got, tc.want) {
 				t.Errorf("groups = %v, want %v", got, tc.want)
@@ -137,7 +141,7 @@ func TestGroupCharges_SortsEachGroupByDateAndKeepsInputUntouched(t *testing.T) {
 	}
 	original := slices.Clone(charges)
 
-	got := externalIDsByKey(GroupCharges(charges, identifyFake, normalizeFake))
+	got := externalIDsByKey(GroupCharges(charges, catalogFake()))
 
 	want := map[GroupKey][]string{"service:Streaming Co||d01": {"january", "february", "march"}}
 	if !reflect.DeepEqual(got, want) {
@@ -156,7 +160,7 @@ func TestGroupCharges_MarksKnownServices(t *testing.T) {
 	}
 
 	got := make(map[GroupKey]bool)
-	for _, group := range GroupCharges(charges, identifyFake, normalizeFake) {
+	for _, group := range GroupCharges(charges, catalogFake()) {
 		got[group.Key] = group.IsKnownService
 	}
 

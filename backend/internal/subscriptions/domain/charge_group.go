@@ -19,6 +19,37 @@ type (
 	NormalizeMerchantFunc func(merchant string) string
 )
 
+// MerchantCatalog tells which service a merchant is, or how to name it when
+// the catalog does not know it.
+type MerchantCatalog struct {
+	Identify  IdentifyServiceFunc
+	Normalize NormalizeMerchantFunc
+}
+
+// parentOf gives the parent of a charge; ChargesMatch compares charges by it.
+func (catalog MerchantCatalog) parentOf(c shared.Charge) GroupKey {
+	service, isKnown := catalog.Identify(c.Merchant)
+	if !isKnown {
+		return merchantKey(catalog.Normalize(c.Merchant), c.Currency)
+	}
+	if service.IsUmbrella {
+		return umbrellaKey(service)
+	}
+	return serviceKey(service)
+}
+
+func (catalog MerchantCatalog) isKnownService(c shared.Charge) bool {
+	_, isKnown := catalog.Identify(c.Merchant)
+	return isKnown
+}
+
+// parentCharges are the charges of one parent, before they are split into lines.
+type parentCharges struct {
+	key            GroupKey
+	charges        []shared.Charge
+	isKnownService bool
+}
+
 type ChargeGroup struct {
 	Key            GroupKey        // the line, or the parent's one-off charges
 	Parent         GroupKey        // the service, umbrella or merchant the line belongs to
@@ -35,40 +66,36 @@ const oneOffSuffix = "|one-off"
 // unknown merchant by normalized name and currency), then split by origin and
 // chained into lines; the one-off charges of a parent get a group of their
 // own. Groups come out ordered by key so the result is deterministic.
-func GroupCharges(
-	charges []shared.Charge,
-	identify IdentifyServiceFunc,
-	normalize NormalizeMerchantFunc,
-) []ChargeGroup {
+func GroupCharges(charges []shared.Charge, catalog MerchantCatalog) []ChargeGroup {
 	var groups []ChargeGroup
-	for parent, parentCharges := range collectByParent(sortByDate(charges), identify, normalize) {
-		_, isKnownService := identify(parentCharges[0].Merchant)
-		groups = append(groups, groupsOfParent(parent, parentCharges, isKnownService)...)
+	for _, parent := range collectByParent(sortByDate(charges), catalog) {
+		groups = append(groups, groupsOfParent(parent)...)
 	}
 	return sortGroupsByKey(groups)
 }
 
-func collectByParent(
-	chronological []shared.Charge,
-	identify IdentifyServiceFunc,
-	normalize NormalizeMerchantFunc,
-) map[GroupKey][]shared.Charge {
-	byParent := make(map[GroupKey][]shared.Charge)
+func collectByParent(chronological []shared.Charge, catalog MerchantCatalog) map[GroupKey]parentCharges {
+	byParent := make(map[GroupKey]parentCharges)
 	for _, c := range chronological {
-		parent := groupKeyOf(c, identify, normalize)
-		byParent[parent] = append(byParent[parent], c)
+		key := catalog.parentOf(c)
+		parent, isSeen := byParent[key]
+		if !isSeen {
+			parent = parentCharges{key: key, isKnownService: catalog.isKnownService(c)}
+		}
+		parent.charges = append(parent.charges, c)
+		byParent[key] = parent
 	}
 	return byParent
 }
 
-func groupsOfParent(parent GroupKey, charges []shared.Charge, isKnownService bool) []ChargeGroup {
-	lines, oneOff := linesOfParent(charges)
+func groupsOfParent(parent parentCharges) []ChargeGroup {
+	lines, oneOff := linesOfParent(parent.charges)
 	groups := make([]ChargeGroup, 0, len(lines)+1)
-	for i, key := range LineKeys(parent, lines) {
-		groups = append(groups, ChargeGroup{Key: key, Parent: parent, IsKnownService: isKnownService, Charges: lines[i]})
+	for i, key := range LineKeys(parent.key, lines) {
+		groups = append(groups, ChargeGroup{Key: key, Parent: parent.key, IsKnownService: parent.isKnownService, Charges: lines[i]})
 	}
 	if len(oneOff) > 0 {
-		groups = append(groups, ChargeGroup{Key: parent + oneOffSuffix, Parent: parent, IsKnownService: isKnownService, IsOneOff: true, Charges: sortByDate(oneOff)})
+		groups = append(groups, ChargeGroup{Key: parent.key + oneOffSuffix, Parent: parent.key, IsKnownService: parent.isKnownService, IsOneOff: true, Charges: sortByDate(oneOff)})
 	}
 	return groups
 }
@@ -89,22 +116,6 @@ func sortByDate(charges []shared.Charge) []shared.Charge {
 		return a.OccurredAt.Compare(b.OccurredAt)
 	})
 	return sorted
-}
-
-// groupKeyOf gives the parent of a charge; ChargesMatch compares charges by it.
-func groupKeyOf(
-	c shared.Charge,
-	identify IdentifyServiceFunc,
-	normalize NormalizeMerchantFunc,
-) GroupKey {
-	service, isKnown := identify(c.Merchant)
-	if !isKnown {
-		return merchantKey(normalize(c.Merchant), c.Currency)
-	}
-	if service.IsUmbrella {
-		return umbrellaKey(service)
-	}
-	return serviceKey(service)
 }
 
 func serviceKey(service Service) GroupKey {

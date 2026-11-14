@@ -1,8 +1,6 @@
 package domain
 
 import (
-	"time"
-
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
 
@@ -24,6 +22,12 @@ const (
 type Decision struct {
 	Kind    DecisionKind
 	Cadence Cadence // only when confirmed
+}
+
+// LineDecision is the user's decision on one line.
+type LineDecision struct {
+	Key      GroupKey
+	Decision Decision
 }
 
 // The actions the user can take on a possible subscription.
@@ -55,12 +59,12 @@ func newConfirmation(cadence string) (Decision, error) {
 // IsCurrentPossible tells whether key names a line that is a possible
 // subscription today, with the same detection the summary uses. One-off
 // charges are never asked about.
-func IsCurrentPossible(groups []ChargeGroup, key GroupKey, looksLikeSubscription LooksLikeSubscriptionFunc, now time.Time) bool {
+func (d SubscriptionDetector) IsCurrentPossible(groups []ChargeGroup, key GroupKey) bool {
 	group, isFound := findGroup(groups, key)
 	if !isFound || group.IsOneOff {
 		return false
 	}
-	return DetectSubscription(group, looksLikeSubscription, now).Status == StatusPossible
+	return d.Detect(group).Status == StatusPossible
 }
 
 func findGroup(groups []ChargeGroup, key GroupKey) (ChargeGroup, bool) {

@@ -19,6 +19,10 @@ var (
 	google  = Service{Name: "Google", IsUmbrella: true}
 )
 
+func scenarioCatalogFake() MerchantCatalog {
+	return MerchantCatalog{Identify: identifyScenarioFake, Normalize: normalizeFake}
+}
+
 func identifyScenarioFake(merchant string) (Service, bool) {
 	switch merchant {
 	case "NETFLIX":
@@ -50,8 +54,8 @@ func scenarioCharges(prefix, merchant string, account *int64, amount shared.Mone
 }
 
 func summaryOfCharges(charges []shared.Charge, decisions map[GroupKey]Decision) Summary {
-	groups := GroupCharges(charges, identifyScenarioFake, normalizeFake)
-	return BuildSummary(groups, decisions, looksLikeSubscriptionFake, detectionNow)
+	groups := GroupCharges(charges, scenarioCatalogFake())
+	return BuildSummary(SummaryInput{Groups: groups, Decisions: decisions, Detector: detectorFake()})
 }
 
 func assertTwoActiveOf(t *testing.T, got Summary, parent GroupKey, spend shared.Money) {
@@ -206,9 +210,9 @@ func TestBuildSummary_DecisionOnALineAppliesOnlyToThatLine(t *testing.T) {
 func TestIsCurrentPossible_OneOffGroupIsNotAPossibleLine(t *testing.T) {
 	credit := scenarioCharges("credit", "ANTHROPIC CLAUDE", &accountA, 500, shared.CurrencyUSD, 15, time.August)
 	charges := append(scenarioCharges("plan", "ANTHROPIC CLAUDE", &accountA, 2000, shared.CurrencyUSD, 1, lastMonths...), credit...)
-	groups := GroupCharges(charges, identifyScenarioFake, normalizeFake)
+	groups := GroupCharges(charges, scenarioCatalogFake())
 
-	if IsCurrentPossible(groups, "service:Claude|one-off", looksLikeSubscriptionFake, detectionNow) {
+	if detectorFake().IsCurrentPossible(groups, "service:Claude|one-off") {
 		t.Errorf("one-off group accepted as a possible subscription, want rejected like in the summary")
 	}
 }

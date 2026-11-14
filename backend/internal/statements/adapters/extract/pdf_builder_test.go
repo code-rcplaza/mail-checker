@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"fmt"
 	"strings"
+
+	"github.com/ledongthuc/pdf"
 )
 
 // Test PDFs are built here instead of committing a binary: the repo is public
@@ -70,7 +72,7 @@ func writeGlyphs(stream *strings.Builder, cell pdfCell, y float64) {
 		if glyph != ' ' {
 			fmt.Fprintf(stream, "BT /F1 %d Tf 1 0 0 1 %.1f %.1f Tm (%s) Tj ET\n", builderFontSize, x, y, escapePDFText(string(glyph)))
 		}
-		x += glyphAdvance(string(glyph), builderFont, builderFontSize)
+		x += glyphAdvance(pdf.Text{S: string(glyph), Font: builderFont, FontSize: builderFontSize})
 	}
 }
 

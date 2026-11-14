@@ -1,7 +1,6 @@
 package domain
 
 import (
-	"errors"
 	"reflect"
 	"slices"
 	"testing"
@@ -51,40 +50,24 @@ func TestLatestExchangeRate(t *testing.T) {
 	}
 }
 
-func TestConvertToPesos(t *testing.T) {
+func TestDollarsToPesos(t *testing.T) {
 	rate := rateOn(time.October, 95000)
 	cases := []struct {
-		name            string
-		amount          shared.Money
-		currency        shared.Currency
-		rate            shared.ExchangeRate
-		want            shared.Money
-		wantApproximate bool
+		name    string
+		dollars shared.Money
+		rate    shared.ExchangeRate
+		want    shared.Money
 	}{
-		{"US$ 20,00 at 950 is CLP 19.000", 2000, shared.CurrencyUSD, rate, 1900000, true},
-		{"half a hundredth rounds up", 1, shared.CurrencyUSD, shared.ExchangeRate{PesosPerDollar: 95050}, 951, true},
-		{"under half a hundredth rounds down", 1, shared.CurrencyUSD, shared.ExchangeRate{PesosPerDollar: 95049}, 950, true},
-		{"US$ 0 is CLP 0", 0, shared.CurrencyUSD, rate, 0, true},
-		{"pesos stay the same and are exact", 599000, shared.CurrencyCLP, rate, 599000, false},
+		{"US$ 20,00 at 950 is CLP 19.000", 2000, rate, 1900000},
+		{"half a hundredth rounds up", 1, shared.ExchangeRate{PesosPerDollar: 95050}, 951},
+		{"under half a hundredth rounds down", 1, shared.ExchangeRate{PesosPerDollar: 95049}, 950},
+		{"US$ 0 is CLP 0", 0, rate, 0},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got, isApproximate, err := ConvertToPesos(tc.amount, tc.currency, tc.rate)
-
-			if err != nil {
-				t.Fatalf("ConvertToPesos error = %v, want nil", err)
-			}
-			if got != tc.want || isApproximate != tc.wantApproximate {
-				t.Errorf("ConvertToPesos = (%d, approximate %v), want (%d, approximate %v)", got, isApproximate, tc.want, tc.wantApproximate)
+			if got := dollarsToPesos(tc.dollars, tc.rate); got != tc.want {
+				t.Errorf("dollarsToPesos = %d, want %d", got, tc.want)
 			}
 		})
-	}
-}
-
-func TestConvertToPesos_RejectsOtherCurrencies(t *testing.T) {
-	_, _, err := ConvertToPesos(2000, shared.Currency("EUR"), rateOn(time.October, 95000))
-
-	if !errors.Is(err, shared.ErrInvalid) {
-		t.Errorf("ConvertToPesos error = %v, want ErrInvalid", err)
 	}
 }

@@ -68,7 +68,7 @@ func TestApplyLineOverrides(t *testing.T) {
 	key := summary.Subscriptions[0].Key
 	overrides := map[GroupKey]LineOverride{key: {Amount: 1599000, BillingDay: 5}}
 
-	got := ApplyLineOverrides(summary, overrides, detectionNow)
+	got := ApplyLineOverrides(summary, overrides)
 
 	line := got.Subscriptions[0]
 	if line.Amount != 1599000 || got.MonthlySpend[shared.CurrencyCLP] != 1599000 {

@@ -66,6 +66,9 @@ la contradice, se pregunta antes de cambiarla.
   `docs/ARCHITECTURE.md`.
 - Guard clauses y retorno temprano; no más de un nivel de `if` anidado; sin `else`
   después de `return`.
+- Máximo 2 parámetros (sin contar `ctx`); con más, se agrupan en un objeto con nombre
+  de lo que es (entrada: `NameLineInput`; dependencias: `SummarySources`). Aplica a
+  constructores, casos de uso y sus pasos, `domain`, puertos y adaptadores.
 - Ningún paso esconde efectos: el nombre dice si lee, calcula o escribe. Los
   cálculos son funciones puras en `domain`; la E/S queda en los puertos.
 - Front: handlers y hooks llaman pasos con nombre; sin lógica inline en el JSX.

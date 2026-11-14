@@ -20,4 +20,6 @@ type Subscription struct {
 	InPesos    *PesosAmount // nil when it is in dollars and there is no exchange rate
 	NextCharge time.Time    // zero while the cadence is unknown or the line is inactive
 	Charges    []shared.Charge
+	// MarkedForCancellationAt is when the user marked it "to cancel"; zero if not marked.
+	MarkedForCancellationAt time.Time
 }

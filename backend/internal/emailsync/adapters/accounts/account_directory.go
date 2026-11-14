@@ -5,12 +5,10 @@ package accounts
 import (
 	"context"
 	"fmt"
-	"time"
 
 	accountsdomain "github.com/code-rcplaza/mail-checker/backend/internal/accounts/domain"
 	accountsusecases "github.com/code-rcplaza/mail-checker/backend/internal/accounts/usecases"
 	"github.com/code-rcplaza/mail-checker/backend/internal/emailsync/domain"
-	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
 
 // AccountDirectory implements emailsync's port with the accounts use cases.
@@ -31,8 +29,8 @@ func (d AccountDirectory) Credentials(ctx context.Context) ([]domain.Credential,
 	return toEmailsyncCredentials(credentials), nil
 }
 
-func (d AccountDirectory) RecordSync(ctx context.Context, accountID int64, at time.Time, syncErrKey shared.MessageKey) error {
-	return d.recordSync.Execute(ctx, accountID, at, syncErrKey)
+func (d AccountDirectory) RecordSync(ctx context.Context, record domain.SyncRecord) error {
+	return d.recordSync.Execute(ctx, accountsdomain.SyncRecord{AccountID: record.AccountID, At: record.At, ErrorKey: record.ErrorKey})
 }
 
 func toEmailsyncCredentials(credentials []accountsdomain.Credential) []domain.Credential {

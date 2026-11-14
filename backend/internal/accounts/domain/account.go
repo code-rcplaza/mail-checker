@@ -16,3 +16,10 @@ type Account struct {
 	LastSyncAt   *time.Time
 	LastErrorKey shared.MessageKey // empty when the last sync had no error
 }
+
+// SyncRecord is when an account was synced and why it failed, if it did.
+type SyncRecord struct {
+	AccountID int64
+	At        time.Time
+	ErrorKey  shared.MessageKey // empty when the sync had no error
+}

@@ -11,19 +11,25 @@ type ExchangeRate struct {
 // hundredthsPerUnit is how many hundredths a whole peso or dollar has.
 const hundredthsPerUnit = 100
 
-// DeriveExchangeRate gives the rate the bank really charged, from the pesos
-// paid for an amount of dollars. Zero dollars give no rate.
-func DeriveExchangeRate(pesos, dollars Money, date time.Time) (ExchangeRate, bool, error) {
-	if pesos < 0 || dollars < 0 {
+// DollarsPaidInPesos is an amount of dollars and the pesos paid for it.
+type DollarsPaidInPesos struct {
+	Dollars Money
+	Pesos   Money
+}
+
+// DeriveExchangeRate gives the rate the bank really charged on date, from the
+// pesos paid for an amount of dollars. Zero dollars give no rate.
+func DeriveExchangeRate(paid DollarsPaidInPesos, date time.Time) (ExchangeRate, bool, error) {
+	if paid.Pesos < 0 || paid.Dollars < 0 {
 		return ExchangeRate{}, false, Invalid(KeyAmountNegative, nil)
 	}
-	if dollars == 0 {
+	if paid.Dollars == 0 {
 		return ExchangeRate{}, false, nil
 	}
-	return ExchangeRate{PesosPerDollar: pesosPerDollar(pesos, dollars), Date: date}, true, nil
+	return ExchangeRate{PesosPerDollar: pesosPerDollar(paid), Date: date}, true, nil
 }
 
 // pesosPerDollar rounds half up to hundredths; both amounts are non-negative.
-func pesosPerDollar(pesos, dollars Money) Money {
-	return (pesos*hundredthsPerUnit + dollars/2) / dollars
+func pesosPerDollar(paid DollarsPaidInPesos) Money {
+	return (paid.Pesos*hundredthsPerUnit + paid.Dollars/2) / paid.Dollars
 }

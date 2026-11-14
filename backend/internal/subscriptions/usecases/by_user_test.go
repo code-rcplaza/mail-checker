@@ -28,11 +28,11 @@ func (d decisionsByUser) List(_ context.Context, userID int64) (map[domain.Group
 	return d[userID], nil
 }
 
-func (d decisionsByUser) Save(_ context.Context, userID int64, key domain.GroupKey, decision domain.Decision) error {
+func (d decisionsByUser) Save(_ context.Context, userID int64, decision domain.LineDecision) error {
 	if d[userID] == nil {
 		d[userID] = make(map[domain.GroupKey]domain.Decision)
 	}
-	d[userID][key] = decision
+	d[userID][decision.Key] = decision.Decision
 	return nil
 }
 
@@ -42,11 +42,11 @@ func (a aliasesByUser) List(_ context.Context, userID int64) (map[domain.GroupKe
 	return a[userID], nil
 }
 
-func (a aliasesByUser) Save(_ context.Context, userID int64, key domain.GroupKey, alias string) error {
+func (a aliasesByUser) Save(_ context.Context, userID int64, alias domain.LineAlias) error {
 	if a[userID] == nil {
 		a[userID] = make(map[domain.GroupKey]string)
 	}
-	a[userID][key] = alias
+	a[userID][alias.Key] = alias.Alias
 	return nil
 }
 
@@ -68,7 +68,7 @@ func TestDecisionsByUser_ADecisionIsNotSeenByAnotherUser(t *testing.T) {
 	decisions := decisionsByUser{}
 	confirmed := domain.Decision{Kind: domain.DecisionConfirmed, Cadence: domain.CadenceMonthly}
 
-	if err := decisions.Save(context.Background(), userOne, streamingLine, confirmed); err != nil {
+	if err := decisions.Save(context.Background(), userOne, domain.LineDecision{Key: streamingLine, Decision: confirmed}); err != nil {
 		t.Fatalf("Save error = %v, want nil", err)
 	}
 
@@ -82,7 +82,10 @@ func TestGetSummary_ReadsOnlyTheDataOfTheUser(t *testing.T) {
 	charges := chargesByUser{userOne: streamingOnce(), userTwo: streamingOnce()}
 	decisions := decisionsByUser{userTwo: {streamingLine: {Kind: domain.DecisionDismissed}}}
 	aliases := aliasesByUser{userTwo: {streamingLine: "Theirs"}}
-	useCase := NewGetSummary(SummarySources{Charges: charges, Catalog: fakeCatalog{}, Decisions: decisions, Aliases: aliases, Rates: ratesByUser{}, KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overridesByUser{}}, fixedNow)
+	sources := summarySourcesOf(charges)
+	sources.Decisions = decisions
+	sources.Aliases = aliases
+	useCase := NewGetSummary(sources)
 
 	got, err := useCase.Execute(context.Background(), userOne, 6)
 
@@ -97,9 +100,9 @@ func TestGetSummary_ReadsOnlyTheDataOfTheUser(t *testing.T) {
 func TestDecidePossibleSubscription_LineOfAnotherUserIsNotFound(t *testing.T) {
 	charges := chargesByUser{userTwo: streamingOnce()}
 	decisions := decisionsByUser{}
-	useCase := NewDecidePossibleSubscription(charges, fakeCatalog{}, decisions, fixedNow)
+	useCase := NewDecidePossibleSubscription(linesOf(charges), decisions)
 
-	err := useCase.Execute(context.Background(), userOne, streamingLine, "confirm", "monthly")
+	err := useCase.Execute(context.Background(), userOne, DecisionInput{Key: streamingLine, Action: "confirm", Cadence: "monthly"})
 
 	if !errors.Is(err, shared.ErrNotFound) || len(decisions) != 0 {
 		t.Errorf("Execute = %v with decisions %v, want ErrNotFound and nothing saved", err, decisions)
@@ -109,9 +112,9 @@ func TestDecidePossibleSubscription_LineOfAnotherUserIsNotFound(t *testing.T) {
 func TestNameLine_LineOfAnotherUserIsNotFound(t *testing.T) {
 	charges := chargesByUser{userTwo: streamingOnce()}
 	aliases := aliasesByUser{}
-	useCase := NewNameLine(charges, fakeCatalog{}, aliases, fixedNow)
+	useCase := NewNameLine(linesOf(charges), aliases)
 
-	err := useCase.Execute(context.Background(), userOne, streamingLine, "Mine")
+	err := useCase.Execute(context.Background(), userOne, domain.LineAlias{Key: streamingLine, Alias: "Mine"})
 
 	assertKeyedError(t, err, shared.ErrNotFound, domain.KeyLineNotFound)
 	if len(aliases) != 0 {

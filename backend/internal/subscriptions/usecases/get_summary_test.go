@@ -8,6 +8,7 @@ import (
 
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/domain"
+	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/ports"
 )
 
 var testNow = time.Date(2026, 11, 12, 12, 0, 0, 0, time.UTC)
@@ -37,20 +38,20 @@ func (fakeCatalog) Normalize(merchant string) string { return merchant }
 
 func (fakeCatalog) LooksLikeSubscription(string) bool { return false }
 
-type fakeDecisions struct {
-	decisions map[domain.GroupKey]domain.Decision
-	err       error
+// linesOf reads the given charges with the fake catalog as of testNow.
+func linesOf(charges ports.ChargeReader) ChargeLines {
+	return ChargeLines{Charges: charges, Catalog: fakeCatalog{}, Now: fixedNow}
 }
 
-func (f fakeDecisions) List(context.Context, int64) (map[domain.GroupKey]domain.Decision, error) {
-	return f.decisions, f.err
+// summarySourcesOf has every port empty except the charges; each test sets
+// only the port it is about.
+func summarySourcesOf(charges ports.ChargeReader) SummarySources {
+	return SummarySources{
+		Lines: linesOf(charges), Decisions: decisionsByUser{}, Aliases: aliasesByUser{}, Rates: ratesByUser{},
+		KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overridesByUser{}, Hidden: hiddenLinesByUser{},
+		Cancellations: cancellationsByUser{},
+	}
 }
-
-// Save is unused by GetSummary; it is here to satisfy the port.
-func (fakeDecisions) Save(context.Context, int64, domain.GroupKey, domain.Decision) error { return nil }
-
-// Delete is unused by GetSummary; it is here to satisfy the port.
-func (fakeDecisions) Delete(context.Context, int64, domain.GroupKey) error { return nil }
 
 func chargeDaysAgo(externalID, merchant string, source shared.Source, amount shared.Money, daysAgo int) shared.Charge {
 	return shared.Charge{
@@ -65,8 +66,10 @@ func chargeDaysAgo(externalID, merchant string, source shared.Source, amount sha
 	}
 }
 
-func getSummary(reader *fakeChargeReader, decisions fakeDecisions, months int) (domain.Summary, error) {
-	useCase := NewGetSummary(SummarySources{Charges: reader, Catalog: fakeCatalog{}, Decisions: decisions, Aliases: newRecordingAliases(), Rates: ratesByUser{}, KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overridesByUser{}}, func() time.Time { return testNow })
+func getSummary(reader *fakeChargeReader, decisions ports.SubscriptionDecisions, months int) (domain.Summary, error) {
+	sources := summarySourcesOf(reader)
+	sources.Decisions = decisions
+	useCase := NewGetSummary(sources)
 	return useCase.Execute(context.Background(), userOne, months)
 }
 
@@ -77,7 +80,7 @@ func TestGetSummary_ChargeInEmailAndStatementCountsOnce(t *testing.T) {
 		chargeDaysAgo("statement-2", "STRMNG*CO", shared.SourceStatement, 599000, 8),
 	}}
 
-	got, err := getSummary(reader, fakeDecisions{}, 6)
+	got, err := getSummary(reader, decisionsByUser{}, 6)
 
 	if err != nil {
 		t.Fatalf("Execute error = %v, want nil", err)
@@ -93,7 +96,7 @@ func TestGetSummary_ChargeInEmailAndStatementCountsOnce(t *testing.T) {
 func TestGetSummary_ReadsChargesSinceNowMinusMonths(t *testing.T) {
 	reader := &fakeChargeReader{}
 
-	if _, err := getSummary(reader, fakeDecisions{}, 6); err != nil {
+	if _, err := getSummary(reader, decisionsByUser{}, 6); err != nil {
 		t.Fatalf("Execute error = %v, want nil", err)
 	}
 
@@ -110,7 +113,7 @@ func TestGetSummary_ActiveServiceAndConfirmedPossibleAreSubscriptions(t *testing
 		chargeDaysAgo("m1", "MUSIC APP", shared.SourceEmail, 399000, 40),
 		chargeDaysAgo("m2", "MUSIC APP", shared.SourceEmail, 399000, 10),
 	}}
-	decisions := fakeDecisions{decisions: map[domain.GroupKey]domain.Decision{
+	decisions := decisionsByUser{userOne: {
 		"merchant:MUSIC APP:CLP||d02": {Kind: domain.DecisionConfirmed, Cadence: domain.CadenceMonthly},
 	}}
 
@@ -130,7 +133,7 @@ func TestGetSummary_ActiveServiceAndConfirmedPossibleAreSubscriptions(t *testing
 
 func TestGetSummary_RejectsMonthsOutOfRange(t *testing.T) {
 	for _, months := range []int{0, 25} {
-		_, err := getSummary(&fakeChargeReader{}, fakeDecisions{}, months)
+		_, err := getSummary(&fakeChargeReader{}, decisionsByUser{}, months)
 
 		if !errors.Is(err, shared.ErrInvalid) {
 			t.Fatalf("months = %d: errors.Is(err, ErrInvalid) = false (err = %v), want true", months, err)
@@ -147,10 +150,10 @@ func TestGetSummary_WrapsPortErrors(t *testing.T) {
 	cases := []struct {
 		name      string
 		reader    *fakeChargeReader
-		decisions fakeDecisions
+		decisions ports.SubscriptionDecisions
 	}{
-		{"charge reader fails", &fakeChargeReader{err: errDatabase}, fakeDecisions{}},
-		{"decisions fail", &fakeChargeReader{}, fakeDecisions{err: errDatabase}},
+		{"charge reader fails", &fakeChargeReader{err: errDatabase}, decisionsByUser{}},
+		{"decisions fail", &fakeChargeReader{}, failingDecisions{err: errDatabase}},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {

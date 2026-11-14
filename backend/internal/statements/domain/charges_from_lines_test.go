@@ -22,7 +22,7 @@ func TestChargesFromLines_DatedLinesBecomeStatementCharges(t *testing.T) {
 	second := time.Date(2026, 10, 9, 0, 0, 0, 0, time.UTC)
 	lines := []StatementLine{line(1, "STREAMING CO", 599000, first), line(2, "MUSIC APP", 399000, second)}
 
-	charges, badLines := ChargesFromLines(lines, 1, "bci", "stmt-1", billingDate)
+	charges, badLines := ChargesFromLines(lines, StatementSource{UserID: 1, Bank: "bci", PublicID: "stmt-1", BillingDate: billingDate})
 
 	if len(badLines) != 0 {
 		t.Errorf("bad lines = %v, want none", badLines)
@@ -46,7 +46,7 @@ func TestChargesFromLines_DatedLinesBecomeStatementCharges(t *testing.T) {
 }
 
 func TestChargesFromLines_UndatedLineTakesBillingDate(t *testing.T) {
-	charges, _ := ChargesFromLines([]StatementLine{line(1, "STREAMING CO", 599000, time.Time{})}, 1, "bci", "stmt-1", billingDate)
+	charges, _ := ChargesFromLines([]StatementLine{line(1, "STREAMING CO", 599000, time.Time{})}, StatementSource{UserID: 1, Bank: "bci", PublicID: "stmt-1", BillingDate: billingDate})
 
 	if len(charges) != 1 || !charges[0].OccurredAt.Equal(billingDate) {
 		t.Errorf("charges = %+v, want one dated %v", charges, billingDate)
@@ -57,7 +57,7 @@ func TestChargesFromLines_InvalidLineIsReportedAndOthersConvert(t *testing.T) {
 	date := time.Date(2026, 10, 3, 0, 0, 0, 0, time.UTC)
 	lines := []StatementLine{line(1, "STREAMING CO", 599000, date), line(2, "", 100000, date), line(3, "MUSIC APP", 399000, date)}
 
-	charges, badLines := ChargesFromLines(lines, 1, "bci", "stmt-1", billingDate)
+	charges, badLines := ChargesFromLines(lines, StatementSource{UserID: 1, Bank: "bci", PublicID: "stmt-1", BillingDate: billingDate})
 
 	if !reflect.DeepEqual(badLines, []int{2}) {
 		t.Errorf("bad lines = %v, want [2]", badLines)

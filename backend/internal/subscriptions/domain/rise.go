@@ -17,6 +17,13 @@ type Rise struct {
 	IsPlanChange bool
 }
 
+// KeptRise is a rise the user chose to keep, by the new amount, so its notice
+// does not show again until the line rises once more.
+type KeptRise struct {
+	Key       GroupKey
+	NewAmount shared.Money
+}
+
 // Impact is what a rise costs per month and per year.
 type Impact struct {
 	Monthly shared.Money

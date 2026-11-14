@@ -5,14 +5,13 @@ import (
 	"errors"
 	"reflect"
 	"testing"
-	"time"
 
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/domain"
 )
 
 func reconcile(reader *fakeChargeReader, months int) (domain.Reconciliation, error) {
-	useCase := NewReconcileCharges(reader, fakeCatalog{}, func() time.Time { return testNow })
+	useCase := NewReconcileCharges(linesOf(reader))
 	return useCase.Execute(context.Background(), userOne, months)
 }
 
@@ -113,7 +112,7 @@ func TestReconcileCharges_FailsLikeGetSummary(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			_, summaryErr := getSummary(tc.reader(), fakeDecisions{}, tc.months)
+			_, summaryErr := getSummary(tc.reader(), decisionsByUser{}, tc.months)
 			_, reconcileErr := reconcile(tc.reader(), tc.months)
 
 			if reconcileErr == nil || summaryErr == nil {

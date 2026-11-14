@@ -67,7 +67,7 @@ func (b blockingMailReader) Read(context.Context, domain.Credential, domain.Mail
 func TestSyncAll_SecondSyncWhileOneRunsIsConflict(t *testing.T) {
 	reader := blockingMailReader{entered: make(chan struct{}), release: make(chan struct{}), reads: &atomic.Int32{}}
 	directory := &fakeDirectory{credentials: []domain.Credential{credential(1, accountOne)}}
-	useCase := NewSyncAll(directory, reader, []ports.BankEmailParser{bankA}, &fakeChargeWriter{}, newFakeUnparsed(), func() time.Time { return testNow })
+	useCase := NewSyncAll(SyncAllDependencies{Accounts: directory, Mail: reader, Parsers: []ports.BankEmailParser{bankA}, Charges: &fakeChargeWriter{}, Unparsed: newFakeUnparsed(), Now: func() time.Time { return testNow }})
 
 	firstDone := make(chan error)
 	go func() {

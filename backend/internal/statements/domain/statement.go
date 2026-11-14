@@ -20,6 +20,13 @@ type Statement struct {
 	BadLines    []int // line numbers; the back never sends text
 }
 
+// ImportedStatement is a statement ready to save with its charges; saving
+// assigns the statement's internal ID.
+type ImportedStatement struct {
+	Statement *Statement
+	Charges   []shared.Charge
+}
+
 type FileKind string
 
 const (
@@ -28,12 +35,3 @@ const (
 	FileKindCSV  FileKind = "csv"
 	FileKindText FileKind = "text"
 )
-
-func ParseFileKind(raw string) (FileKind, error) {
-	kind := FileKind(raw)
-	switch kind {
-	case FileKindPDF, FileKindXLSX, FileKindCSV, FileKindText:
-		return kind, nil
-	}
-	return "", shared.Invalid(KeyFileKindUnknown, nil)
-}

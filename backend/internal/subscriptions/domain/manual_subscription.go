@@ -37,24 +37,32 @@ type ManualSubscription struct {
 	BillingDay int
 }
 
+// ManualSubscriptionInput is what the user typed for a manual subscription.
+type ManualSubscriptionInput struct {
+	Name       string
+	Amount     shared.Money
+	Currency   string
+	BillingDay int
+}
+
 // NewManualSubscription validates what the user typed. The name is as long
 // as a line alias, since it shows in the same place.
-func NewManualSubscription(publicID, name string, amount shared.Money, currency string, billingDay int) (ManualSubscription, error) {
-	trimmed := strings.TrimSpace(name)
-	if err := validateManualName(trimmed); err != nil {
+func NewManualSubscription(publicID string, input ManualSubscriptionInput) (ManualSubscription, error) {
+	name := strings.TrimSpace(input.Name)
+	if err := validateManualName(name); err != nil {
 		return ManualSubscription{}, err
 	}
-	if amount <= 0 {
+	if input.Amount <= 0 {
 		return ManualSubscription{}, shared.Invalid(KeyManualAmountNotPositive, nil)
 	}
-	if billingDay < firstBillingDay || billingDay > lastBillingDay {
+	if input.BillingDay < firstBillingDay || input.BillingDay > lastBillingDay {
 		return ManualSubscription{}, shared.Invalid(KeyManualDayOutOfRange, nil)
 	}
-	parsedCurrency, err := shared.ParseCurrency(currency)
+	currency, err := shared.ParseCurrency(input.Currency)
 	if err != nil {
 		return ManualSubscription{}, err
 	}
-	return ManualSubscription{PublicID: publicID, Name: trimmed, Amount: amount, Currency: parsedCurrency, BillingDay: billingDay}, nil
+	return ManualSubscription{PublicID: publicID, Name: name, Amount: input.Amount, Currency: currency, BillingDay: input.BillingDay}, nil
 }
 
 func validateManualName(name string) error {
@@ -70,25 +78,23 @@ func validateManualName(name string) error {
 // NextManualCharge is the next time the billing day comes, today included,
 // in the time zone now carries.
 func NextManualCharge(billingDay int, now time.Time) time.Time {
-	thisMonth := dayOfMonth(now.Year(), now.Month(), billingDay, now.Location())
+	thisMonth := monthOf(now).day(billingDay)
 	if thisMonth.Day() >= now.Day() {
 		return thisMonth
 	}
-	return dayOfMonth(now.Year(), now.Month()+1, billingDay, now.Location())
+	return monthOf(now).plus(1).day(billingDay)
 }
 
 // AddManualSubscriptions puts the manual ones in Subscriptions and counts
 // them in the monthly spend and the charges still to come this month; the
 // given summary is left untouched.
-func AddManualSubscriptions(summary Summary, manuals []ManualSubscription, now time.Time) Summary {
+func AddManualSubscriptions(summary Summary, manuals []ManualSubscription) Summary {
 	subscriptions := slices.Clone(summary.Subscriptions)
 	for _, manual := range manuals {
-		subscriptions = append(subscriptions, manualLine(manual, now))
+		subscriptions = append(subscriptions, manualLine(manual, summary.AsOf))
 	}
 	summary.Subscriptions = subscriptions
-	summary.MonthlySpend = MonthlySpend(subscriptions)
-	summary.RemainingThisMonth = CountRemainingThisMonth(subscriptions, now)
-	return summary
+	return recountSpend(summary)
 }
 
 func manualLine(manual ManualSubscription, now time.Time) Subscription {

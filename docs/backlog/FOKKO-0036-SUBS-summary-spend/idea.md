@@ -19,5 +19,5 @@ El Resumen muestra el total del mes y un anillo con el reparto por servicio.
 - Cuántos segmentos muestra el anillo: se propone los 5 mayores y el resto junto en "Otros".
 
 ## Tareas
-- [ ] [TASK-001 Reparto por servicio](TASK-001-SPEND-SHARE-BY-PARENT.md)
-- [ ] [TASK-002 Cinco mayores más "Otros"](TASK-002-SPEND-TOP-AND-OTHERS.md)
+- [x] [TASK-001 Reparto por servicio](TASK-001-SPEND-SHARE-BY-PARENT.md)
+- [x] [TASK-002 Cinco mayores más "Otros"](TASK-002-SPEND-TOP-AND-OTHERS.md)

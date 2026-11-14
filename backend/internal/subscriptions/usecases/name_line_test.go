@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"strings"
 	"testing"
-	"time"
 
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 	"github.com/code-rcplaza/mail-checker/backend/internal/subscriptions/domain"
@@ -29,11 +28,11 @@ func (r *recordingAliases) List(context.Context, int64) (map[domain.GroupKey]str
 	return r.aliases, r.listErr
 }
 
-func (r *recordingAliases) Save(_ context.Context, _ int64, key domain.GroupKey, alias string) error {
+func (r *recordingAliases) Save(_ context.Context, _ int64, alias domain.LineAlias) error {
 	if r.saveErr != nil {
 		return r.saveErr
 	}
-	r.saved[key] = alias
+	r.saved[alias.Key] = alias.Alias
 	return nil
 }
 
@@ -61,8 +60,8 @@ func chargesWithEveryKindOfLine() *fakeChargeReader {
 }
 
 func nameLine(aliases *recordingAliases, key domain.GroupKey, alias string) error {
-	useCase := NewNameLine(chargesWithEveryKindOfLine(), fakeCatalog{}, aliases, func() time.Time { return testNow })
-	return useCase.Execute(context.Background(), userOne, key, alias)
+	useCase := NewNameLine(linesOf(chargesWithEveryKindOfLine()), aliases)
+	return useCase.Execute(context.Background(), userOne, domain.LineAlias{Key: key, Alias: alias})
 }
 
 func TestNameLine_SavesTheTrimmedAliasOfAnyLine(t *testing.T) {
@@ -148,7 +147,9 @@ func TestNameLine_WrapsAliasErrors(t *testing.T) {
 func TestGetSummary_SubscriptionsCarryTheAliasOfTheirLine(t *testing.T) {
 	aliases := newRecordingAliases()
 	aliases.aliases = map[domain.GroupKey]string{activeLineKey: "Padres"}
-	useCase := NewGetSummary(SummarySources{Charges: chargesWithPossibleAndActive(), Catalog: fakeCatalog{}, Decisions: fakeDecisions{}, Aliases: aliases, Rates: ratesByUser{}, KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overridesByUser{}}, func() time.Time { return testNow })
+	sources := summarySourcesOf(chargesWithPossibleAndActive())
+	sources.Aliases = aliases
+	useCase := NewGetSummary(sources)
 
 	got, err := useCase.Execute(context.Background(), userOne, 6)
 
@@ -167,7 +168,9 @@ func TestGetSummary_WrapsAliasReadError(t *testing.T) {
 	errDatabase := errors.New("database is locked")
 	aliases := newRecordingAliases()
 	aliases.listErr = errDatabase
-	useCase := NewGetSummary(SummarySources{Charges: chargesWithPossibleAndActive(), Catalog: fakeCatalog{}, Decisions: fakeDecisions{}, Aliases: aliases, Rates: ratesByUser{}, KeptRises: keptRisesByUser{}, Manuals: manualsByUser{}, Overrides: overridesByUser{}}, func() time.Time { return testNow })
+	sources := summarySourcesOf(chargesWithPossibleAndActive())
+	sources.Aliases = aliases
+	useCase := NewGetSummary(sources)
 
 	_, err := useCase.Execute(context.Background(), userOne, 6)
 

@@ -7,6 +7,14 @@ import (
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
 
+// rateWhenKnown is nil when the case has no rate, as ApplyExchangeRates passes it.
+func rateWhenKnown(rate shared.ExchangeRate, isKnown bool) *shared.ExchangeRate {
+	if !isKnown {
+		return nil
+	}
+	return &rate
+}
+
 func TestTotalInPesos(t *testing.T) {
 	rate := rateOn(time.October, 95000)
 	cases := []struct {
@@ -43,7 +51,7 @@ func TestTotalInPesos(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			got := TotalInPesos(tc.spend, rate, tc.hasRate)
+			got := TotalInPesos(tc.spend, rateWhenKnown(rate, tc.hasRate))
 
 			if got != tc.want {
 				t.Errorf("TotalInPesos = %+v, want %+v", got, tc.want)

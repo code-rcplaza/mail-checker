@@ -1,6 +1,7 @@
 package domain
 
 import (
+	"slices"
 	"time"
 
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
@@ -17,25 +18,69 @@ type Summary struct {
 	RemainingThisMonth int    // subscriptions whose next charge is still to come
 	Rises              []Rise // subscriptions whose last charge went up
 	Total              Total  // the monthly spend in pesos; set with ApplyExchangeRates
+	// ExchangeRate is the rate used for every amount in pesos; nil without one.
+	ExchangeRate *shared.ExchangeRate
+	// AsOf is the moment the summary describes; its time zone is the user's
+	// calendar for "this month".
+	AsOf time.Time
+}
+
+// SummaryInput is what a summary is built from: the grouped charges, the
+// user's decisions on possible subscriptions and the detector, whose Now is
+// the moment the summary describes.
+type SummaryInput struct {
+	Groups    []ChargeGroup
+	Decisions map[GroupKey]Decision
+	Detector  SubscriptionDetector
 }
 
 // BuildSummary puts each line in its section, honoring the user's decisions
 // on possible subscriptions, sends one-off charges to other charges and adds
 // up the monthly spend.
-func BuildSummary(
-	groups []ChargeGroup,
-	decisions map[GroupKey]Decision,
-	looksLikeSubscription LooksLikeSubscriptionFunc,
-	now time.Time,
-) Summary {
-	lines, oneOff := splitOneOffGroups(groups)
-	subscriptions := buildSubscriptions(lines, decisions, looksLikeSubscription, now)
-	summary := sortIntoSections(subscriptions)
+func BuildSummary(input SummaryInput) Summary {
+	lines, oneOff := splitOneOffGroups(input.Groups)
+	summary := sortIntoSections(buildSubscriptions(lines, input))
 	summary.OtherCharges = append(summary.OtherCharges, chargesOfGroups(oneOff)...)
-	summary.MonthlySpend = MonthlySpend(summary.Subscriptions)
-	summary.ChargedThisMonth = CountChargedThisMonth(summary.Subscriptions, now)
-	summary.RemainingThisMonth = CountRemainingThisMonth(summary.Subscriptions, now)
 	summary.Rises = risesOf(summary.Subscriptions)
+	summary.AsOf = input.Detector.Now
+	return recountSpend(summary)
+}
+
+// recountSpend recalculates what depends on the subscriptions section: the
+// monthly spend and this month's charged and remaining counts.
+func recountSpend(summary Summary) Summary {
+	summary.MonthlySpend = MonthlySpend(summary.Subscriptions)
+	summary.ChargedThisMonth = CountChargedThisMonth(summary.Subscriptions, summary.AsOf)
+	summary.RemainingThisMonth = CountRemainingThisMonth(summary.Subscriptions, summary.AsOf)
+	return summary
+}
+
+// changeEveryLine applies change to each line of the three sections that hold
+// lines; the given summary is left untouched.
+func changeEveryLine(summary Summary, change func(Subscription) Subscription) Summary {
+	summary.Subscriptions = changeEach(summary.Subscriptions, change)
+	summary.Possible = changeEach(summary.Possible, change)
+	summary.Inactive = changeEach(summary.Inactive, change)
+	return summary
+}
+
+func changeEach(lines []Subscription, change func(Subscription) Subscription) []Subscription {
+	if lines == nil {
+		return nil
+	}
+	changed := make([]Subscription, 0, len(lines))
+	for _, line := range lines {
+		changed = append(changed, change(line))
+	}
+	return changed
+}
+
+// removeLines takes out of the three sections the lines isRemoved picks; the
+// given summary is left untouched.
+func removeLines(summary Summary, isRemoved func(Subscription) bool) Summary {
+	summary.Subscriptions = slices.DeleteFunc(slices.Clone(summary.Subscriptions), isRemoved)
+	summary.Possible = slices.DeleteFunc(slices.Clone(summary.Possible), isRemoved)
+	summary.Inactive = slices.DeleteFunc(slices.Clone(summary.Inactive), isRemoved)
 	return summary
 }
 
@@ -58,26 +103,16 @@ func chargesOfGroups(groups []ChargeGroup) []shared.Charge {
 	return charges
 }
 
-func buildSubscriptions(
-	groups []ChargeGroup,
-	decisions map[GroupKey]Decision,
-	looksLikeSubscription LooksLikeSubscriptionFunc,
-	now time.Time,
-) []Subscription {
-	subscriptions := make([]Subscription, 0, len(groups))
-	for _, group := range groups {
-		subscriptions = append(subscriptions, buildSubscription(group, decisions, looksLikeSubscription, now))
+func buildSubscriptions(lines []ChargeGroup, input SummaryInput) []Subscription {
+	subscriptions := make([]Subscription, 0, len(lines))
+	for _, group := range lines {
+		subscriptions = append(subscriptions, buildSubscription(group, input))
 	}
 	return subscriptions
 }
 
-func buildSubscription(
-	group ChargeGroup,
-	decisions map[GroupKey]Decision,
-	looksLikeSubscription LooksLikeSubscriptionFunc,
-	now time.Time,
-) Subscription {
-	detection := DetectSubscription(group, looksLikeSubscription, now)
+func buildSubscription(group ChargeGroup, input SummaryInput) Subscription {
+	detection := input.Detector.Detect(group)
 	amount, currency := currentAmount(group)
 	subscription := Subscription{
 		Key:      group.Key,
@@ -88,7 +123,7 @@ func buildSubscription(
 		Currency: currency,
 		Charges:  group.Charges,
 	}
-	return withNextCharge(applyDecision(subscription, decisions))
+	return withNextCharge(applyDecision(subscription, input.Decisions))
 }
 
 // withNextCharge runs after the decision: a confirmed possible only then has
@@ -98,7 +133,7 @@ func withNextCharge(s Subscription) Subscription {
 		return s
 	}
 	lastCharge := lastOf(s.Charges).OccurredAt
-	nextCharge, hasNextCharge := NextCharge(lastCharge, medianDayOfMonth(s.Charges), s.Cadence)
+	nextCharge, hasNextCharge := NextCharge(lastCharge, LineCycle{Cadence: s.Cadence, Day: medianDayOfMonth(s.Charges)})
 	if hasNextCharge {
 		s.NextCharge = nextCharge
 	}

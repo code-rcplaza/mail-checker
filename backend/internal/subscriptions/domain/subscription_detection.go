@@ -33,20 +33,27 @@ type Detection struct {
 	Cadence Cadence
 }
 
-// DetectSubscription classifies a group of charges. A known service is never
-// dismissed: with too little evidence it is possible and the user decides. An
-// unknown merchant is at most possible. Only what may still be charging today
-// is asked about: a possible outside its activity window is inactive.
-func DetectSubscription(group ChargeGroup, looksLikeSubscription LooksLikeSubscriptionFunc, now time.Time) Detection {
+// SubscriptionDetector classifies groups of charges as of Now, asking the
+// catalog whether a single unknown charge reads like a subscription.
+type SubscriptionDetector struct {
+	LooksLikeSubscription LooksLikeSubscriptionFunc
+	Now                   time.Time
+}
+
+// Detect classifies a group of charges. A known service is never dismissed:
+// with too little evidence it is possible and the user decides. An unknown
+// merchant is at most possible. Only what may still be charging today is
+// asked about: a possible outside its activity window is inactive.
+func (d SubscriptionDetector) Detect(group ChargeGroup) Detection {
 	if group.IsKnownService {
-		return detectKnownService(group.Charges, now)
+		return d.detectKnownService(group.Charges)
 	}
-	return detectUnknownMerchant(group.Charges, looksLikeSubscription, now)
+	return d.detectUnknownMerchant(group.Charges)
 }
 
 // detectKnownService looks only at recurring charges, so one-off charges of
 // the service do not count towards the cadence.
-func detectKnownService(charges []shared.Charge, now time.Time) Detection {
+func (d SubscriptionDetector) detectKnownService(charges []shared.Charge) Detection {
 	recurring := AnalyzeKnownServiceAmount(charges).RecurringCharges
 	if len(recurring) == 0 {
 		return Detection{Status: StatusNotSubscription}
@@ -54,9 +61,9 @@ func detectKnownService(charges []shared.Charge, now time.Time) Detection {
 	lastCharge := recurring[len(recurring)-1].OccurredAt
 	cadence := recurringCadence(recurring)
 	if cadence == CadenceNone {
-		return possibleWhileRecent(lastCharge, CadenceNone, now)
+		return d.possibleWhileRecent(lastCharge, CadenceNone)
 	}
-	return Detection{Status: activityStatus(lastCharge, cadence, now), Cadence: cadence}
+	return Detection{Status: d.activityStatus(lastCharge, cadence), Cadence: cadence}
 }
 
 // recurringCadence needs MinChargesForSubscription: with one charge it is
@@ -68,40 +75,40 @@ func recurringCadence(recurring []shared.Charge) Cadence {
 	return DetectCadence(datesOf(recurring))
 }
 
-func detectUnknownMerchant(charges []shared.Charge, looksLikeSubscription LooksLikeSubscriptionFunc, now time.Time) Detection {
+func (d SubscriptionDetector) detectUnknownMerchant(charges []shared.Charge) Detection {
 	if len(charges) == 1 {
-		return detectSingleUnknownCharge(charges[0], looksLikeSubscription, now)
+		return d.detectSingleUnknownCharge(charges[0])
 	}
 	cadence := DetectCadence(datesOf(charges))
 	if cadence == CadenceNone || !AnalyzeUnknownMerchantAmount(charges).IsConsistent {
 		return Detection{Status: StatusNotSubscription}
 	}
-	return possibleWhileRecent(charges[len(charges)-1].OccurredAt, cadence, now)
+	return d.possibleWhileRecent(charges[len(charges)-1].OccurredAt, cadence)
 }
 
-func detectSingleUnknownCharge(c shared.Charge, looksLikeSubscription LooksLikeSubscriptionFunc, now time.Time) Detection {
-	if !looksLikeSubscription(c.Merchant) {
+func (d SubscriptionDetector) detectSingleUnknownCharge(c shared.Charge) Detection {
+	if !d.LooksLikeSubscription(c.Merchant) {
 		return Detection{Status: StatusNotSubscription}
 	}
-	return possibleWhileRecent(c.OccurredAt, CadenceNone, now)
+	return d.possibleWhileRecent(c.OccurredAt, CadenceNone)
 }
 
-func possibleWhileRecent(lastCharge time.Time, cadence Cadence, now time.Time) Detection {
-	if !isRecent(lastCharge, cadence, now) {
+func (d SubscriptionDetector) possibleWhileRecent(lastCharge time.Time, cadence Cadence) Detection {
+	if !d.isRecent(lastCharge, cadence) {
 		return Detection{Status: StatusInactive, Cadence: cadence}
 	}
 	return Detection{Status: StatusPossible, Cadence: cadence}
 }
 
-func activityStatus(lastCharge time.Time, cadence Cadence, now time.Time) Status {
-	if !isRecent(lastCharge, cadence, now) {
+func (d SubscriptionDetector) activityStatus(lastCharge time.Time, cadence Cadence) Status {
+	if !d.isRecent(lastCharge, cadence) {
 		return StatusInactive
 	}
 	return StatusActive
 }
 
-func isRecent(lastCharge time.Time, cadence Cadence, now time.Time) bool {
-	return daysBetween(lastCharge, now) <= activeWithinDays(cadence)
+func (d SubscriptionDetector) isRecent(lastCharge time.Time, cadence Cadence) bool {
+	return daysBetween(lastCharge, d.Now) <= activeWithinDays(cadence)
 }
 
 func activeWithinDays(cadence Cadence) int {

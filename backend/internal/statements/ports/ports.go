@@ -38,7 +38,7 @@ type ExchangeRateRecorder interface {
 type StatementRepository interface {
 	// Create saves the statement and its charges atomically and assigns the ID.
 	// A statement is unique per user, bank and billing date.
-	Create(ctx context.Context, userID int64, statement *domain.Statement, charges []shared.Charge) error
+	Create(ctx context.Context, userID int64, imported domain.ImportedStatement) error
 	List(ctx context.Context, userID int64) ([]domain.Statement, error)
 	// Delete also removes the statement's charges; a publicID that is unknown
 	// or belongs to another user is shared.ErrNotFound.

@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"testing"
 
+	"github.com/code-rcplaza/mail-checker/backend/internal/accounts/domain"
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
 )
 
@@ -21,7 +22,7 @@ func TestRecordSync_MarksTheAccountWithTimeAndErrorKey(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			accounts := &fakeAccounts{}
 
-			if err := NewRecordSync(accounts).Execute(context.Background(), 7, testNow, tt.errKey); err != nil {
+			if err := NewRecordSync(accounts).Execute(context.Background(), domain.SyncRecord{AccountID: 7, At: testNow, ErrorKey: tt.errKey}); err != nil {
 				t.Fatalf("Execute error = %v, want nil", err)
 			}
 
@@ -36,7 +37,7 @@ func TestRecordSync_MarksTheAccountWithTimeAndErrorKey(t *testing.T) {
 func TestRecordSync_AccountRemovedDuringSyncIsIgnored(t *testing.T) {
 	accounts := &fakeAccounts{markErr: shared.ErrNotFound}
 
-	err := NewRecordSync(accounts).Execute(context.Background(), 7, testNow, "")
+	err := NewRecordSync(accounts).Execute(context.Background(), domain.SyncRecord{AccountID: 7, At: testNow, ErrorKey: ""})
 
 	if err != nil {
 		t.Errorf("Execute error = %v, want nil", err)
@@ -50,7 +51,7 @@ func TestRecordSync_RepositoryErrorIsWrapped(t *testing.T) {
 	cause := errors.New("boom")
 	accounts := &fakeAccounts{markErr: cause}
 
-	err := NewRecordSync(accounts).Execute(context.Background(), 7, testNow, "")
+	err := NewRecordSync(accounts).Execute(context.Background(), domain.SyncRecord{AccountID: 7, At: testNow, ErrorKey: ""})
 
 	assertWrapped(t, err, cause, "record account sync")
 }

@@ -49,7 +49,7 @@ func closestBandFor(bands [][]shared.Charge, c shared.Charge) (int, bool) {
 		if last.Currency != c.Currency || isAmountJump(last.Amount, c.Amount) {
 			continue
 		}
-		if !isFound || compareAmountDistance(last, lastOf(bands[best]), c) < 0 {
+		if !isFound || compareAmountDistance(rivalCharges{candidate: last, current: lastOf(bands[best])}, c) < 0 {
 			best, isFound = i, true
 		}
 	}
@@ -107,7 +107,7 @@ func bestLineFor(lines [][]shared.Charge, c shared.Charge) (int, bool) {
 		if !continuesLine(line, c) {
 			continue
 		}
-		if !isFound || fitsBetter(line, lines[best], c) {
+		if !isFound || fitsBetter(rivalCharges{candidate: lastOf(line), current: lastOf(lines[best])}, c) {
 			best, isFound = i, true
 		}
 	}
@@ -119,18 +119,27 @@ func continuesLine(line []shared.Charge, c shared.Charge) bool {
 	return isMonthlyInterval(days) || isYearlyInterval(days)
 }
 
+// rivalCharges are the last charges of two lines (or bands) competing for a
+// new charge: the candidate and the best one found so far.
+type rivalCharges struct {
+	candidate shared.Charge
+	current   shared.Charge
+}
+
 // fitsBetter compares by amount first and by expected date on a tie.
-func fitsBetter(candidate, current []shared.Charge, c shared.Charge) bool {
-	byAmount := compareAmountDistance(lastOf(candidate), lastOf(current), c)
+func fitsBetter(rivals rivalCharges, c shared.Charge) bool {
+	byAmount := compareAmountDistance(rivals, c)
 	if byAmount != 0 {
 		return byAmount < 0
 	}
-	return daysOffCadence(lastOf(candidate), c) < daysOffCadence(lastOf(current), c)
+	return daysOffCadence(rivals.candidate, c) < daysOffCadence(rivals.current, c)
 }
 
 // compareAmountDistance compares relative distances without floats:
-// |a-c|/a against |b-c|/b. Another currency is always farther.
-func compareAmountDistance(a, b, c shared.Charge) int {
+// |a-c|/a against |b-c|/b, a being the candidate and b the current one.
+// Another currency is always farther.
+func compareAmountDistance(rivals rivalCharges, c shared.Charge) int {
+	a, b := rivals.candidate, rivals.current
 	aOtherCurrency, bOtherCurrency := a.Currency != c.Currency, b.Currency != c.Currency
 	if aOtherCurrency != bOtherCurrency {
 		if aOtherCurrency {

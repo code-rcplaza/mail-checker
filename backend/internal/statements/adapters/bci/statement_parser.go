@@ -51,7 +51,7 @@ func (p StatementParser) Parse(text string) (lines []domain.StatementLine, bad [
 	for index, raw := range strings.Split(text, "\n") {
 		current = nextSection(current, raw)
 		number := index + 1
-		charge, outcome := p.readLine(current, raw, cardLast4)
+		charge, outcome := p.readLine(sectionLine{section: current, raw: raw}, cardLast4)
 		switch outcome {
 		case linePurchase:
 			lines = append(lines, domain.StatementLine{Number: number, Charge: charge})
@@ -62,12 +62,18 @@ func (p StatementParser) Parse(text string) (lines []domain.StatementLine, bad [
 	return lines, bad
 }
 
-func (p StatementParser) readLine(current section, raw, cardLast4 string) (shared.ParsedCharge, lineOutcome) {
-	switch current {
+// sectionLine is a raw line of the statement and the section it is in.
+type sectionLine struct {
+	section section
+	raw     string
+}
+
+func (p StatementParser) readLine(line sectionLine, cardLast4 string) (shared.ParsedCharge, lineOutcome) {
+	switch line.section {
 	case sectionNationalPurchases:
-		return p.readNationalLine(raw, cardLast4)
+		return p.readNationalLine(line.raw, cardLast4)
 	case sectionInternational:
-		return p.readInternationalLine(raw, cardLast4)
+		return p.readInternationalLine(line.raw, cardLast4)
 	}
 	return shared.ParsedCharge{}, lineSkipped
 }

@@ -107,7 +107,7 @@ func linesOfGlyphs(sorted []pdf.Text) []string {
 }
 
 func separatorBetween(previous, glyph pdf.Text) string {
-	gap := glyph.X - previous.X - glyphAdvance(previous.S, previous.Font, previous.FontSize)
+	gap := glyph.X - previous.X - glyphAdvance(previous)
 	switch {
 	case gap > glyph.FontSize*columnGapFontSizes:
 		return "\t"

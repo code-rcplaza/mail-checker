@@ -34,13 +34,13 @@ func savedGym() domain.ManualSubscription {
 }
 
 func TestEditManualSubscription(t *testing.T) {
-	edited := ManualSubscriptionInput{Name: "Gimnasio anual", Amount: 600000, Currency: "CLP", BillingDay: 20}
-	invalid := ManualSubscriptionInput{Name: "", Amount: 600000, Currency: "CLP", BillingDay: 20}
+	edited := domain.ManualSubscriptionInput{Name: "Gimnasio anual", Amount: 600000, Currency: "CLP", BillingDay: 20}
+	invalid := domain.ManualSubscriptionInput{Name: "", Amount: 600000, Currency: "CLP", BillingDay: 20}
 	cases := []struct {
 		name     string
 		userID   int64
 		publicID string
-		input    ManualSubscriptionInput
+		input    domain.ManualSubscriptionInput
 		wantErr  error
 		want     domain.ManualSubscription
 	}{
@@ -54,7 +54,7 @@ func TestEditManualSubscription(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			manuals := manualsByUser{userOne: {savedGym()}}
 
-			err := NewEditManualSubscription(manuals).Execute(context.Background(), tc.userID, tc.publicID, tc.input)
+			err := NewEditManualSubscription(manuals).Execute(context.Background(), tc.userID, ManualSubscriptionEdit{PublicID: tc.publicID, Input: tc.input})
 
 			if !errors.Is(err, tc.wantErr) {
 				t.Fatalf("Execute error = %v, want %v", err, tc.wantErr)
@@ -93,7 +93,9 @@ func TestRemoveManualSubscription(t *testing.T) {
 			if errors.Is(tc.wantErr, shared.ErrNotFound) {
 				assertKeyedError(t, err, shared.ErrNotFound, domain.KeyManualNotFound)
 			}
-			summary, _ := NewGetSummary(SummarySources{Charges: chargesByUser{}, Catalog: fakeCatalog{}, Decisions: decisionsByUser{}, Aliases: aliasesByUser{}, Rates: ratesByUser{}, KeptRises: keptRisesByUser{}, Manuals: manuals, Overrides: overridesByUser{}}, fixedNow).Execute(context.Background(), userOne, 6)
+			sources := summarySourcesOf(chargesByUser{})
+			sources.Manuals = manuals
+			summary, _ := NewGetSummary(sources).Execute(context.Background(), userOne, 6)
 			if len(summary.Subscriptions) != tc.wantLeft {
 				t.Errorf("subscriptions in the summary = %d, want %d", len(summary.Subscriptions), tc.wantLeft)
 			}

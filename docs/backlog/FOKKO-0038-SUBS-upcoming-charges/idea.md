@@ -19,6 +19,6 @@ El Resumen lista los próximos cobros, ordenados por fecha.
 - Horizonte de la lista: se propone los próximos 30 días.
 
 ## Tareas
-- [ ] [TASK-001A Ordenar por fecha](TASK-001A-UPCOMING-ORDER.md)
-- [ ] [TASK-001B Cortar a 30 días](TASK-001B-UPCOMING-HORIZON.md)
-- [ ] [TASK-001C Incluir las manuales](TASK-001C-UPCOMING-MANUAL.md)
+- [x] [TASK-001A Ordenar por fecha](TASK-001A-UPCOMING-ORDER.md)
+- [x] [TASK-001B Cortar a 30 días](TASK-001B-UPCOMING-HORIZON.md)
+- [x] [TASK-001C Incluir las manuales](TASK-001C-UPCOMING-MANUAL.md)

@@ -2,7 +2,6 @@ package httpserver
 
 import (
 	"errors"
-	"log/slog"
 	"net/http"
 
 	"github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
@@ -26,12 +25,12 @@ var internalErrorKind = errorKind{status: http.StatusInternalServerError, fallba
 
 // WriteError answers with the status and i18n key of a domain error. Any other
 // error becomes a 500 with common.internal: the real error goes only to the log.
-func WriteError(w http.ResponseWriter, r *http.Request, logger *slog.Logger, err error) {
+func (responder Responder) WriteError(exchange Exchange, err error) {
 	kind := matchErrorKind(err)
 	if kind.status == http.StatusInternalServerError {
-		logger.Error("request failed", "method", r.Method, "path", r.URL.Path, "err", err)
+		responder.Logger.Error("request failed", "method", exchange.Request.Method, "path", exchange.Request.URL.Path, "err", err)
 	}
-	respond(w, r, logger, kind.status, errorResponse{Error: payloadFor(err, kind)})
+	responder.Respond(exchange, Reply{Status: kind.status, Body: errorResponse{Error: payloadFor(err, kind)}})
 }
 
 func matchErrorKind(err error) errorKind {
