@@ -13,7 +13,7 @@ export function RegisterScreen() {
   const navigate = useNavigate();
   const theme = useThemeToggle();
   const registration = useRegister({
-    onRegistered: (email) => navigate({ to: "/codigo", search: { email } }),
+    onRegistered: (email) => navigate({ to: "/codigo", search: { email, flow: "register" } }),
   });
 
   return (

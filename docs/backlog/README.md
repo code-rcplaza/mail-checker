@@ -177,7 +177,7 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 | FOKKO-0093-SUBS | [`SideNav` de escritorio](FOKKO-0093-SUBS-front-shell-desktop/idea.md) | done |
 | FOKKO-0094-SUBS | [Pantalla Registro](FOKKO-0094-SUBS-screen-register/idea.md) | doing |
 | FOKKO-0095-SUBS | [Pantalla Login](FOKKO-0095-SUBS-screen-login/idea.md) | doing |
-| FOKKO-0096-SUBS | [Pantalla Código](FOKKO-0096-SUBS-screen-code/idea.md) | todo |
+| FOKKO-0096-SUBS | [Pantalla Código](FOKKO-0096-SUBS-screen-code/idea.md) | done |
 | FOKKO-0097-SUBS | [Pantalla Bienvenida](FOKKO-0097-SUBS-screen-welcome/idea.md) | todo |
 | FOKKO-0098-SUBS | [Protección de rutas](FOKKO-0098-SUBS-front-session-routes/idea.md) | todo |
 | FOKKO-0099-SUBS | [Subir cartola](FOKKO-0099-SUBS-screen-upload/idea.md) | todo |

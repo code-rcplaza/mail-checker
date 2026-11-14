@@ -11,5 +11,11 @@ export function createHttpAuthGateway(api: ApiClient): AuthGateway {
     login: async (email) => {
       await api.send({ method: "POST", path: "/api/auth/login", body: { email } });
     },
+    verifyCode: async (entry) => {
+      await api.send({ method: "POST", path: "/api/auth/code/verify", body: entry });
+    },
+    resendCode: async (email) => {
+      await api.send({ method: "POST", path: "/api/auth/code/resend", body: { email } });
+    },
   };
 }

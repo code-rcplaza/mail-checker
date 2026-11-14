@@ -1,15 +1,26 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { z } from "zod";
+import { accessFlows } from "../features/auth/domain/code";
+import { CodeScreen } from "../features/auth/presentation/screens/CodeScreen";
 
-/** The email the code went to; Registro and Login send it here. */
-const codeSearchSchema = z.object({ email: z.string().optional() });
+/** The email the code went to and where the person came from; a broken flow is ignored. */
+const codeSearchSchema = z.object({
+  email: z.string().optional().catch(undefined),
+  flow: z.enum(accessFlows).optional().catch(undefined),
+});
 
-/** Placeholder until the Código screen (FOKKO-0096-SUBS). */
-function CodeScreen() {
-  return <main />;
+function CodeRoute() {
+  const { email, flow } = Route.useSearch();
+  return <CodeScreen email={email ?? ""} flow={flow} />;
 }
 
 export const Route = createFileRoute("/codigo")({
   validateSearch: (search) => codeSearchSchema.parse(search),
-  component: CodeScreen,
+  // Opened directly there is no email to check the code against: back to Login.
+  beforeLoad: ({ search }) => {
+    if (search.email === undefined || search.email === "") {
+      throw redirect({ to: "/entrar" });
+    }
+  },
+  component: CodeRoute,
 });

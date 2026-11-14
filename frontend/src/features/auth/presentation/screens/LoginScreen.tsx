@@ -12,7 +12,9 @@ export function LoginScreen() {
   const navigate = useNavigate();
   const navigateTo = useNavigateTo();
   const theme = useThemeToggle();
-  const login = useLogin({ onCodeSent: (email) => navigate({ to: "/codigo", search: { email } }) });
+  const login = useLogin({
+    onCodeSent: (email) => navigate({ to: "/codigo", search: { email, flow: "login" } }),
+  });
 
   return (
     <AppShell header={<BrandHeader theme={theme} />} zone={<AccessRing />}>

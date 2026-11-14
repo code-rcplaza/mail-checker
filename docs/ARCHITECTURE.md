@@ -822,7 +822,9 @@ frontend/src/
   `<a href>` real cuyo clic simple llama `onNavigate(to)` (la pantalla le pasa `navigate` del router);
   un clic con Cmd/Ctrl/Shift o el botón del medio queda para el navegador. La pantalla lo conecta
   con `useNavigateTo` (`lib/router`), que empuja la ruta al historial del router. Las secciones viven en
-  `sectionPaths`: `/resumen`, `/subs`, `/perfil`. Acceso: `/registro`, `/entrar`, `/codigo?email=`.
+  `sectionPaths`: `/resumen`, `/subs`, `/perfil`. Acceso: `/registro`, `/entrar`,
+  `/codigo?email=&flow=register|login` (sin correo vuelve a `/entrar`; tras verificar, `register`
+  va a `/bienvenida` y `login` al Resumen, porque el back no dice si es el primer acceso).
 - **Formularios:** react-hook-form con `zodResolver` (`@hookform/resolvers`) en el hook de
   `application`; los mensajes del esquema son llaves i18n, igual que las del back. Un 400 con
   `fields` pone cada llave en su campo (`serverFieldErrors`); cualquier otro error va arriba del

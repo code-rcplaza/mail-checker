@@ -25,7 +25,7 @@ describe("Register screen", () => {
     await userEvent.click(screen.getByRole("button", { name: "Crear cuenta" }));
 
     await waitFor(() => expect(router.state.location.pathname).toBe("/codigo"));
-    expect(router.state.location.search).toEqual({ email: "ana@example.com" });
+    expect(router.state.location.search).toEqual({ email: "ana@example.com", flow: "register" });
     expect(auth.register).toHaveBeenCalledWith({
       name: "Ana Prueba",
       email: "ana@example.com",

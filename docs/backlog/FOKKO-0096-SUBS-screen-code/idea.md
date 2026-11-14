@@ -20,13 +20,16 @@ clean architecture por feature (`features/auth/{domain,application,infrastructur
 - `frontend` (`features/auth`)
 
 ## Dudas abiertas
-- Ninguna.
+- Resuelta: el back no dice si es el primer acceso (verificar responde 204). El front lo sabe por
+  el flujo: Registro y Login mandan `flow=register|login` a Código; desde Registro va a Bienvenida
+  y desde Login al Resumen. Sin cambio en el back.
+- Resuelta: `CodeInput` no borraba un casillero lleno con Backspace; se arregló con su test.
 
 ## Tareas
-- [ ] [TASK-001A Enviar los seis dígitos](TASK-001A-VERIFY-SUBMIT.md)
-- [ ] [TASK-001B Mostrar un código inválido](TASK-001B-VERIFY-WRONG.md)
-- [ ] [TASK-001C Volver a Login sin correo](TASK-001C-VERIFY-NO-EMAIL.md)
-- [ ] [TASK-002 Reenviar el código](TASK-002-CODE-RESEND.md)
-- [ ] [TASK-003 Verificar el código por HTTP](TASK-003-GATEWAY-VERIFY.md)
-- [ ] [TASK-004 Reenviar el código por HTTP](TASK-004-GATEWAY-RESEND.md)
-- [ ] [TASK-005 Conectar el hook con los componentes](TASK-005-CONTAINER-CODE.md)
+- [x] [TASK-001A Enviar los seis dígitos](TASK-001A-VERIFY-SUBMIT.md)
+- [x] [TASK-001B Mostrar un código inválido](TASK-001B-VERIFY-WRONG.md)
+- [x] [TASK-001C Volver a Login sin correo](TASK-001C-VERIFY-NO-EMAIL.md)
+- [x] [TASK-002 Reenviar el código](TASK-002-CODE-RESEND.md)
+- [x] [TASK-003 Verificar el código por HTTP](TASK-003-GATEWAY-VERIFY.md)
+- [x] [TASK-004 Reenviar el código por HTTP](TASK-004-GATEWAY-RESEND.md)
+- [x] [TASK-005 Conectar el hook con los componentes](TASK-005-CONTAINER-CODE.md)

@@ -12,12 +12,14 @@ function digitsOnly(text: string): string {
 export interface CodeInputProps {
   /** Called once the six digits are in. */
   readonly onComplete: (code: string) => void;
+  /** Called on every change, with the digits typed so far. */
+  readonly onChange?: ((code: string) => void) | undefined;
   readonly disabled?: boolean;
   readonly invalid?: boolean;
 }
 
 /** Six boxes for the login code: digits only, it advances, pastes and goes back. */
-export function CodeInput({ onComplete, disabled = false, invalid = false }: CodeInputProps) {
+export function CodeInput({ onComplete, onChange, disabled = false, invalid = false }: CodeInputProps) {
   const [digits, setDigits] = useState(emptyDigits);
   const boxes = useRef<Array<HTMLInputElement | null>>([]);
 
@@ -27,6 +29,7 @@ export function CodeInput({ onComplete, disabled = false, invalid = false }: Cod
 
   function update(next: string[]) {
     setDigits(next);
+    onChange?.(next.join(""));
     if (next.every((digit) => digit !== "")) {
       onComplete(next.join(""));
     }
@@ -34,6 +37,10 @@ export function CodeInput({ onComplete, disabled = false, invalid = false }: Cod
 
   function typeAt(index: number, typed: string) {
     const digit = digitsOnly(typed).slice(-1);
+    if (typed === "") {
+      update(digits.map((current, position) => (position === index ? "" : current)));
+      return;
+    }
     if (digit === "") {
       return;
     }
@@ -56,7 +63,7 @@ export function CodeInput({ onComplete, disabled = false, invalid = false }: Cod
       return;
     }
     event.preventDefault();
-    setDigits(digits.map((current, position) => (position === index - 1 ? "" : current)));
+    update(digits.map((current, position) => (position === index - 1 ? "" : current)));
     focusBox(index - 1);
   }
 

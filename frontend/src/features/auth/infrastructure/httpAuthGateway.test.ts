@@ -72,4 +72,38 @@ describe("http auth gateway", () => {
       key: "common.validation_failed",
     });
   });
+
+  it.each([
+    [
+      "verifies the code",
+      "/api/auth/code/verify",
+      (gateway: ReturnType<typeof createHttpAuthGateway>) =>
+        gateway.verifyCode({ email: "ana@example.com", code: "123456" }),
+      { email: "ana@example.com", code: "123456" },
+    ],
+    [
+      "resends the code",
+      "/api/auth/code/resend",
+      (gateway: ReturnType<typeof createHttpAuthGateway>) => gateway.resendCode("ana@example.com"),
+      { email: "ana@example.com" },
+    ],
+  ])("%s with POST %s and resolves empty on 204", async (_case, path, call, body) => {
+    const fetchFunction = fetchAnswering(204);
+
+    await expect(call(createHttpAuthGateway(createApiClient(fetchFunction)))).resolves.toBeUndefined();
+    expect(fetchFunction).toHaveBeenCalledWith(
+      path,
+      expect.objectContaining({ method: "POST", body: JSON.stringify(body) }),
+    );
+  });
+
+  it("throws ApiError when verifying gets a 400", async () => {
+    const body = { error: { key: "auth.code_invalid" } };
+    const gateway = createHttpAuthGateway(createApiClient(fetchAnswering(400, body)));
+
+    await expect(gateway.verifyCode({ email: "ana@example.com", code: "000000" })).rejects.toMatchObject({
+      status: 400,
+      key: "auth.code_invalid",
+    });
+  });
 });

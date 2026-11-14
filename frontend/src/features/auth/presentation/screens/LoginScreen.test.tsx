@@ -23,7 +23,7 @@ describe("Login screen", () => {
     await sendEmail(" ana@example.com ");
 
     await waitFor(() => expect(router.state.location.pathname).toBe("/codigo"));
-    expect(router.state.location.search).toEqual({ email: "ana@example.com" });
+    expect(router.state.location.search).toEqual({ email: "ana@example.com", flow: "login" });
     expect(auth.login).toHaveBeenCalledWith("ana@example.com");
   });
 

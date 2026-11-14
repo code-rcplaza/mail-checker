@@ -1,3 +1,4 @@
+import type { CodeEntry } from "../domain/code";
 import type { Me } from "../domain/me";
 import type { Registration } from "../domain/registration";
 
@@ -8,4 +9,8 @@ export interface AuthGateway {
   register(registration: Registration): Promise<void>;
   /** Sends a login code; an unknown email gets the same answer and no code. */
   login(email: string): Promise<void>;
+  /** Opens the session: the back sets the cookie. */
+  verifyCode(entry: CodeEntry): Promise<void>;
+  /** A new code replaces the previous one. */
+  resendCode(email: string): Promise<void>;
 }

@@ -166,6 +166,28 @@ describe("CodeInput", () => {
     expect(box(1)).toHaveValue("");
   });
 
+  it("clears a filled box on Backspace", async () => {
+    render(<CodeInput onComplete={() => {}} />);
+    await userEvent.click(box(1));
+    await userEvent.keyboard("12");
+
+    await userEvent.click(box(1));
+    await userEvent.keyboard("{Backspace}");
+
+    expect(box(1)).toHaveValue("");
+    expect(box(2)).toHaveValue("2");
+  });
+
+  it("tells every change of the code, complete or not", async () => {
+    const onChange = vi.fn();
+    render(<CodeInput onComplete={() => {}} onChange={onChange} />);
+
+    await userEvent.click(box(1));
+    await userEvent.keyboard("12{Backspace}");
+
+    expect(onChange.mock.calls.map(([code]) => code)).toEqual(["1", "12", "1"]);
+  });
+
   it("calls onComplete with the code once the six digits are typed", async () => {
     const onComplete = vi.fn();
     render(<CodeInput onComplete={onComplete} />);
@@ -198,6 +220,22 @@ describe("ResendTimer", () => {
     advance(1);
 
     expect(screen.getByRole("button", { name: "Reenviar código" })).toBeEnabled();
+  });
+
+  it("waits for the result of an async resend and restarts only when it went out", async () => {
+    let finish: (sent: boolean) => void = () => {};
+    const onResend = vi.fn(() => new Promise<boolean>((resolve) => (finish = resolve)));
+    render(<ResendTimer onResend={onResend} />);
+    advance(30);
+
+    fireEvent.click(screen.getByRole("button", { name: "Reenviar código" }));
+    expect(screen.getByRole("button", { name: "Reenviar código" })).toBeDisabled();
+    await act(async () => finish(false));
+
+    expect(screen.getByRole("button", { name: "Reenviar código" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "Reenviar código" }));
+    await act(async () => finish(true));
+    expect(screen.getByRole("button", { name: "Reenviar en 0:30" })).toBeDisabled();
   });
 
   it("restarts the countdown after a resend", () => {

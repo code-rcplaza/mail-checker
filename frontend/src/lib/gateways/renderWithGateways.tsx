@@ -13,6 +13,8 @@ const missingAuth: AuthGateway = {
   getMe: () => notGiven("auth"),
   register: () => notGiven("auth"),
   login: () => notGiven("auth"),
+  verifyCode: () => notGiven("auth"),
+  resendCode: () => notGiven("auth"),
 };
 
 /** Fills the ports a test did not give with doubles that fail when used. */
