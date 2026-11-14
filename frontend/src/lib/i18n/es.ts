@@ -138,6 +138,11 @@ export const es = {
   "ui.upload.kept_title": "Qué guardamos",
   "ui.upload.kept_text":
     "De cada cobro guardamos el comercio, el monto, la fecha y los últimos 4 dígitos de la tarjeta, y del archivo solo su nombre. El PDF no se guarda.",
+  "ui.analysis.step": "Análisis",
+  "ui.loading_statement.ring": "Leyendo",
+  "ui.loading_statement.title": "Leyendo tus cobros",
+  "ui.loading_statement.text": "Esto toma unos segundos.",
+  "ui.loading_statement.status": "Leyendo tu cartola",
   "ui.not_found.title": "No encontramos esta página",
   "ui.not_found.back": "Volver al inicio",
   "ui.code.digit": "Dígito {n} de {total}",

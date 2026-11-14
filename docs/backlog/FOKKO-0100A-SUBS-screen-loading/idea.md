@@ -22,8 +22,11 @@ clean architecture por feature (`features/statements/{domain,application,infrast
 - `frontend` (`features/statements`)
 
 ## Dudas abiertas
-- Ninguna.
+- Resuelta: Cargando es el estado pendiente de la misma pantalla `/fuente` (sin ruta propia); al
+  responder navega a `/analisis/<id>`, y si falla vuelve al formulario con el mensaje.
+- Resuelta: sin "Cancelar y elegir otra fuente" ni "Puedes salir y te avisamos". La subida no se
+  interrumpe en el servidor (la cartola quedaría importada igual) y el MVP no tiene avisos.
 
 ## Tareas
-- [ ] [TASK-001 Cargando](TASK-001-UPLOAD-LOADING.md)
-- [ ] [TASK-002 Conectar el hook con los componentes](TASK-002-CONTAINER-LOADING.md)
+- [x] [TASK-001 Cargando](TASK-001-UPLOAD-LOADING.md)
+- [x] [TASK-002 Conectar el hook con los componentes](TASK-002-CONTAINER-LOADING.md)

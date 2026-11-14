@@ -7,6 +7,7 @@ import { useBanks } from "../../application/useBanks";
 import { useUploadStatement } from "../../application/useUploadStatement";
 import { SourceZone } from "../components/SourceZone";
 import { UploadForm } from "../components/UploadForm";
+import { UploadLoadingContent, UploadLoadingZone } from "../components/UploadLoading";
 
 export interface UploadScreenProps {
   /** The signed-in person, from the route guard. */
@@ -22,25 +23,29 @@ export function UploadScreen({ account }: UploadScreenProps) {
   return (
     <AppShell
       header={<BrandHeader session={{ name: account.name, onNavigate: navigateTo }} />}
-      zone={<SourceZone onNavigate={navigateTo} />}
+      zone={upload.isUploading ? <UploadLoadingZone /> : <SourceZone onNavigate={navigateTo} />}
       nav={<BottomNav onNavigate={navigateTo} />}
       sideNav={<SideNav account={account} onNavigate={navigateTo} />}
     >
-      <UploadForm
-        file={upload.file}
-        fileError={upload.fileError}
-        onPick={upload.pick}
-        banks={banks}
-        bank={upload.bank}
-        onChooseBank={upload.chooseBank}
-        needsBillingDate={upload.needsBillingDate}
-        billingDate={upload.billingDateText}
-        onWriteBillingDate={upload.writeBillingDate}
-        error={upload.error}
-        canUpload={upload.canUpload}
-        isUploading={upload.isUploading}
-        onUpload={upload.upload}
-      />
+      {upload.isUploading ? (
+        <UploadLoadingContent />
+      ) : (
+        <UploadForm
+          file={upload.file}
+          fileError={upload.fileError}
+          onPick={upload.pick}
+          banks={banks}
+          bank={upload.bank}
+          onChooseBank={upload.chooseBank}
+          needsBillingDate={upload.needsBillingDate}
+          billingDate={upload.billingDateText}
+          onWriteBillingDate={upload.writeBillingDate}
+          error={upload.error}
+          canUpload={upload.canUpload}
+          isUploading={upload.isUploading}
+          onUpload={upload.upload}
+        />
+      )}
     </AppShell>
   );
 }

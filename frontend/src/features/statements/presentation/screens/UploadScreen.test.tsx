@@ -110,4 +110,36 @@ describe("Upload screen", () => {
 
     expect(await screen.findByText("Esta cartola ya estaba cargada.")).toBeInTheDocument();
   });
+
+  it("shows Cargando while the upload is on its way, with nothing to send again, then goes to Análisis", async () => {
+    let finish: (result: typeof uploaded) => void = () => {};
+    const statements = statementsWith({
+      upload: vi.fn(() => new Promise<typeof uploaded>((resolve) => (finish = resolve))),
+    });
+    const { router } = renderUpload(statements);
+
+    await chooseFile(pdf);
+    await userEvent.click(screen.getByRole("button", { name: "Analizar cartola" }));
+
+    expect(await screen.findByText("Paso 2 de 3 · Análisis")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: /Analizar cartola/ })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText("Archivo de la cartola")).not.toBeInTheDocument();
+
+    finish(uploaded);
+    await waitFor(() => expect(router.state.location.pathname).toBe("/analisis/s1"));
+    expect(statements.upload).toHaveBeenCalledOnce();
+  });
+
+  it("goes back to the form when the upload fails", async () => {
+    const statements = statementsWith({
+      upload: vi.fn(async () => Promise.reject(new ApiError({ status: 422, key: "statements.no_charges" }))),
+    });
+    renderUpload(statements);
+
+    await chooseFile(pdf);
+    await userEvent.click(screen.getByRole("button", { name: "Analizar cartola" }));
+
+    expect(await screen.findByText("No encontramos cobros en esta cartola.")).toBeInTheDocument();
+    expect(screen.getByLabelText("Archivo de la cartola")).toBeInTheDocument();
+  });
 });

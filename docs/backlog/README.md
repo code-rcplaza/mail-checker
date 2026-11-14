@@ -181,7 +181,7 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 | FOKKO-0097-SUBS | [Pantalla Bienvenida](FOKKO-0097-SUBS-screen-welcome/idea.md) | doing |
 | FOKKO-0098-SUBS | [Protección de rutas](FOKKO-0098-SUBS-front-session-routes/idea.md) | done |
 | FOKKO-0099-SUBS | [Subir cartola](FOKKO-0099-SUBS-screen-upload/idea.md) | done |
-| FOKKO-0100A-SUBS | [Pantalla Cargando](FOKKO-0100A-SUBS-screen-loading/idea.md) | todo |
+| FOKKO-0100A-SUBS | [Pantalla Cargando](FOKKO-0100A-SUBS-screen-loading/idea.md) | done |
 | FOKKO-0100B-SUBS | [Pantalla Análisis](FOKKO-0100B-SUBS-screen-analysis-result/idea.md) | todo |
 | FOKKO-0101-SUBS | [Error de lectura](FOKKO-0101-SUBS-screen-upload-error/idea.md) | todo |
 | FOKKO-0102-SUBS | [Revisión (con selector de cadencia)](FOKKO-0102-SUBS-screen-review/idea.md) | todo |
