@@ -789,7 +789,7 @@ frontend/src/
 │   ├── ui/                    componentes de base presentacionales, por Atomic Design (lista en `docs/mvp.md`):
 │   │   ├── atoms/             una sola pieza: Button, Input, Checkbox, Badge, ServiceAvatar, Skeleton, AnimatedNumber
 │   │   ├── molecules/         atoms juntos con un fin: FormField, CodeInput, ResendTimer, ListRow, SegmentedControl, Toast, EmptyState, Card
-│   │   └── organisms/         bloques completos y genéricos: SegmentedRing
+│   │   └── organisms/         bloques completos y genéricos: SegmentedRing (geometría pura en ringGeometry.ts)
 │   └── layout/                templates: AppShell, BrandHeader, BottomNav, SideNav (presentacionales)
 ├── styles/                    index.css (base) y tokens.css (tokens raw y semantic)
 ├── features/<feature>/        auth · statements · subscriptions · profile

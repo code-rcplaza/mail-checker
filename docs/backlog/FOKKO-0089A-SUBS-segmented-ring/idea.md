@@ -23,7 +23,7 @@ Esta idea cubre solo: `SegmentedRing`. El resto del trabajo original está en la
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Geometría de segmentos](TASK-001-RING-GEOMETRY.md)
-- [ ] [TASK-002A Variantes vacía o de carga](TASK-002A-RING-EMPTY-LOADING.md)
-- [ ] [TASK-002B Respetar `prefers-reduced-motion`](TASK-002B-RING-REDUCED-MOTION.md)
-- [ ] [TASK-002C Tamaños del anillo](TASK-002C-RING-SIZES.md)
+- [x] [TASK-001 Geometría de segmentos](TASK-001-RING-GEOMETRY.md)
+- [x] [TASK-002A Variantes vacía o de carga](TASK-002A-RING-EMPTY-LOADING.md)
+- [x] [TASK-002B Respetar `prefers-reduced-motion`](TASK-002B-RING-REDUCED-MOTION.md)
+- [x] [TASK-002C Tamaños del anillo](TASK-002C-RING-SIZES.md)

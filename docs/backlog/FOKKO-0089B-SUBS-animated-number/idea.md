@@ -22,4 +22,4 @@ Esta idea cubre solo: `AnimatedNumber`. El resto del trabajo original está en l
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 `AnimatedNumber`](TASK-001-ANIMATED-NUMBER.md)
+- [x] [TASK-001 `AnimatedNumber`](TASK-001-ANIMATED-NUMBER.md)

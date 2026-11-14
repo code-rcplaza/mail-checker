@@ -169,8 +169,8 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 | FOKKO-0086B-SUBS | [Test de contrato con las llaves del back](FOKKO-0086B-SUBS-i18n-contract/idea.md) | done |
 | FOKKO-0087-SUBS | [`Button`, `Input`, `FormField`, `Checkbox`](FOKKO-0087-SUBS-front-form-components/idea.md) | done |
 | FOKKO-0088-SUBS | [`Card`, `Badge`, `ListRow`, `ServiceAvatar`](FOKKO-0088-SUBS-front-display-components/idea.md) | done |
-| FOKKO-0089A-SUBS | [`SegmentedRing`](FOKKO-0089A-SUBS-segmented-ring/idea.md) | todo |
-| FOKKO-0089B-SUBS | [`AnimatedNumber`](FOKKO-0089B-SUBS-animated-number/idea.md) | todo |
+| FOKKO-0089A-SUBS | [`SegmentedRing`](FOKKO-0089A-SUBS-segmented-ring/idea.md) | done |
+| FOKKO-0089B-SUBS | [`AnimatedNumber`](FOKKO-0089B-SUBS-animated-number/idea.md) | done |
 | FOKKO-0090-SUBS | [`Toast`, `Skeleton`, `SegmentedControl`, `EmptyState`](FOKKO-0090-SUBS-front-feedback-components/idea.md) | done |
 | FOKKO-0091-SUBS | [`CodeInput`](FOKKO-0091-SUBS-front-code-input/idea.md) | done |
 | FOKKO-0092-SUBS | [`AppShell` móvil](FOKKO-0092-SUBS-front-shell-mobile/idea.md) | todo |
