@@ -1,7 +1,7 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "files": {
-    "includes": ["**", "!node_modules", "!dist"]
+    "includes": ["**", "!node_modules", "!dist", "!src/routeTree.gen.ts"]
   },
   "plugins": ["./biome-plugins/no-type-assertion.grit"],
   "formatter": {
@@ -32,5 +32,95 @@
     "parser": {
       "tailwindDirectives": true
     }
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["src/**", "!src/main.tsx", "!src/features/*/infrastructure/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/infrastructure", "**/infrastructure/**"],
+                    "message": "Only main.tsx and infrastructure import infrastructure: the rest gets the ports by useGateways."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/features/*/domain/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/infrastructure", "**/infrastructure/**"],
+                    "message": "Only main.tsx and infrastructure import infrastructure: the rest gets the ports by useGateways."
+                  },
+                  {
+                    "group": ["@tanstack/*"],
+                    "message": "This layer does not touch TanStack: data comes from application hooks."
+                  },
+                  {
+                    "group": ["**/application", "**/application/**"],
+                    "message": "Presentational pieces get data by props; only screens call application hooks."
+                  },
+                  {
+                    "group": ["**/presentation", "**/presentation/**"],
+                    "message": "domain knows nothing of the UI."
+                  }
+                ],
+                "paths": {
+                  "react": "domain is plain TypeScript: no React.",
+                  "react-dom": "domain is plain TypeScript: no React."
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["src/features/*/presentation/components/**", "src/components/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": ["**/infrastructure", "**/infrastructure/**"],
+                    "message": "Only main.tsx and infrastructure import infrastructure: the rest gets the ports by useGateways."
+                  },
+                  {
+                    "group": ["@tanstack/*"],
+                    "message": "This layer does not touch TanStack: data comes from application hooks."
+                  },
+                  {
+                    "group": ["**/application", "**/application/**"],
+                    "message": "Presentational pieces get data by props; only screens call application hooks."
+                  },
+                  {
+                    "group": ["**/lib/api/**", "**/lib/gateways/**"],
+                    "message": "Presentational pieces never reach the API nor the gateways."
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }

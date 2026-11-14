@@ -21,6 +21,6 @@ Esta idea cubre solo: Cimientos de TanStack (Query, Router). El resto del trabaj
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Reintentos de Query](TASK-001A-QUERY-DEFAULTS.md)
-- [ ] [TASK-001B Pantalla 404 del router](TASK-001B-ROUTER-404.md)
-- [ ] [TASK-001C Sin estado global duplicado](TASK-001C-NO-GLOBAL-STATE.md)
+- [x] [TASK-001A Reintentos de Query](TASK-001A-QUERY-DEFAULTS.md)
+- [x] [TASK-001B Pantalla 404 del router](TASK-001B-ROUTER-404.md)
+- [x] [TASK-001C Sin estado global duplicado](TASK-001C-NO-GLOBAL-STATE.md)

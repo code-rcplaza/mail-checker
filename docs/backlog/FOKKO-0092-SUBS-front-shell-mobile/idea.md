@@ -20,8 +20,8 @@ En el móvil, la app es una hoja con esquinas redondeadas sobre una zona superio
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 `AppShell` móvil](TASK-001-APP-SHELL-LAYOUT.md)
-- [ ] [TASK-002 `BrandHeader`](TASK-002-BRAND-HEADER.md)
-- [ ] [TASK-003 `BottomNav`](TASK-003-BOTTOM-NAV.md)
-- [ ] [TASK-004A `BackLink`](TASK-004A-BACKLINK.md)
-- [ ] [TASK-004B `StepIndicator`](TASK-004B-STEP-INDICATOR.md)
+- [x] [TASK-001 `AppShell` móvil](TASK-001-APP-SHELL-LAYOUT.md)
+- [x] [TASK-002 `BrandHeader`](TASK-002-BRAND-HEADER.md)
+- [x] [TASK-003 `BottomNav`](TASK-003-BOTTOM-NAV.md)
+- [x] [TASK-004A `BackLink`](TASK-004A-BACKLINK.md)
+- [x] [TASK-004B `StepIndicator`](TASK-004B-STEP-INDICATOR.md)

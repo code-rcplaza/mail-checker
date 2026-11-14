@@ -19,7 +19,7 @@ Los casos de uso del front (`application`) dependen de puertos (gateways) y no d
 - La composición completa solo se puede probar cuando existan gateways (primeras pantallas).
 
 ## Tareas
-- [ ] [TASK-001 Entregar los puertos con un Context](TASK-001-GATEWAYS-PROVIDER.md)
-- [ ] [TASK-002 Fallar sin proveedor](TASK-002-GATEWAYS-MISSING.md)
-- [ ] [TASK-003 Ayudante de pruebas con dobles](TASK-003-RENDER-WITH-GATEWAYS.md)
-- [ ] [TASK-004 Armar los puertos reales en `main.tsx`](TASK-004-MAIN-COMPOSITION.md)
+- [x] [TASK-001 Entregar los puertos con un Context](TASK-001-GATEWAYS-PROVIDER.md)
+- [x] [TASK-002 Fallar sin proveedor](TASK-002-GATEWAYS-MISSING.md)
+- [x] [TASK-003 Ayudante de pruebas con dobles](TASK-003-RENDER-WITH-GATEWAYS.md)
+- [x] [TASK-004 Armar los puertos reales en `main.tsx`](TASK-004-MAIN-COMPOSITION.md)

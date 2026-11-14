@@ -784,13 +784,16 @@ Clean architecture por feature, igual que el back: las dependencias apuntan haci
 ```
 frontend/src/
 ├── main.tsx                   composición: crea los gateways reales y monta `GatewaysProvider`
+├── app/                       router.ts (`createAppRouter`), AppProviders (Query → Gateways → Router), screens/ (404)
 ├── routes/                    TanStack Router (file-based); cada ruta monta un contenedor de `screens`
+├── routeTree.gen.ts           generado por `@tanstack/router-plugin` desde `routes/` (se versiona; Biome lo ignora)
 ├── components/
 │   ├── ui/                    componentes de base presentacionales, por Atomic Design (lista en `docs/mvp.md`):
 │   │   ├── atoms/             una sola pieza: Button, Input, Checkbox, Badge, ServiceAvatar, Skeleton, AnimatedNumber
 │   │   ├── molecules/         atoms juntos con un fin: FormField, CodeInput, ResendTimer, ListRow, SegmentedControl, Toast, EmptyState, Card
 │   │   └── organisms/         bloques completos y genéricos: SegmentedRing (geometría pura en ringGeometry.ts)
-│   └── layout/                templates: AppShell, BrandHeader, BottomNav, SideNav (presentacionales)
+│   └── layout/                templates: AppShell, BrandHeader, BottomNav, SideNav, BackLink, StepIndicator;
+│                              navigation.ts (rutas de las secciones) y AppLink (presentacionales)
 ├── styles/                    index.css (base) y tokens.css (tokens raw y semantic)
 ├── features/<feature>/        auth · statements · subscriptions · profile
 │   ├── domain/                tipos `readonly`, funciones puras y schemas zod; sin React ni red
@@ -815,11 +818,25 @@ frontend/src/
 - **Componente presentacional:** recibe datos y callbacks por props; puede usar `t()` y `react`, nada más.
   No usa `useQuery`, router, `fetch` ni importa `application` o `infrastructure`. Con las mismas props
   pinta lo mismo, así que se prueba sin servidor y se extrae copiando su carpeta.
+- **Navegación en componentes:** los componentes no usan el router. Los enlaces son `AppLink`: un
+  `<a href>` real cuyo clic simple llama `onNavigate(to)` (la pantalla le pasa `navigate` del router);
+  un clic con Cmd/Ctrl/Shift o el botón del medio queda para el navegador. Las secciones viven en
+  `sectionPaths`: `/resumen`, `/subs`, `/perfil`.
 - **Contenedor (`screens`):** único lugar que llama hooks de `application`; sin lógica inline en el JSX.
 - **Puertos:** se entregan por Context (`useGateways`). Aunque cada puerto tenga una sola implementación
   real, las pruebas usan un doble en memoria, así que se permiten (como en el back).
-- **Guardia:** Biome con `noRestrictedImports` por carpeta rompe el lint al cruzar un límite
-  (ideas `FOKKO-0085C-SUBS` y `FOKKO-0085D-SUBS`).
+- **Guardia:** Biome con `noRestrictedImports` por carpeta (`overrides` en `biome.json`) rompe el
+  lint al cruzar un límite:
+  - `features/*/domain`: sin `react`, `@tanstack/*`, `application`, `presentation` ni `infrastructure`.
+  - `presentation/components` y `components/`: sin `@tanstack/*`, `application`, `infrastructure`,
+    `lib/api` ni `lib/gateways`; sí `react` y `lib/i18n`.
+  - `infrastructure` solo se importa desde `main.tsx` y desde otra `infrastructure`.
+  - `src/layerBoundaries.test.ts` escribe archivos de prueba en cada capa y comprueba que la regla salte.
+- **Datos:** `createQueryClient` no reintenta errores de la API (4xx) y reintenta una vez los de red;
+  las mutaciones no reintentan. En pruebas, `renderWithGateways` da un `QueryClient` nuevo sin
+  reintentos y rellena los puertos no dados con dobles que fallan al usarse.
+- **Respuestas:** cada gateway valida con zod lo que devuelve la API (`meSchema.parse`); el cliente
+  devuelve `unknown`.
 
 ### Mobile first
 
@@ -828,6 +845,12 @@ frontend/src/
   (Resumen · Subs), hoja con esquinas redondeadas y objetivos táctiles de al menos 44 px.
 - **Escritorio (`lg:`, 1024 px):** barra lateral con Resumen y Subs y contenido en dos columnas (detalle en
   `docs/mvp.md`). La tablet (768–1023 px) no está diseñada: usa el layout de escritorio con barra inferior.
+- **`AppShell`:** un solo árbol para los tres anchos. En el celular, la zona (brillo `bg-zone`, header
+  y lo que la pantalla ponga arriba) y la hoja que sube 24 px. Desde `md:` la zona se abre
+  (`display: contents`): el header ocupa las dos columnas, la zona queda como tarjeta hero a la
+  izquierda y la hoja es la columna derecha (máximo 1200 px, 48 px de separación). Desde `lg:` la
+  barra lateral (que trae la marca) reemplaza a la inferior y al header. Sin `nav` ni `sideNav` es
+  una pantalla de acceso.
 - Cada cargo y suscripción muestra su banco y tarjeta (ej. "BCI · crédito").
 - Tema claro/oscuro con tokens propios (`src/styles/tokens.css`), sin librería de UI:
   - **Raw:** la paleta aprobada de Fokko (Púrpura, Coral, Emerald, Gold, Onyx; 12 pasos OKLCH por

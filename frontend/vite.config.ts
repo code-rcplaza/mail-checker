@@ -1,4 +1,5 @@
 import tailwindcss from "@tailwindcss/vite";
+import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vitest/config";
 
@@ -7,7 +8,8 @@ import { defineConfig } from "vitest/config";
 const backendURL = "http://127.0.0.1:8080";
 
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  // The router plugin builds src/routeTree.gen.ts from src/routes; it goes before react.
+  plugins: [tanstackRouter({ target: "react", autoCodeSplitting: true }), react(), tailwindcss()],
   server: {
     port: 5173,
     strictPort: true,

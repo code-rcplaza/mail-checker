@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @import "./tokens.css";
 
+/* The glow of the top zone: the accent fades into the page (handoff `zone`). */
+@utility bg-zone {
+  background-image: radial-gradient(110% 80% at 50% 0%, var(--color-zone-from) 0%, var(--color-page) 78%);
+}
+
 @layer base {
   html {
     color-scheme: light;

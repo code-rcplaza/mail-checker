@@ -162,9 +162,9 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 | FOKKO-0084A-SUBS | [Tokens de diseño en Tailwind](FOKKO-0084A-SUBS-tailwind-tokens/idea.md) | done |
 | FOKKO-0084B-SUBS | [Preferencia de tema](FOKKO-0084B-SUBS-theme-preference/idea.md) | done |
 | FOKKO-0085A-SUBS | [Cliente de la API](FOKKO-0085A-SUBS-api-client/idea.md) | done |
-| FOKKO-0085B-SUBS | [Cimientos de TanStack (Query, Router)](FOKKO-0085B-SUBS-query-router-base/idea.md) | todo |
-| FOKKO-0085C-SUBS | [Límites entre capas del front](FOKKO-0085C-SUBS-front-layer-boundaries/idea.md) | todo |
-| FOKKO-0085D-SUBS | [Puertos del front por Context](FOKKO-0085D-SUBS-front-gateways-context/idea.md) | todo |
+| FOKKO-0085B-SUBS | [Cimientos de TanStack (Query, Router)](FOKKO-0085B-SUBS-query-router-base/idea.md) | done |
+| FOKKO-0085C-SUBS | [Límites entre capas del front](FOKKO-0085C-SUBS-front-layer-boundaries/idea.md) | done |
+| FOKKO-0085D-SUBS | [Puertos del front por Context](FOKKO-0085D-SUBS-front-gateways-context/idea.md) | done |
 | FOKKO-0086A-SUBS | [Traducción tipada con catálogo en español](FOKKO-0086A-SUBS-translate-catalog/idea.md) | done |
 | FOKKO-0086B-SUBS | [Test de contrato con las llaves del back](FOKKO-0086B-SUBS-i18n-contract/idea.md) | done |
 | FOKKO-0087-SUBS | [`Button`, `Input`, `FormField`, `Checkbox`](FOKKO-0087-SUBS-front-form-components/idea.md) | done |
@@ -173,8 +173,8 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 | FOKKO-0089B-SUBS | [`AnimatedNumber`](FOKKO-0089B-SUBS-animated-number/idea.md) | done |
 | FOKKO-0090-SUBS | [`Toast`, `Skeleton`, `SegmentedControl`, `EmptyState`](FOKKO-0090-SUBS-front-feedback-components/idea.md) | done |
 | FOKKO-0091-SUBS | [`CodeInput`](FOKKO-0091-SUBS-front-code-input/idea.md) | done |
-| FOKKO-0092-SUBS | [`AppShell` móvil](FOKKO-0092-SUBS-front-shell-mobile/idea.md) | todo |
-| FOKKO-0093-SUBS | [`SideNav` de escritorio](FOKKO-0093-SUBS-front-shell-desktop/idea.md) | todo |
+| FOKKO-0092-SUBS | [`AppShell` móvil](FOKKO-0092-SUBS-front-shell-mobile/idea.md) | done |
+| FOKKO-0093-SUBS | [`SideNav` de escritorio](FOKKO-0093-SUBS-front-shell-desktop/idea.md) | done |
 | FOKKO-0094-SUBS | [Pantalla Registro](FOKKO-0094-SUBS-screen-register/idea.md) | todo |
 | FOKKO-0095-SUBS | [Pantalla Login](FOKKO-0095-SUBS-screen-login/idea.md) | todo |
 | FOKKO-0096-SUBS | [Pantalla Código](FOKKO-0096-SUBS-screen-code/idea.md) | todo |
