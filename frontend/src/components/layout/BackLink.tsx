@@ -1,5 +1,5 @@
+import { AppLink } from "../ui/atoms/AppLink";
 import { BackIcon } from "../ui/atoms/icons";
-import { AppLink } from "./AppLink";
 import type { Navigate } from "./navigation";
 
 export interface BackLinkProps {

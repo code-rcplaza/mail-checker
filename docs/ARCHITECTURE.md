@@ -789,11 +789,11 @@ frontend/src/
 ├── routeTree.gen.ts           generado por `@tanstack/router-plugin` desde `routes/` (se versiona; Biome lo ignora)
 ├── components/
 │   ├── ui/                    componentes de base presentacionales, por Atomic Design (lista en `docs/mvp.md`):
-│   │   ├── atoms/             una sola pieza: Button, Input, Checkbox, Badge, ServiceAvatar, Skeleton, AnimatedNumber
+│   │   ├── atoms/             una sola pieza: Button, Input, Checkbox, Badge, ServiceAvatar, Skeleton, AnimatedNumber, AppLink, icons
 │   │   ├── molecules/         atoms juntos con un fin: FormField, CodeInput, ResendTimer, ListRow, SegmentedControl, Toast, EmptyState, Card
 │   │   └── organisms/         bloques completos y genéricos: SegmentedRing (geometría pura en ringGeometry.ts)
 │   └── layout/                templates: AppShell, BrandHeader, BottomNav, SideNav, BackLink, StepIndicator;
-│                              navigation.ts (rutas de las secciones) y AppLink (presentacionales)
+│                              y navigation.ts (rutas de las secciones); AppLink es un atom
 ├── styles/                    index.css (base) y tokens.css (tokens raw y semantic)
 ├── features/<feature>/        auth · statements · subscriptions · profile
 │   ├── domain/                tipos `readonly`, funciones puras y schemas zod; sin React ni red
@@ -821,7 +821,12 @@ frontend/src/
 - **Navegación en componentes:** los componentes no usan el router. Los enlaces son `AppLink`: un
   `<a href>` real cuyo clic simple llama `onNavigate(to)` (la pantalla le pasa `navigate` del router);
   un clic con Cmd/Ctrl/Shift o el botón del medio queda para el navegador. Las secciones viven en
-  `sectionPaths`: `/resumen`, `/subs`, `/perfil`.
+  `sectionPaths`: `/resumen`, `/subs`, `/perfil`. Acceso: `/registro`, `/entrar`, `/codigo?email=`.
+- **Formularios:** react-hook-form con `zodResolver` (`@hookform/resolvers`) en el hook de
+  `application`; los mensajes del esquema son llaves i18n, igual que las del back. Un 400 con
+  `fields` pone cada llave en su campo (`serverFieldErrors`); cualquier otro error va arriba del
+  botón (`serverMessageOf`: la llave, o `common.unavailable` sin red). El hook bloquea un segundo
+  envío mientras el primero viaja.
 - **Contenedor (`screens`):** único lugar que llama hooks de `application`; sin lógica inline en el JSX.
 - **Puertos:** se entregan por Context (`useGateways`). Aunque cada puerto tenga una sola implementación
   real, las pruebas usan un doble en memoria, así que se permiten (como en el back).

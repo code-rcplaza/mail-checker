@@ -9,7 +9,7 @@ function notGiven(name: string): Promise<never> {
   return Promise.reject(new Error(`the ${name} gateway was not given to this test`));
 }
 
-const missingAuth: AuthGateway = { getMe: () => notGiven("auth") };
+const missingAuth: AuthGateway = { getMe: () => notGiven("auth"), register: () => notGiven("auth") };
 
 /** Fills the ports a test did not give with doubles that fail when used. */
 export function gatewaysWith(given: Partial<Gateways>): Gateways {

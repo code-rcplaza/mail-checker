@@ -1,6 +1,6 @@
 import { classNames } from "../../lib/classNames";
 import { t } from "../../lib/i18n/translate";
-import { AppLink } from "./AppLink";
+import { AppLink } from "../ui/atoms/AppLink";
 import { BrandMark, initialsOf } from "./BrandHeader";
 import { type Navigate, type NavSection, navEntries, sectionPaths } from "./navigation";
 

@@ -1,10 +1,16 @@
-import { describe, expect, it } from "vitest";
-import type { ApiClient } from "../../../lib/api/client";
+import { describe, expect, it, vi } from "vitest";
+import { type ApiClient, ApiError, createApiClient } from "../../../lib/api/client";
 import { createHttpAuthGateway } from "./httpAuthGateway";
 
 function apiAnswering(body: unknown): ApiClient {
   return { get: async () => body, send: async () => undefined };
 }
+
+function fetchAnswering(status: number, body?: unknown) {
+  return vi.fn(async () => new Response(body === undefined ? null : JSON.stringify(body), { status }));
+}
+
+const registration = { name: "Ana Prueba", email: "ana@example.com", acceptedTerms: true };
 
 describe("http auth gateway", () => {
   it("reads me from the API", async () => {
@@ -15,5 +21,33 @@ describe("http auth gateway", () => {
 
   it("rejects an answer with another shape", async () => {
     await expect(createHttpAuthGateway(apiAnswering({ id: 1 })).getMe()).rejects.toThrow();
+  });
+
+  it("registers with POST /api/auth/register and resolves empty on 204", async () => {
+    const fetchFunction = fetchAnswering(204);
+
+    await expect(
+      createHttpAuthGateway(createApiClient(fetchFunction)).register(registration),
+    ).resolves.toBeUndefined();
+    expect(fetchFunction).toHaveBeenCalledWith(
+      "/api/auth/register",
+      expect.objectContaining({ method: "POST", body: JSON.stringify(registration) }),
+    );
+  });
+
+  it.each([
+    [400, { error: { key: "common.validation_failed", fields: { email: "auth.email_invalid" } } }],
+    [409, { error: { key: "common.conflict" } }],
+  ])("throws ApiError with the key and the fields on %d", async (status, body) => {
+    const gateway = createHttpAuthGateway(createApiClient(fetchAnswering(status, body)));
+
+    const error = await gateway.register(registration).catch((caught: unknown) => caught);
+
+    expect(error).toBeInstanceOf(ApiError);
+    expect(error).toMatchObject({
+      status,
+      key: body.error.key,
+      fields: "fields" in body.error ? body.error.fields : {},
+    });
   });
 });

@@ -1,6 +1,6 @@
 import { t } from "../../lib/i18n/translate";
+import { AppLink } from "../ui/atoms/AppLink";
 import { MoonIcon, SunIcon } from "../ui/atoms/icons";
-import { AppLink } from "./AppLink";
 import { type Navigate, sectionPaths } from "./navigation";
 
 const neutralInitials = "•";

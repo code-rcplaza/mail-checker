@@ -1,5 +1,7 @@
 import type { AnchorHTMLAttributes, MouseEvent } from "react";
-import type { Navigate } from "./navigation";
+
+/** Links get the destination; the screen decides how to go there (the router). */
+export type Navigate = (to: string) => void;
 
 export interface AppLinkProps extends Omit<AnchorHTMLAttributes<HTMLAnchorElement>, "href" | "onClick"> {
   readonly to: string;

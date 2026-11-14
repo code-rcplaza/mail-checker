@@ -3,7 +3,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import type { AuthGateway } from "../../features/auth/application/ports";
 import { useGateways } from "./GatewaysProvider";
-import { renderWithGateways } from "./renderWithGateways";
+import { gatewaysWith, renderWithGateways } from "./renderWithGateways";
 
 const ana = { id: "u1", name: "Ana Prueba", email: "ana@example.com", initials: "AP" };
 
@@ -15,7 +15,7 @@ function MeName() {
 
 describe("gateways", () => {
   it("hands the hooks the double the provider got", async () => {
-    const auth: AuthGateway = { getMe: vi.fn(async () => ana) };
+    const auth: AuthGateway = { ...gatewaysWith({}).auth, getMe: vi.fn(async () => ana) };
 
     renderWithGateways(<MeName />, { auth });
 

@@ -10,8 +10,7 @@ export const sectionPaths = {
 
 export type NavSection = "summary" | "subs";
 
-/** Layout links get the destination; the screen decides how to go there (the router). */
-export type Navigate = (to: string) => void;
+export type { Navigate } from "../ui/atoms/AppLink";
 
 export interface NavEntry {
   readonly section: NavSection;
