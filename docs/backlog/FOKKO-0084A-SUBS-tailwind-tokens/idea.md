@@ -21,6 +21,6 @@ Esta idea cubre solo: Tokens de diseño en Tailwind. El resto del trabajo origin
 - Los tokens salen del `tokens.json` del handoff Fokko Subs. Hace falta tener ese archivo a mano; no se inventan colores.
 
 ## Tareas
-- [ ] [TASK-001A Tokens en `:root`](TASK-001A-TOKENS-ROOT.md)
-- [ ] [TASK-001B Clases de Tailwind sobre los tokens](TASK-001B-TOKENS-CLASSES.md)
-- [ ] [TASK-001C Valores del tema oscuro](TASK-001C-TOKENS-DARK.md)
+- [x] [TASK-001A Tokens en `:root`](TASK-001A-TOKENS-ROOT.md)
+- [x] [TASK-001B Clases de Tailwind sobre los tokens](TASK-001B-TOKENS-CLASSES.md)
+- [x] [TASK-001C Valores del tema oscuro](TASK-001C-TOKENS-DARK.md)

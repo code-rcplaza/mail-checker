@@ -21,5 +21,5 @@ Esta idea cubre solo: Preferencia de tema. El resto del trabajo original está e
 - Los tokens salen del `tokens.json` del handoff Fokko Subs. Hace falta tener ese archivo a mano; no se inventan colores.
 
 ## Tareas
-- [ ] [TASK-001A Seguir el tema del sistema](TASK-001A-THEME-SYSTEM.md)
-- [ ] [TASK-001B Recordar la preferencia](TASK-001B-THEME-PERSIST.md)
+- [x] [TASK-001A Seguir el tema del sistema](TASK-001A-THEME-SYSTEM.md)
+- [x] [TASK-001B Recordar la preferencia](TASK-001B-THEME-PERSIST.md)

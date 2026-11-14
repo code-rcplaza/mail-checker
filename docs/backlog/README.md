@@ -156,23 +156,23 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 
 | # | Idea | Estado |
 |---|---|---|
-| FOKKO-0083A-SUBS | [Proyecto Vite con React](FOKKO-0083A-SUBS-vite-react/idea.md) | todo |
-| FOKKO-0083B-SUBS | [TypeScript estricto con Biome](FOKKO-0083B-SUBS-strict-biome/idea.md) | todo |
-| FOKKO-0083C-SUBS | [Corredor de pruebas del front](FOKKO-0083C-SUBS-front-tests/idea.md) | todo |
-| FOKKO-0084A-SUBS | [Tokens de diseño en Tailwind](FOKKO-0084A-SUBS-tailwind-tokens/idea.md) | todo |
-| FOKKO-0084B-SUBS | [Preferencia de tema](FOKKO-0084B-SUBS-theme-preference/idea.md) | todo |
-| FOKKO-0085A-SUBS | [Cliente de la API](FOKKO-0085A-SUBS-api-client/idea.md) | todo |
+| FOKKO-0083A-SUBS | [Proyecto Vite con React](FOKKO-0083A-SUBS-vite-react/idea.md) | done |
+| FOKKO-0083B-SUBS | [TypeScript estricto con Biome](FOKKO-0083B-SUBS-strict-biome/idea.md) | done |
+| FOKKO-0083C-SUBS | [Corredor de pruebas del front](FOKKO-0083C-SUBS-front-tests/idea.md) | done |
+| FOKKO-0084A-SUBS | [Tokens de diseño en Tailwind](FOKKO-0084A-SUBS-tailwind-tokens/idea.md) | done |
+| FOKKO-0084B-SUBS | [Preferencia de tema](FOKKO-0084B-SUBS-theme-preference/idea.md) | done |
+| FOKKO-0085A-SUBS | [Cliente de la API](FOKKO-0085A-SUBS-api-client/idea.md) | done |
 | FOKKO-0085B-SUBS | [Cimientos de TanStack (Query, Router)](FOKKO-0085B-SUBS-query-router-base/idea.md) | todo |
 | FOKKO-0085C-SUBS | [Límites entre capas del front](FOKKO-0085C-SUBS-front-layer-boundaries/idea.md) | todo |
 | FOKKO-0085D-SUBS | [Puertos del front por Context](FOKKO-0085D-SUBS-front-gateways-context/idea.md) | todo |
-| FOKKO-0086A-SUBS | [Traducción tipada con catálogo en español](FOKKO-0086A-SUBS-translate-catalog/idea.md) | todo |
-| FOKKO-0086B-SUBS | [Test de contrato con las llaves del back](FOKKO-0086B-SUBS-i18n-contract/idea.md) | todo |
-| FOKKO-0087-SUBS | [`Button`, `Input`, `FormField`, `Checkbox`](FOKKO-0087-SUBS-front-form-components/idea.md) | todo |
-| FOKKO-0088-SUBS | [`Card`, `Badge`, `ListRow`, `ServiceAvatar`](FOKKO-0088-SUBS-front-display-components/idea.md) | todo |
+| FOKKO-0086A-SUBS | [Traducción tipada con catálogo en español](FOKKO-0086A-SUBS-translate-catalog/idea.md) | done |
+| FOKKO-0086B-SUBS | [Test de contrato con las llaves del back](FOKKO-0086B-SUBS-i18n-contract/idea.md) | done |
+| FOKKO-0087-SUBS | [`Button`, `Input`, `FormField`, `Checkbox`](FOKKO-0087-SUBS-front-form-components/idea.md) | done |
+| FOKKO-0088-SUBS | [`Card`, `Badge`, `ListRow`, `ServiceAvatar`](FOKKO-0088-SUBS-front-display-components/idea.md) | done |
 | FOKKO-0089A-SUBS | [`SegmentedRing`](FOKKO-0089A-SUBS-segmented-ring/idea.md) | todo |
 | FOKKO-0089B-SUBS | [`AnimatedNumber`](FOKKO-0089B-SUBS-animated-number/idea.md) | todo |
-| FOKKO-0090-SUBS | [`Toast`, `Skeleton`, `SegmentedControl`, `EmptyState`](FOKKO-0090-SUBS-front-feedback-components/idea.md) | todo |
-| FOKKO-0091-SUBS | [`CodeInput`](FOKKO-0091-SUBS-front-code-input/idea.md) | todo |
+| FOKKO-0090-SUBS | [`Toast`, `Skeleton`, `SegmentedControl`, `EmptyState`](FOKKO-0090-SUBS-front-feedback-components/idea.md) | done |
+| FOKKO-0091-SUBS | [`CodeInput`](FOKKO-0091-SUBS-front-code-input/idea.md) | done |
 | FOKKO-0092-SUBS | [`AppShell` móvil](FOKKO-0092-SUBS-front-shell-mobile/idea.md) | todo |
 | FOKKO-0093-SUBS | [`SideNav` de escritorio](FOKKO-0093-SUBS-front-shell-desktop/idea.md) | todo |
 | FOKKO-0094-SUBS | [Pantalla Registro](FOKKO-0094-SUBS-screen-register/idea.md) | todo |

@@ -23,4 +23,4 @@ Esta idea cubre solo: Corredor de pruebas del front. El resto del trabajo origin
 - Comandos del front (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`) se agregan a "Comandos" de `CLAUDE.md` con tu ok.
 
 ## Tareas
-- [ ] [TASK-001 Pruebas de componentes](TASK-001-FRONT-TEST-RUNNER.md)
+- [x] [TASK-001 Pruebas de componentes](TASK-001-FRONT-TEST-RUNNER.md)

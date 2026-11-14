@@ -22,7 +22,7 @@ Esta idea cubre solo: Cliente de la API. El resto del trabajo original está en 
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Leer respuestas correctas](TASK-001A-CLIENT-SUCCESS.md)
-- [ ] [TASK-001B Leer errores de la API](TASK-001B-CLIENT-ERRORS.md)
-- [ ] [TASK-001C Enviar cookie con origen propio](TASK-001C-CLIENT-CREDENTIALS.md)
-- [ ] [TASK-002 Errores de la API tipados](TASK-002-API-ERROR-TYPES.md)
+- [x] [TASK-001A Leer respuestas correctas](TASK-001A-CLIENT-SUCCESS.md)
+- [x] [TASK-001B Leer errores de la API](TASK-001B-CLIENT-ERRORS.md)
+- [x] [TASK-001C Enviar cookie con origen propio](TASK-001C-CLIENT-CREDENTIALS.md)
+- [x] [TASK-002 Errores de la API tipados](TASK-002-API-ERROR-TYPES.md)

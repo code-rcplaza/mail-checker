@@ -786,8 +786,12 @@ frontend/src/
 ├── main.tsx                   composición: crea los gateways reales y monta `GatewaysProvider`
 ├── routes/                    TanStack Router (file-based); cada ruta monta un contenedor de `screens`
 ├── components/
-│   ├── ui/                    componentes de base presentacionales (Button, Input, Card, Badge, ListRow…; lista en `docs/mvp.md`)
-│   └── layout/                AppShell, BrandHeader, BottomNav, SideNav (presentacionales)
+│   ├── ui/                    componentes de base presentacionales, por Atomic Design (lista en `docs/mvp.md`):
+│   │   ├── atoms/             una sola pieza: Button, Input, Checkbox, Badge, ServiceAvatar, Skeleton, AnimatedNumber
+│   │   ├── molecules/         atoms juntos con un fin: FormField, CodeInput, ResendTimer, ListRow, SegmentedControl, Toast, EmptyState, Card
+│   │   └── organisms/         bloques completos y genéricos: SegmentedRing
+│   └── layout/                templates: AppShell, BrandHeader, BottomNav, SideNav (presentacionales)
+├── styles/                    index.css (base) y tokens.css (tokens raw y semantic)
 ├── features/<feature>/        auth · statements · subscriptions · profile
 │   ├── domain/                tipos `readonly`, funciones puras y schemas zod; sin React ni red
 │   ├── application/           hooks de caso de uso (`useSummary`, `useRegister`) y puertos (gateways)
@@ -799,8 +803,14 @@ frontend/src/
     ├── api/                   client.ts, types.ts
     ├── gateways/              `GatewaysProvider`, `useGateways`, `renderWithGateways` (pruebas)
     ├── format.ts              montos y fechas (es-CL)
-    └── i18n/                  es.ts (catálogo tipado de llaves) + t(key, params)
+    ├── i18n/                  es.ts (catálogo tipado de llaves) + t(key, params)
+    └── theme/                 preferencia claro/oscuro/sistema (localStorage; si falla, sistema)
 ```
+
+- **Atomic Design:** atoms → molecules → organisms en `components/ui`; los templates son
+  `components/layout`; los organismos propios de una feature viven en su
+  `presentation/components` y las páginas son los contenedores de `screens`. Una pieza solo
+  importa piezas de su nivel o de niveles menores.
 
 - **Componente presentacional:** recibe datos y callbacks por props; puede usar `t()` y `react`, nada más.
   No usa `useQuery`, router, `fetch` ni importa `application` o `infrastructure`. Con las mismas props
@@ -819,7 +829,19 @@ frontend/src/
 - **Escritorio (`lg:`, 1024 px):** barra lateral con Resumen y Subs y contenido en dos columnas (detalle en
   `docs/mvp.md`). La tablet (768–1023 px) no está diseñada: usa el layout de escritorio con barra inferior.
 - Cada cargo y suscripción muestra su banco y tarjeta (ej. "BCI · crédito").
-- Tema claro/oscuro con tokens de color propios en `:root` (con variante `dark`), sin librería de UI.
+- Tema claro/oscuro con tokens propios (`src/styles/tokens.css`), sin librería de UI:
+  - **Raw:** la paleta aprobada de Fokko (Púrpura, Coral, Emerald, Gold, Onyx; 12 pasos OKLCH por
+    esquema: 1–2 fondos, 3–5 componentes, 6–8 bordes, 9–10 sólidos, 11–12 texto) y el crema de la
+    página clara (`sand`), que no está en la paleta. Son variables CSS sin clases de Tailwind.
+  - **Semantic:** para qué es el color (`page`, `ink`, `primary`, `alert`, `danger`…). Son los únicos
+    colores que conoce Tailwind (`@theme` con `--color-*: initial`) y los únicos que usan los
+    componentes. Cada esquema los apunta a un paso raw; salen del `tokens.json` del handoff, llevado
+    al paso más cercano de la paleta.
+  - Un test falla si fuera de `tokens.css` aparece `--raw-*`, un hex, `rgb()`/`hsl()`/`oklch()` o una
+    clase de la paleta por defecto de Tailwind.
+  - Oscuro: `data-theme="dark"` en `<html>`, o el sistema cuando la preferencia es "sistema".
+  - Radios `sm` 6, `md` 10, `lg` 14, `sheet` 28 px; fuentes Be Vietnam Pro (cuerpo) y Prompt 600
+    (wordmark), servidas desde el propio binario (`@fontsource`), sin pedir nada a terceros.
 
 Los componentes del MVP están listados en `docs/mvp.md`. Se escriben cuando la pantalla que los
 usa los pida (YAGNI), no todos de golpe. Si hace falta un overlay (diálogo, hoja), hay que cuidar
@@ -828,7 +850,7 @@ dependencia aprobada.
 
 ### Desarrollo y build
 
-- Desarrollo: Vite en `:5173` con proxy `/api` → Go en `:8765`.
+- Desarrollo: Vite en `:5173` con proxy `/api` → Go en `:8080` (el puerto por defecto de `MAILCHECKER_PORT`).
 - Build: `pnpm build` deja el front en `backend/internal/shared/httpserver/web/dist` y Go lo
   embebe, así queda **un solo binario**.
 

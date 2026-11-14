@@ -20,8 +20,8 @@ Los formularios necesitan componentes propios de base, accesibles y con objetivo
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Variantes de `Button`](TASK-001A-BUTTON-VARIANTS.md)
-- [ ] [TASK-001B Bloquear el clic deshabilitado o cargando](TASK-001B-BUTTON-BLOCKED.md)
-- [ ] [TASK-002A Etiqueta de `FormField`](TASK-002A-FORMFIELD-LABEL.md)
-- [ ] [TASK-002B Errores de `FormField`](TASK-002B-FORMFIELD-ERROR.md)
-- [ ] [TASK-003 `Checkbox`](TASK-003-CHECKBOX.md)
+- [x] [TASK-001A Variantes de `Button`](TASK-001A-BUTTON-VARIANTS.md)
+- [x] [TASK-001B Bloquear el clic deshabilitado o cargando](TASK-001B-BUTTON-BLOCKED.md)
+- [x] [TASK-002A Etiqueta de `FormField`](TASK-002A-FORMFIELD-LABEL.md)
+- [x] [TASK-002B Errores de `FormField`](TASK-002B-FORMFIELD-ERROR.md)
+- [x] [TASK-003 `Checkbox`](TASK-003-CHECKBOX.md)

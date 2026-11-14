@@ -1,0 +1,7 @@
+language js
+
+// `as const` freezes a literal; any other `as` hides a type error.
+`$value as $type` where {
+  not $type <: r"const",
+  register_diagnostic(span=$value, message="No `as`: narrow the type with a check instead of asserting it.", severity="error")
+}

@@ -20,6 +20,6 @@ Esta idea cubre solo: Proyecto Vite con React. El resto del trabajo original est
 - Comandos del front (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`) se agregan a "Comandos" de `CLAUDE.md` con tu ok.
 
 ## Tareas
-- [ ] [TASK-001A Compilar el sitio](TASK-001A-SCAFFOLD-BUILD.md)
-- [ ] [TASK-001B Proxy de desarrollo hacia la API](TASK-001B-SCAFFOLD-PROXY.md)
-- [ ] [TASK-001C Montar la app](TASK-001C-SCAFFOLD-MOUNT.md)
+- [x] [TASK-001A Compilar el sitio](TASK-001A-SCAFFOLD-BUILD.md)
+- [x] [TASK-001B Proxy de desarrollo hacia la API](TASK-001B-SCAFFOLD-PROXY.md)
+- [x] [TASK-001C Montar la app](TASK-001C-SCAFFOLD-MOUNT.md)

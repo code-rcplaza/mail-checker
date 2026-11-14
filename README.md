@@ -109,8 +109,10 @@ Para detenerlo, `Ctrl+C`.
 | Git | cualquiera | Obtener el código |
 | Staticcheck | última | Solo para revisar el código (`go install honnef.co/go/tools/cmd/staticcheck@latest`) |
 | sqlc | v1.31.1 | No se instala: `go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1 generate` regenera las consultas y `diff` comprueba que estén al día; el código generado ya viene en el repo |
+| Node.js | 24 o superior | Herramientas del front |
+| pnpm | 10 o superior | Instalar y correr el front (`pnpm install` dentro de `frontend/`) |
 
-El frontend y Docker todavía no están listos; hoy no hay nada que instalar para ellos.
+Docker todavía no está listo.
 
 | Variable | Por defecto | Qué hace |
 |---|---|---|
@@ -127,16 +129,30 @@ Un valor inválido hace que el programa se detenga con un mensaje claro en lugar
 <details>
 <summary><strong>Correr las pruebas</strong></summary>
 
-Desde `backend/`:
+Backend, desde `backend/`:
 
 ```sh
 go test -count=1 -timeout 60s ./...
 ```
 
+Frontend, desde `frontend/`:
+
+```sh
+pnpm install
+pnpm test        # pruebas (Vitest + Testing Library)
+pnpm lint        # Biome: lint y formato
+pnpm typecheck   # TypeScript estricto
+```
+
+Para desarrollar el front: con el servidor de Go corriendo en `:8080`, `pnpm dev` abre Vite en
+`http://localhost:5173` y le pasa `/api` al servidor. `pnpm build` deja el sitio dentro del backend
+(`backend/internal/shared/httpserver/web/dist`), para que Go lo sirva en un solo binario.
+
 </details>
 
-> **Todavía no puedes usar el producto completo desde aquí.** Por ahora el servidor solo responde al
-> chequeo de salud. Las rutas de la app (registro, subir cartola, resumen) aún no están conectadas.
+> **Todavía no puedes usar el producto completo desde aquí.** La API ya responde (registro con código,
+> subir cartola, resumen, acciones sobre suscripciones, copia de tus datos y eliminar la cuenta), pero
+> las pantallas del front están en construcción.
 
 ---
 
@@ -155,7 +171,7 @@ primera versión está en [`docs/mvp.md`](docs/mvp.md).
 | Router HTTP | `github.com/go-chi/chi/v5` |
 | Base de datos | SQLite (`modernc.org/sqlite`, sin cgo), migraciones con `github.com/pressly/goose/v3` |
 | Lectura de PDF | `github.com/ledongthuc/pdf` |
-| Frontend | React + TypeScript, Tailwind v4, TanStack Router y Query, react-hook-form + zod (pendiente) |
+| Frontend | React 19 + TypeScript (estricto) con Vite, Tailwind v4, Biome, Vitest + Testing Library; TanStack Router y Query, react-hook-form + zod (cuando lleguen sus pantallas) |
 | Despliegue | Docker (pendiente) |
 
 Las dependencias listadas están aprobadas. Agregar una nueva requiere preguntar antes.
@@ -193,7 +209,7 @@ El detalle completo (puertos por feature, flujos numerados y modelo de datos) es
 </details>
 
 <details>
-<summary><strong>Frontend: capas y componentes (planeado, aún no existe)</strong></summary>
+<summary><strong>Frontend: capas y componentes (en construcción)</strong></summary>
 
 El front sigue la misma idea que el back: cada feature se parte en capas, y las dependencias apuntan
 hacia adentro (`presentation → application → domain`; `infrastructure → application`).
@@ -220,6 +236,13 @@ Otras reglas:
   usan dobles en memoria.
 - **Un límite roto rompe el lint.** Biome no deja que una carpeta importe lo que no debe.
 - **Mobile first.** Diseño base para ~390 px; desde 1024 px (`lg:`) aparece la barra lateral.
+- **Atomic Design.** Los componentes de base van en `components/ui/` por nivel: `atoms` (Button,
+  Input, Badge…), `molecules` (FormField, ListRow, Card…) y `organisms`. Los templates son
+  `components/layout` y las páginas, los contenedores de `screens`.
+- **Solo colores semánticos.** `src/styles/tokens.css` tiene dos capas: *raw* (la paleta de Fokko,
+  12 pasos por color en claro y oscuro) y *semantic* (para qué es el color: `page`, `ink`, `primary`,
+  `danger`…). Tailwind solo conoce los semánticos (`bg-page`, `text-ink`) y un test falla si aparece
+  un color raw, un hex o la paleta por defecto fuera de ese archivo.
 
 El detalle (carpetas, tokens de color, navegación) está en
 [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md#frontend).
@@ -355,10 +378,12 @@ Los commits van en inglés e identifican la tarea (`FOKKO-XXXX-SUBS/TASK-XXX`) e
 <summary><strong>Estado técnico</strong></summary>
 
 **Hecho:** dominio y casos de uso del MVP (catálogo de servicios, detección, cartolas de BCI, tipo
-de cambio, resumen, manuales, alzas, ajustes por línea y decisiones del usuario).
+de cambio, resumen, manuales, alzas, ajustes por línea y decisiones del usuario), acceso con código
+por correo, persistencia en SQLite, la API REST completa con pruebas de humo, y la base del front
+(proyecto, tokens, tema, cliente de la API, i18n y los primeros componentes).
 
-**Pendiente:** la capa HTTP de cada caso de uso, la persistencia SQLite de las features nuevas, el
-frontend y el empaquetado en Docker. El avance exacto está en
+**Pendiente:** el resto de los componentes y las pantallas del front, servir el front desde Go y el
+empaquetado en Docker. El avance exacto está en
 [`docs/backlog/README.md`](docs/backlog/README.md).
 
 </details>

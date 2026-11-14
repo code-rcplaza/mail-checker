@@ -216,6 +216,8 @@ la contradice, se pregunta antes de cambiarla.
 - Los componentes son presentacionales: solo props y `t()`; sin `useQuery`, router ni `fetch`.
   Los contenedores de `screens` llaman los hooks; los gateways se entregan por Context.
 - Formato con Biome (hook en `.claude/settings.json`, activo cuando exista `frontend/`).
+- Colores: solo tokens semánticos (`bg-page`, `text-ink`…); los raw viven solo en
+  `src/styles/tokens.css`. Componentes base por Atomic Design (`components/ui/{atoms,molecules,organisms}`).
 
 ## Comandos
 Backend (desde `backend/`, módulo `github.com/code-rcplaza/mail-checker/backend`):
@@ -228,4 +230,7 @@ Backend (desde `backend/`, módulo `github.com/code-rcplaza/mail-checker/backend
 
 Tests solo con la stdlib `testing` (tablas), sin testify.
 
-(se completan: front, dev, sqlc, migraciones)
+Frontend (desde `frontend/`, con pnpm):
+- Dev: `pnpm dev` (Vite en :5173, `/api` va a Go en :8080)
+- Test: `pnpm test` · Lint y formato: `pnpm lint` · Tipos: `pnpm typecheck`
+- Build: `pnpm build` (deja el sitio en `backend/internal/shared/httpserver/web/dist`)

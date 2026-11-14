@@ -23,6 +23,6 @@ Esta idea cubre solo: TypeScript estricto con Biome. El resto del trabajo origin
 - Comandos del front (`pnpm lint`, `pnpm typecheck`, `pnpm test`, `pnpm build`) se agregan a "Comandos" de `CLAUDE.md` con tu ok.
 
 ## Tareas
-- [ ] [TASK-001A Activar TypeScript estricto](TASK-001A-STRICT-TSCONFIG.md)
-- [ ] [TASK-001B Reglas de Biome contra `any`](TASK-001B-BIOME-RULES.md)
-- [ ] [TASK-001C Pasar lint más typecheck](TASK-001C-LINT-TYPECHECK-PASS.md)
+- [x] [TASK-001A Activar TypeScript estricto](TASK-001A-STRICT-TSCONFIG.md)
+- [x] [TASK-001B Reglas de Biome contra `any`](TASK-001B-BIOME-RULES.md)
+- [x] [TASK-001C Pasar lint más typecheck](TASK-001C-LINT-TYPECHECK-PASS.md)

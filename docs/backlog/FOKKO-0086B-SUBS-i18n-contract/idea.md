@@ -21,4 +21,4 @@ Esta idea cubre solo: Test de contrato con las llaves del back. El resto del tra
 - El test lee las constantes `MessageKey` de los `.go` del back con una búsqueda de texto. Si cambia la forma de declararlas, el test falla fuerte.
 
 ## Tareas
-- [ ] [TASK-001 Contrato con el back](TASK-001-I18N-CONTRACT-TEST.md)
+- [x] [TASK-001 Contrato con el back](TASK-001-I18N-CONTRACT-TEST.md)

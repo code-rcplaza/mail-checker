@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@import "./tokens.css";
+
+@layer base {
+  html {
+    color-scheme: light;
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+    }
+  }
+  body {
+    @apply bg-page text-ink font-body antialiased;
+    min-height: 100dvh;
+  }
+  :focus-visible {
+    outline: 3px solid color-mix(in oklab, var(--color-primary) 60%, transparent);
+    outline-offset: 0;
+  }
+}

@@ -20,7 +20,7 @@ Las pantallas necesitan avisos, estados de carga, vacíos y un selector segmenta
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 `Toast`](TASK-001-TOAST.md)
-- [ ] [TASK-002A `Skeleton`](TASK-002A-SKELETON.md)
-- [ ] [TASK-002B `EmptyState`](TASK-002B-EMPTY-STATE.md)
-- [ ] [TASK-003 `SegmentedControl`](TASK-003-SEGMENTED-CONTROL.md)
+- [x] [TASK-001 `Toast`](TASK-001-TOAST.md)
+- [x] [TASK-002A `Skeleton`](TASK-002A-SKELETON.md)
+- [x] [TASK-002B `EmptyState`](TASK-002B-EMPTY-STATE.md)
+- [x] [TASK-003 `SegmentedControl`](TASK-003-SEGMENTED-CONTROL.md)

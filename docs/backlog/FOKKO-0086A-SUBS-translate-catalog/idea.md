@@ -22,6 +22,6 @@ Esta idea cubre solo: Traducción tipada con catálogo en español. El resto del
 - El test lee las constantes `MessageKey` de los `.go` del back con una búsqueda de texto. Si cambia la forma de declararlas, el test falla fuerte.
 
 ## Tareas
-- [ ] [TASK-001A Traducir una llave](TASK-001A-T-LOOKUP.md)
-- [ ] [TASK-001B Mensaje genérico para llaves desconocidas](TASK-001B-T-FALLBACK.md)
-- [ ] [TASK-002 Catálogo en español](TASK-002-CATALOG-ES.md)
+- [x] [TASK-001A Traducir una llave](TASK-001A-T-LOOKUP.md)
+- [x] [TASK-001B Mensaje genérico para llaves desconocidas](TASK-001B-T-FALLBACK.md)
+- [x] [TASK-002 Catálogo en español](TASK-002-CATALOG-ES.md)
