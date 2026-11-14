@@ -1,8 +1,8 @@
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
+import { serverMessageOf } from "../../../lib/api/serverErrors";
 import { useGateways } from "../../../lib/gateways/GatewaysProvider";
 import { t } from "../../../lib/i18n/translate";
-import { serverMessageOf } from "./serverErrors";
 
 export interface ResendNotice {
   /** A new id per notice, so a new toast replaces the old one and restarts. */

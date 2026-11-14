@@ -9,3 +9,8 @@ export const meSchema = z.object({
 });
 
 export type Me = Readonly<z.infer<typeof meSchema>>;
+
+/** The greeting uses only the first word of the name. */
+export function firstNameOf(name: string): string {
+  return name.trim().split(/\s+/)[0] ?? "";
+}

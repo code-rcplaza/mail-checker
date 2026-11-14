@@ -88,3 +88,11 @@ export function ShieldIcon({ size = 20 }: IconProps) {
     </Icon>
   );
 }
+
+export function CheckIcon({ size = 20 }: IconProps) {
+  return (
+    <Icon size={size}>
+      <path d="m5 12 5 5 9-10" />
+    </Icon>
+  );
+}

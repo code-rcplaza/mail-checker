@@ -784,8 +784,11 @@ Clean architecture por feature, igual que el back: las dependencias apuntan haci
 ```
 frontend/src/
 ├── main.tsx                   composición: crea los gateways reales y monta `GatewaysProvider`
-├── app/                       router.ts (`createAppRouter`), AppProviders (Query → Gateways → Router), screens/ (404)
-├── routes/                    TanStack Router (file-based); cada ruta monta un contenedor de `screens`
+├── app/                       createApp (QueryClient + router, 401 → Login), router.ts, AppProviders
+│                              (Query → Gateways → Router), screens/ (404); renderApp para las pruebas
+├── routes/                    TanStack Router (file-based); cada ruta monta un contenedor de `screens`:
+│                              index (redirige), _guest/ (registro, entrar), _session/ (bienvenida,
+│                              fuente, resumen…) y codigo
 ├── routeTree.gen.ts           generado por `@tanstack/router-plugin` desde `routes/` (se versiona; Biome lo ignora)
 ├── components/
 │   ├── ui/                    componentes de base presentacionales, por Atomic Design (lista en `docs/mvp.md`):
@@ -803,11 +806,13 @@ frontend/src/
 │       ├── components/        presentacionales
 │       └── screens/           contenedores: llaman hooks y pasan props
 └── lib/
-    ├── api/                   client.ts, types.ts
+    ├── api/                   client.ts (JSON, o un FormData tal cual) y serverErrors.ts (llave de un campo, mensaje del formulario)
     ├── gateways/              `GatewaysProvider`, `useGateways`, `renderWithGateways` (pruebas)
+    ├── query/                 createQueryClient (reintentos y aviso de 401)
+    ├── router/                useNavigateTo (lo que las pantallas pasan a `AppLink`)
     ├── format.ts              montos y fechas (es-CL)
     ├── i18n/                  es.ts (catálogo tipado de llaves) + t(key, params)
-    └── theme/                 preferencia claro/oscuro/sistema (localStorage; si falla, sistema)
+    └── theme/                 preferencia claro/oscuro/sistema (localStorage; si falla, sistema) y useThemeToggle
 ```
 
 - **Atomic Design:** atoms → molecules → organisms en `components/ui`; los templates son
@@ -825,10 +830,22 @@ frontend/src/
   `sectionPaths`: `/resumen`, `/subs`, `/perfil`. Acceso: `/registro`, `/entrar`,
   `/codigo?email=&flow=register|login` (sin correo vuelve a `/entrar`; tras verificar, `register`
   va a `/bienvenida` y `login` al Resumen, porque el back no dice si es el primer acceso).
+- **Sesión:** `useSession` lee `GET /api/me` (`sessionQuery`, clave `["session"]`) y distingue
+  cargando, sin sesión (el gateway convierte el 401 en `null`) y con sesión. Las rutas se agrupan en
+  dos layouts sin path: `_session` (sin sesión → `/entrar`) y `_guest` (Registro y Login; con sesión
+  → `/resumen`; si `/api/me` no responde, igual abren). La raíz `/` no es una pantalla: redirige a
+  `/resumen` con sesión y a `/entrar` sin ella. Al verificar el código se borra la sesión
+  cacheada para que la guarda vuelva a preguntar. `createApp` arma el `QueryClient` y el router:
+  un 401 de cualquier query o mutación vacía la caché y vuelve a Login. `useLogout` vacía la caché
+  pase lo que pase y le dice a la pantalla si el servidor confirmó el cierre.
+- **Subida:** `/fuente` valida el PDF en el front (tipo y 10 MB, `fileProblemOf`) y manda
+  `multipart` con `file` y solo los campos presentes; la fecha de facturación aparece solo tras
+  `statements.billing_date_required` y va en unix segundos al mediodía UTC, para que ningún huso
+  mueva el día. Si `GET /api/banks` falla, el selector queda en automático.
 - **Formularios:** react-hook-form con `zodResolver` (`@hookform/resolvers`) en el hook de
   `application`; los mensajes del esquema son llaves i18n, igual que las del back. Un 400 con
   `fields` pone cada llave en su campo (`serverFieldErrors`); cualquier otro error va arriba del
-  botón (`serverMessageOf`: la llave, o `common.unavailable` sin red). El hook bloquea un segundo
+  botón (`serverMessageOf` de `lib/api/serverErrors`: la llave, o `common.unavailable` sin red). El hook bloquea un segundo
   envío mientras el primero viaja.
 - **Contenedor (`screens`):** único lugar que llama hooks de `application`; sin lógica inline en el JSX.
 - **Puertos:** se entregan por Context (`useGateways`). Aunque cada puerto tenga una sola implementación
@@ -931,6 +948,8 @@ Otros:
   `shutdown: context deadline exceeded` (código 1). Lo común es forzar `server.Close()` al vencer el
   plazo y no tratarlo como falla. Lo detectaron las pruebas de humo (`cmd/api/smoke_test.go`).
 - **Sin diseño en el handoff:** tablet (768–1023 px) y las versiones de escritorio de Revisión vacía y Resumen vacío.
+- **Revisión visual del front:** Registro, Login y Bienvenida no se han revisado a 390, 768 y 1280 px
+  (no había navegador en la máquina de desarrollo); sus ideas quedan en `doing` hasta hacerlo.
 - **Post-MVP:** ocultar la contraseña de `Credential` en logs (`LogValue()` que la reemplace), para que un
   `slog.Any("cred", cred)` accidental no la exponga.
 - **Post-MVP:** registrar el detalle de un error de lectura de correo en `SyncAll` (hoy solo queda la

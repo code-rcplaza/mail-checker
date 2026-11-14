@@ -10,13 +10,26 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as GuestRouteImport } from './routes/_guest'
+import { Route as SessionRouteImport } from './routes/_session'
 import { Route as CodigoRouteImport } from './routes/codigo'
-import { Route as EntrarRouteImport } from './routes/entrar'
-import { Route as RegistroRouteImport } from './routes/registro'
+import { Route as GuestEntrarRouteImport } from './routes/_guest/entrar'
+import { Route as GuestRegistroRouteImport } from './routes/_guest/registro'
+import { Route as SessionBienvenidaRouteImport } from './routes/_session/bienvenida'
+import { Route as SessionFuenteRouteImport } from './routes/_session/fuente'
+import { Route as SessionResumenRouteImport } from './routes/_session/resumen'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GuestRoute = GuestRouteImport.update({
+  id: '/_guest',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SessionRoute = SessionRouteImport.update({
+  id: '/_session',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CodigoRoute = CodigoRouteImport.update({
@@ -24,49 +37,99 @@ const CodigoRoute = CodigoRouteImport.update({
   path: '/codigo',
   getParentRoute: () => rootRouteImport,
 } as any)
-const EntrarRoute = EntrarRouteImport.update({
+const GuestEntrarRoute = GuestEntrarRouteImport.update({
   id: '/entrar',
   path: '/entrar',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GuestRoute,
 } as any)
-const RegistroRoute = RegistroRouteImport.update({
+const GuestRegistroRoute = GuestRegistroRouteImport.update({
   id: '/registro',
   path: '/registro',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => GuestRoute,
+} as any)
+const SessionBienvenidaRoute = SessionBienvenidaRouteImport.update({
+  id: '/bienvenida',
+  path: '/bienvenida',
+  getParentRoute: () => SessionRoute,
+} as any)
+const SessionFuenteRoute = SessionFuenteRouteImport.update({
+  id: '/fuente',
+  path: '/fuente',
+  getParentRoute: () => SessionRoute,
+} as any)
+const SessionResumenRoute = SessionResumenRouteImport.update({
+  id: '/resumen',
+  path: '/resumen',
+  getParentRoute: () => SessionRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/codigo': typeof CodigoRoute
-  '/entrar': typeof EntrarRoute
-  '/registro': typeof RegistroRoute
+  '/entrar': typeof GuestEntrarRoute
+  '/registro': typeof GuestRegistroRoute
+  '/bienvenida': typeof SessionBienvenidaRoute
+  '/fuente': typeof SessionFuenteRoute
+  '/resumen': typeof SessionResumenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/codigo': typeof CodigoRoute
-  '/entrar': typeof EntrarRoute
-  '/registro': typeof RegistroRoute
+  '/entrar': typeof GuestEntrarRoute
+  '/registro': typeof GuestRegistroRoute
+  '/bienvenida': typeof SessionBienvenidaRoute
+  '/fuente': typeof SessionFuenteRoute
+  '/resumen': typeof SessionResumenRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_guest': typeof GuestRouteWithChildren
+  '/_session': typeof SessionRouteWithChildren
   '/codigo': typeof CodigoRoute
-  '/entrar': typeof EntrarRoute
-  '/registro': typeof RegistroRoute
+  '/_guest/entrar': typeof GuestEntrarRoute
+  '/_guest/registro': typeof GuestRegistroRoute
+  '/_session/bienvenida': typeof SessionBienvenidaRoute
+  '/_session/fuente': typeof SessionFuenteRoute
+  '/_session/resumen': typeof SessionResumenRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/codigo' | '/entrar' | '/registro'
+  fullPaths:
+    | '/'
+    | '/codigo'
+    | '/entrar'
+    | '/registro'
+    | '/bienvenida'
+    | '/fuente'
+    | '/resumen'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/codigo' | '/entrar' | '/registro'
-  id: '__root__' | '/' | '/codigo' | '/entrar' | '/registro'
+  to:
+    | '/'
+    | '/codigo'
+    | '/entrar'
+    | '/registro'
+    | '/bienvenida'
+    | '/fuente'
+    | '/resumen'
+  id:
+    | '__root__'
+    | '/'
+    | '/_guest'
+    | '/_session'
+    | '/codigo'
+    | '/_guest/entrar'
+    | '/_guest/registro'
+    | '/_session/bienvenida'
+    | '/_session/fuente'
+    | '/_session/resumen'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  GuestRoute: typeof GuestRouteWithChildren
+  SessionRoute: typeof SessionRouteWithChildren
   CodigoRoute: typeof CodigoRoute
-  EntrarRoute: typeof EntrarRoute
-  RegistroRoute: typeof RegistroRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -78,6 +141,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_guest': {
+      id: '/_guest'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof GuestRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_session': {
+      id: '/_session'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SessionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/codigo': {
       id: '/codigo'
       path: '/codigo'
@@ -85,28 +162,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CodigoRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/entrar': {
-      id: '/entrar'
+    '/_guest/entrar': {
+      id: '/_guest/entrar'
       path: '/entrar'
       fullPath: '/entrar'
-      preLoaderRoute: typeof EntrarRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GuestEntrarRouteImport
+      parentRoute: typeof GuestRoute
     }
-    '/registro': {
-      id: '/registro'
+    '/_guest/registro': {
+      id: '/_guest/registro'
       path: '/registro'
       fullPath: '/registro'
-      preLoaderRoute: typeof RegistroRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof GuestRegistroRouteImport
+      parentRoute: typeof GuestRoute
+    }
+    '/_session/bienvenida': {
+      id: '/_session/bienvenida'
+      path: '/bienvenida'
+      fullPath: '/bienvenida'
+      preLoaderRoute: typeof SessionBienvenidaRouteImport
+      parentRoute: typeof SessionRoute
+    }
+    '/_session/fuente': {
+      id: '/_session/fuente'
+      path: '/fuente'
+      fullPath: '/fuente'
+      preLoaderRoute: typeof SessionFuenteRouteImport
+      parentRoute: typeof SessionRoute
+    }
+    '/_session/resumen': {
+      id: '/_session/resumen'
+      path: '/resumen'
+      fullPath: '/resumen'
+      preLoaderRoute: typeof SessionResumenRouteImport
+      parentRoute: typeof SessionRoute
     }
   }
 }
 
+interface GuestRouteChildren {
+  GuestEntrarRoute: typeof GuestEntrarRoute
+  GuestRegistroRoute: typeof GuestRegistroRoute
+}
+
+const GuestRouteChildren: GuestRouteChildren = {
+  GuestEntrarRoute: GuestEntrarRoute,
+  GuestRegistroRoute: GuestRegistroRoute,
+}
+
+const GuestRouteWithChildren = GuestRoute._addFileChildren(GuestRouteChildren)
+
+interface SessionRouteChildren {
+  SessionBienvenidaRoute: typeof SessionBienvenidaRoute
+  SessionFuenteRoute: typeof SessionFuenteRoute
+  SessionResumenRoute: typeof SessionResumenRoute
+}
+
+const SessionRouteChildren: SessionRouteChildren = {
+  SessionBienvenidaRoute: SessionBienvenidaRoute,
+  SessionFuenteRoute: SessionFuenteRoute,
+  SessionResumenRoute: SessionResumenRoute,
+}
+
+const SessionRouteWithChildren =
+  SessionRoute._addFileChildren(SessionRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  GuestRoute: GuestRouteWithChildren,
+  SessionRoute: SessionRouteWithChildren,
   CodigoRoute: CodigoRoute,
-  EntrarRoute: EntrarRoute,
-  RegistroRoute: RegistroRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

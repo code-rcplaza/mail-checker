@@ -178,9 +178,9 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 | FOKKO-0094-SUBS | [Pantalla Registro](FOKKO-0094-SUBS-screen-register/idea.md) | doing |
 | FOKKO-0095-SUBS | [Pantalla Login](FOKKO-0095-SUBS-screen-login/idea.md) | doing |
 | FOKKO-0096-SUBS | [Pantalla Código](FOKKO-0096-SUBS-screen-code/idea.md) | done |
-| FOKKO-0097-SUBS | [Pantalla Bienvenida](FOKKO-0097-SUBS-screen-welcome/idea.md) | todo |
-| FOKKO-0098-SUBS | [Protección de rutas](FOKKO-0098-SUBS-front-session-routes/idea.md) | todo |
-| FOKKO-0099-SUBS | [Subir cartola](FOKKO-0099-SUBS-screen-upload/idea.md) | todo |
+| FOKKO-0097-SUBS | [Pantalla Bienvenida](FOKKO-0097-SUBS-screen-welcome/idea.md) | doing |
+| FOKKO-0098-SUBS | [Protección de rutas](FOKKO-0098-SUBS-front-session-routes/idea.md) | done |
+| FOKKO-0099-SUBS | [Subir cartola](FOKKO-0099-SUBS-screen-upload/idea.md) | done |
 | FOKKO-0100A-SUBS | [Pantalla Cargando](FOKKO-0100A-SUBS-screen-loading/idea.md) | todo |
 | FOKKO-0100B-SUBS | [Pantalla Análisis](FOKKO-0100B-SUBS-screen-analysis-result/idea.md) | todo |
 | FOKKO-0101-SUBS | [Error de lectura](FOKKO-0101-SUBS-screen-upload-error/idea.md) | todo |

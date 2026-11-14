@@ -20,13 +20,17 @@ clean architecture por feature (`features/statements/{domain,application,infrast
 - `frontend` (`features/statements`)
 
 ## Dudas abiertas
-- Ninguna.
+- Resuelta: la ruta es `/fuente`; al subir, el resultado queda en la caché
+  (`["statements", "uploaded", id]`) y se navega a `/analisis/<id>` (FOKKO-0100A/B-SUBS).
+- Resuelta: el texto "Qué guardamos" dice lo que guarda el back de verdad: comercio, monto, fecha y
+  últimos 4 dígitos de la tarjeta de cada cobro, y el nombre del archivo; el PDF no se guarda.
+  Falta la revisión legal (FOKKO-0113A-SUBS).
 
 ## Tareas
-- [ ] [TASK-001A Elegir o soltar un PDF](TASK-001A-DROPZONE-PICK.md)
-- [ ] [TASK-001B Rechazar archivos inválidos](TASK-001B-DROPZONE-REJECT.md)
-- [ ] [TASK-002 `BankSelect`](TASK-002-BANK-SELECT.md)
-- [ ] [TASK-003 Fecha de facturación de respaldo](TASK-003-BILLING-DATE-FALLBACK.md)
-- [ ] [TASK-004 `useUploadStatement`](TASK-004-USE-UPLOAD-STATEMENT.md)
-- [ ] [TASK-005 Subir la cartola por HTTP](TASK-005-GATEWAY-UPLOAD.md)
-- [ ] [TASK-006 Conectar el hook con los componentes](TASK-006-CONTAINER-UPLOAD.md)
+- [x] [TASK-001A Elegir o soltar un PDF](TASK-001A-DROPZONE-PICK.md)
+- [x] [TASK-001B Rechazar archivos inválidos](TASK-001B-DROPZONE-REJECT.md)
+- [x] [TASK-002 `BankSelect`](TASK-002-BANK-SELECT.md)
+- [x] [TASK-003 Fecha de facturación de respaldo](TASK-003-BILLING-DATE-FALLBACK.md)
+- [x] [TASK-004 `useUploadStatement`](TASK-004-USE-UPLOAD-STATEMENT.md)
+- [x] [TASK-005 Subir la cartola por HTTP](TASK-005-GATEWAY-UPLOAD.md)
+- [x] [TASK-006 Conectar el hook con los componentes](TASK-006-CONTAINER-UPLOAD.md)

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { ApiError, NetworkError } from "../api/client";
 import { createQueryClient, shouldRetry } from "./queryClient";
 
@@ -18,5 +18,40 @@ describe("query retries", () => {
 
     expect(defaults.queries?.retry).toBe(shouldRetry);
     expect(defaults.mutations?.retry).toBe(false);
+  });
+});
+
+describe("unauthorized answers", () => {
+  const unauthorized = new ApiError({ status: 401, key: "common.unauthorized" });
+
+  it("leave the session when a query gets a 401", async () => {
+    const onUnauthorized = vi.fn();
+    const client = createQueryClient({ onUnauthorized });
+
+    await client.fetchQuery({ queryKey: ["x"], queryFn: () => Promise.reject(unauthorized) }).catch(() => {});
+
+    expect(onUnauthorized).toHaveBeenCalledOnce();
+  });
+
+  it("leave the session when a mutation gets a 401", async () => {
+    const onUnauthorized = vi.fn();
+    const client = createQueryClient({ onUnauthorized });
+    const mutation = client
+      .getMutationCache()
+      .build(client, { mutationFn: () => Promise.reject(unauthorized) });
+
+    await mutation.execute(undefined).catch(() => {});
+
+    expect(onUnauthorized).toHaveBeenCalledOnce();
+  });
+
+  it("ignore any other error", async () => {
+    const onUnauthorized = vi.fn();
+    const client = createQueryClient({ onUnauthorized });
+    const notFound = new ApiError({ status: 404, key: "common.not_found" });
+
+    await client.fetchQuery({ queryKey: ["x"], queryFn: () => Promise.reject(notFound) }).catch(() => {});
+
+    expect(onUnauthorized).not.toHaveBeenCalled();
   });
 });

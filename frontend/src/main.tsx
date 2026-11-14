@@ -7,11 +7,11 @@ import "./styles/index.css";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import { AppProviders } from "./app/AppProviders";
-import { createAppRouter } from "./app/router";
+import { createApp } from "./app/createApp";
 import { createHttpAuthGateway } from "./features/auth/infrastructure/httpAuthGateway";
+import { createHttpStatementsGateway } from "./features/statements/infrastructure/httpStatementsGateway";
 import { createApiClient } from "./lib/api/client";
 import type { Gateways } from "./lib/gateways/gateways";
-import { createQueryClient } from "./lib/query/queryClient";
 import { applyThemePreference, browserStorage, readThemePreference } from "./lib/theme/theme";
 
 const root = document.getElementById("root");
@@ -24,9 +24,8 @@ applyThemePreference(document.documentElement, readThemePreference(browserStorag
 
 // The composition root: the only place that builds the real gateways.
 const api = createApiClient((input, init) => window.fetch(input, init));
-const gateways: Gateways = { auth: createHttpAuthGateway(api) };
-const queryClient = createQueryClient();
-const router = createAppRouter({ queryClient, gateways });
+const gateways: Gateways = { auth: createHttpAuthGateway(api), statements: createHttpStatementsGateway(api) };
+const { queryClient, router } = createApp(gateways);
 
 createRoot(root).render(
   <StrictMode>

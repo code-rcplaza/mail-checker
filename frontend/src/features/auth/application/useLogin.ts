@@ -2,17 +2,15 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
+import { fieldErrorOf, serverMessageOf } from "../../../lib/api/serverErrors";
 import { useGateways } from "../../../lib/gateways/GatewaysProvider";
 import { translateServerKey } from "../../../lib/i18n/translate";
 import { emptyLogin, type Login, loginSchema } from "../domain/login";
-import { serverFieldErrors, serverMessageOf } from "./serverErrors";
 
 export interface UseLoginOptions {
   /** Called with the email once the code is on its way. */
   readonly onCodeSent: (email: string) => void;
 }
-
-const loginFields = ["email"] as const;
 
 /** Login: validates the email, asks for a code once and reports what the server rejected. */
 export function useLogin({ onCodeSent }: UseLoginOptions) {
@@ -21,11 +19,11 @@ export function useLogin({ onCodeSent }: UseLoginOptions) {
   const [formError, setFormError] = useState<string | undefined>(undefined);
 
   function showServerError(error: unknown) {
-    const fieldErrors = serverFieldErrors(error, loginFields);
-    for (const [field, key] of fieldErrors) {
-      form.setError(field, { message: key });
+    const emailKey = fieldErrorOf(error, "email");
+    if (emailKey !== undefined) {
+      form.setError("email", { message: emailKey });
     }
-    setFormError(fieldErrors.length > 0 ? undefined : serverMessageOf(error));
+    setFormError(emailKey === undefined ? serverMessageOf(error) : undefined);
   }
 
   const sending = useMutation({

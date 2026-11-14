@@ -4,7 +4,8 @@ import { AppLink } from "../ui/atoms/AppLink";
 import { type Navigate, type NavSection, navEntries, sectionPaths } from "./navigation";
 
 export interface BottomNavProps {
-  readonly current: NavSection;
+  /** None marked: a screen outside the sections (Bienvenida). */
+  readonly current?: NavSection | undefined;
   readonly onNavigate: Navigate;
 }
 

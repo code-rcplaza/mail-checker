@@ -106,4 +106,30 @@ describe("http auth gateway", () => {
       key: "auth.code_invalid",
     });
   });
+
+  it("reads no session from a 401 of /api/me", async () => {
+    const body = { error: { key: "common.unauthorized" } };
+
+    await expect(
+      createHttpAuthGateway(createApiClient(fetchAnswering(401, body))).getMe(),
+    ).resolves.toBeNull();
+  });
+
+  it("still throws any other error of /api/me", async () => {
+    const gateway = createHttpAuthGateway(
+      createApiClient(fetchAnswering(500, { error: { key: "common.internal" } })),
+    );
+
+    await expect(gateway.getMe()).rejects.toBeInstanceOf(ApiError);
+  });
+
+  it("logs out with POST /api/auth/logout and resolves empty on 204", async () => {
+    const fetchFunction = fetchAnswering(204);
+
+    await expect(createHttpAuthGateway(createApiClient(fetchFunction)).logout()).resolves.toBeUndefined();
+    expect(fetchFunction).toHaveBeenCalledWith(
+      "/api/auth/logout",
+      expect.objectContaining({ method: "POST" }),
+    );
+  });
 });

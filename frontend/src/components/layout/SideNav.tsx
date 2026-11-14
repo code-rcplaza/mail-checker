@@ -10,7 +10,8 @@ export interface SideNavAccount {
 }
 
 export interface SideNavProps {
-  readonly current: NavSection;
+  /** None marked: a screen outside the sections (Bienvenida). */
+  readonly current?: NavSection | undefined;
   readonly account: SideNavAccount;
   readonly onNavigate: Navigate;
 }

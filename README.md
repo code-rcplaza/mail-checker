@@ -66,8 +66,9 @@ flowchart LR
 
 Tus datos son tuyos y solo los ves tú.
 
-- **Guardamos lo mínimo**: comercio, monto, fecha y los últimos 4 dígitos de la tarjeta.
-- **El texto completo de la cartola no se guarda.** Se descarta al terminar de leerla.
+- **Guardamos lo mínimo**: de cada cobro, el comercio, el monto, la fecha y los últimos 4 dígitos de
+  la tarjeta; del archivo, solo su nombre.
+- **El PDF y su texto no se guardan.** Se descartan al terminar de leerlo.
 - **Te los llevas cuando quieras**: descarga una copia (CSV o JSON) o elimina todo.
 
 ## Lo que todavía no hace
@@ -85,8 +86,8 @@ Tus datos son tuyos y solo los ves tú.
 Necesitas Go 1.27 o superior y Git. Nada más: la base de datos (SQLite) viene incluida.
 
 ```sh
-git clone https://github.com/code-rcplaza/mail-checker.git
-cd mail-checker/backend
+git clone https://github.com/code-rcplaza/fokko-subs-tracker.git
+cd fokko-subs-tracker/backend
 go build -o mail-checker ./cmd/api
 ./mail-checker
 ```
@@ -150,9 +151,28 @@ Para desarrollar el front: con el servidor de Go corriendo en `:8080`, `pnpm dev
 
 </details>
 
-> **Todavía no puedes usar el producto completo desde aquí.** La API ya responde (registro con código,
-> subir cartola, resumen, acciones sobre suscripciones, copia de tus datos y eliminar la cuenta), pero
-> las pantallas del front están en construcción.
+<details>
+<summary><strong>Probar las pantallas</strong></summary>
+
+Con el servidor de Go corriendo, en otra terminal:
+
+```sh
+cd frontend
+pnpm install
+pnpm dev
+```
+
+Abre `http://localhost:5173`. Sin sesión, la raíz te lleva a Login; desde ahí puedes crear tu cuenta.
+En desarrollo el código de 6 dígitos no se envía por correo: aparece en la terminal del servidor de Go.
+
+Hoy funcionan Registro, Login, Código, Bienvenida y Subir cartola. El resto (Análisis, Revisión,
+Resumen, Subs, Perfil) está en construcción; la API de todas ya responde.
+
+</details>
+
+> **Todavía no puedes usar el producto completo.** La API ya responde (registro con código, subir
+> cartola, resumen, acciones sobre suscripciones, copia de tus datos y eliminar la cuenta); en el
+> front faltan las pantallas que siguen a la subida.
 
 ---
 
@@ -171,7 +191,7 @@ primera versión está en [`docs/mvp.md`](docs/mvp.md).
 | Router HTTP | `github.com/go-chi/chi/v5` |
 | Base de datos | SQLite (`modernc.org/sqlite`, sin cgo), migraciones con `github.com/pressly/goose/v3` |
 | Lectura de PDF | `github.com/ledongthuc/pdf` |
-| Frontend | React 19 + TypeScript (estricto) con Vite, Tailwind v4, Biome, Vitest + Testing Library; TanStack Router y Query, react-hook-form + zod (cuando lleguen sus pantallas) |
+| Frontend | React 19 + TypeScript (estricto) con Vite, Tailwind v4, Biome, Vitest + Testing Library; TanStack Router y Query, react-hook-form + zod (`@hookform/resolvers`) |
 | Despliegue | Docker (pendiente) |
 
 Las dependencias listadas están aprobadas. Agregar una nueva requiere preguntar antes.
@@ -235,7 +255,16 @@ Otras reglas:
 - **Puertos por Context.** `GatewaysProvider` entrega las implementaciones reales; en las pruebas se
   usan dobles en memoria.
 - **Un límite roto rompe el lint.** Biome no deja que una carpeta importe lo que no debe.
-- **Mobile first.** Diseño base para ~390 px; desde 1024 px (`lg:`) aparece la barra lateral.
+- **Mobile first.** Diseño base para ~390 px. Desde 768 px (`md:`) el contenido va en dos columnas
+  con la barra inferior; desde 1024 px (`lg:`) la barra lateral la reemplaza. Un solo `AppShell`
+  para los tres anchos.
+- **Componentes sin router.** Los enlaces son `<a href>` reales (`AppLink`) y la pantalla decide cómo
+  navegar; un clic con Cmd o Ctrl abre otra pestaña como siempre.
+- **Sesión y rutas.** `/api/me` dice si hay sesión. Las pantallas con datos piden sesión y
+  mandan a Login si no la hay; Registro y Login mandan al Resumen si ya entraste. Un 401 en
+  cualquier llamada borra la caché y vuelve a Login.
+- **Formularios con react-hook-form y zod.** Los mensajes del esquema son las mismas llaves i18n que
+  devuelve el back; un error de un campo aparece en su campo.
 - **Atomic Design.** Los componentes de base van en `components/ui/` por nivel: `atoms` (Button,
   Input, Badge…), `molecules` (FormField, ListRow, Card…) y `organisms`. Los templates son
   `components/layout` y las páginas, los contenedores de `screens`.

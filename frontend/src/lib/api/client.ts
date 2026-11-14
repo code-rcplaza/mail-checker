@@ -104,6 +104,17 @@ async function answerOf(response: Response): Promise<unknown> {
   return read.body;
 }
 
+/** JSON by default; a FormData goes as is, so the browser writes the multipart boundary. */
+function bodyOf(body: unknown): RequestInit {
+  if (body === undefined) {
+    return {};
+  }
+  if (body instanceof FormData) {
+    return { body };
+  }
+  return { body: JSON.stringify(body), headers: { "Content-Type": "application/json" } };
+}
+
 export function createApiClient(fetchFunction: FetchFunction): ApiClient {
   async function request(path: string, init: RequestInit): Promise<unknown> {
     let response: Response;
@@ -118,12 +129,6 @@ export function createApiClient(fetchFunction: FetchFunction): ApiClient {
 
   return {
     get: (path) => request(path, { method: "GET" }),
-    send: ({ method, path, body }) =>
-      request(path, {
-        method,
-        ...(body === undefined
-          ? {}
-          : { body: JSON.stringify(body), headers: { "Content-Type": "application/json" } }),
-      }),
+    send: ({ method, path, body }) => request(path, { method, ...bodyOf(body) }),
   };
 }

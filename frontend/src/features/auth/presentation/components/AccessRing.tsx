@@ -1,4 +1,8 @@
-import { type RingSegment, SegmentedRing } from "../../../../components/ui/organisms/SegmentedRing";
+import {
+  type RingSegment,
+  type RingSize,
+  SegmentedRing,
+} from "../../../../components/ui/organisms/SegmentedRing";
 import { t } from "../../../../lib/i18n/translate";
 
 /** The shape of a month of charges, only to show what the app does (no user data yet). */
@@ -11,7 +15,7 @@ const sampleMonth: readonly RingSegment[] = [
   { value: 16, series: 6 },
 ];
 
-/** The ring of the access screens (Registro, Login, Código). */
-export function AccessRing() {
-  return <SegmentedRing variant="normal" segments={sampleMonth} label={t("ui.access_ring")} size={120} />;
+/** The ring of the access screens (Registro, Login, Código) and of Bienvenida (224 px). */
+export function AccessRing({ size = 120 }: { readonly size?: RingSize }) {
+  return <SegmentedRing variant="normal" segments={sampleMonth} label={t("ui.access_ring")} size={size} />;
 }

@@ -102,4 +102,16 @@ describe("api client", () => {
     });
     expect(new Headers(init?.headers).get("Content-Type")).toBe("application/json");
   });
+
+  it("sends a FormData as multipart, letting the browser set the boundary", async () => {
+    const fetchDouble = respondWith(JSON.stringify({ id: "s1" }), { status: 201 });
+    const form = new FormData();
+    form.append("bank", "bci");
+
+    await createApiClient(fetchDouble).send({ method: "POST", path: "/api/statements", body: form });
+
+    const init = fetchDouble.mock.calls[0]?.[1];
+    expect(init?.body).toBe(form);
+    expect(init?.headers).toBeUndefined();
+  });
 });

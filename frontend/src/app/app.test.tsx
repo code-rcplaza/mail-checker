@@ -1,14 +1,21 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { gatewaysWith } from "../lib/gateways/renderWithGateways";
 import { renderApp } from "./renderApp";
 
-describe("app router", () => {
-  it("shows the home route", async () => {
-    renderApp("/");
+const ana = { id: "u1", name: "Ana Pérez", email: "ana@example.com", initials: "AP" };
 
-    expect(await screen.findByRole("heading", { name: "Fokko Subs" })).toBeInTheDocument();
+describe("app router", () => {
+  it.each([
+    ["with a session", "/resumen", async () => ana],
+    ["without a session", "/entrar", async () => null],
+    ["when /api/me cannot be read", "/entrar", async () => Promise.reject(new Error("offline"))],
+  ])("sends the root %s to %s", async (_case, destination, getMe) => {
+    const { router } = renderApp("/", { auth: { ...gatewaysWith({}).auth, getMe } });
+
+    await waitFor(() => expect(router.state.location.pathname).toBe(destination));
   });
 
   it("shows the 404 screen with a way home for an unknown route", async () => {

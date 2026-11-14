@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { useState } from "react";
 import { type FieldErrors, useForm } from "react-hook-form";
+import { fieldErrorOf, serverMessageOf } from "../../../lib/api/serverErrors";
 import { useGateways } from "../../../lib/gateways/GatewaysProvider";
 import { translateServerKey } from "../../../lib/i18n/translate";
 import {
@@ -12,7 +13,6 @@ import {
   registrationFields,
   registrationSchema,
 } from "../domain/registration";
-import { serverFieldErrors, serverMessageOf } from "./serverErrors";
 
 export interface UseRegisterOptions {
   /** Called with the email once the code is on its way. */
@@ -36,11 +36,14 @@ export function useRegister({ onRegistered }: UseRegisterOptions) {
   const [formError, setFormError] = useState<string | undefined>(undefined);
 
   function showServerError(error: unknown) {
-    const fieldErrors = serverFieldErrors(error, registrationFields);
-    for (const [field, key] of fieldErrors) {
+    const rejected = registrationFields.flatMap((field) => {
+      const key = fieldErrorOf(error, field);
+      return key === undefined ? [] : [{ field, key }];
+    });
+    for (const { field, key } of rejected) {
       form.setError(field, { message: key });
     }
-    setFormError(fieldErrors.length > 0 ? undefined : serverMessageOf(error));
+    setFormError(rejected.length > 0 ? undefined : serverMessageOf(error));
   }
 
   const sending = useMutation({

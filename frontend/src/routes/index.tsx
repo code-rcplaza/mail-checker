@@ -1,12 +1,15 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { sessionQuery } from "../features/auth/application/sessionQuery";
 
-/** Placeholder until the first screens (Bienvenida, Resumen) arrive. */
-function HomeScreen() {
-  return (
-    <main className="mx-auto max-w-md p-6">
-      <h1 className="font-wordmark text-2xl font-semibold text-ink">Fokko Subs</h1>
-    </main>
-  );
-}
-
-export const Route = createFileRoute("/")({ component: HomeScreen });
+/**
+ * The root is not a screen: with a session it opens the Resumen, without one
+ * (or if /api/me cannot be read) Login, which links to Registro.
+ */
+export const Route = createFileRoute("/")({
+  beforeLoad: async ({ context }) => {
+    const me = await context.queryClient
+      .ensureQueryData(sessionQuery(context.gateways.auth))
+      .catch(() => null);
+    throw redirect({ to: me === null ? "/entrar" : "/resumen" });
+  },
+});

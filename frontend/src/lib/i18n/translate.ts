@@ -4,7 +4,7 @@ export type MessageKey = keyof typeof es;
 
 export type MessageParams = Readonly<Record<string, string | number>>;
 
-function isMessageKey(key: string): key is MessageKey {
+export function isMessageKey(key: string): key is MessageKey {
   return Object.hasOwn(es, key);
 }
 
