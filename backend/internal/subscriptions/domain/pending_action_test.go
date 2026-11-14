@@ -13,7 +13,7 @@ func TestPendingActions(t *testing.T) {
 		Inactive: []Subscription{{Key: "merchant:OLD APP:CLP||d26", Status: StatusInactive}},
 		Rises:    []Rise{{Key: "service:Netflix||d25", Before: 1299000, After: 1349000, Currency: shared.CurrencyCLP}},
 	}
-	keptNetflix := map[GroupKey]shared.Money{"service:Netflix||d25": 1349000}
+	keptNetflix := map[GroupKey][]shared.Money{"service:Netflix||d25": {1349000}}
 	possibleActions := []PendingAction{
 		{Kind: PendingActionPossible, Key: "service:Music||d03"},
 		{Kind: PendingActionPossible, Key: "merchant:GYM:CLP||d01"},

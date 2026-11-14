@@ -36,7 +36,7 @@ type userChoices struct {
 	decisions     map[domain.GroupKey]domain.Decision
 	aliases       map[domain.GroupKey]string
 	rates         []shared.ExchangeRate
-	keptRises     map[domain.GroupKey]shared.Money
+	keptRises     map[domain.GroupKey][]shared.Money
 	manuals       []domain.ManualSubscription
 	overrides     map[domain.GroupKey]domain.LineOverride
 	hidden        []domain.GroupKey

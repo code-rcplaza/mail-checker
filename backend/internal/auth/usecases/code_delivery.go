@@ -33,7 +33,7 @@ func NewCodeDelivery(dependencies CodeDeliveryDependencies) CodeDelivery {
 // the limit answers the same for both.
 func (d CodeDelivery) admitRequest(ctx context.Context, email string) error {
 	now := d.dependencies.Now()
-	sends, err := d.dependencies.Sends.List(ctx, email)
+	sends, err := d.dependencies.Sends.ListSince(ctx, email, now.Add(-domain.SendWindow))
 	if err != nil {
 		return fmt.Errorf("read code sends: %w", err)
 	}

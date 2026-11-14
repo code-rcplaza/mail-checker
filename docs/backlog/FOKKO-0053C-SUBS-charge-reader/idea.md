@@ -19,4 +19,4 @@
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Leer los cargos del usuario](TASK-001-CHARGE-READER.md)
+- [x] [TASK-001 Leer los cargos del usuario](TASK-001-CHARGE-READER.md)

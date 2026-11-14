@@ -20,8 +20,8 @@ Las suscripciones manuales deben persistir y exponerse con un `public_id`.
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Tabla `manual_subscriptions`](TASK-001-MANUALS-MIGRATION.md)
-- [ ] [TASK-002A Crear una manual](TASK-002A-MANUALS-CREATE.md)
-- [ ] [TASK-002B Listar mis manuales](TASK-002B-MANUALS-LIST.md)
-- [ ] [TASK-003A Editar una manual](TASK-003A-MANUALS-UPDATE.md)
-- [ ] [TASK-003B Quitar una manual](TASK-003B-MANUALS-DELETE.md)
+- [x] [TASK-001 Tabla `manual_subscriptions`](TASK-001-MANUALS-MIGRATION.md)
+- [x] [TASK-002A Crear una manual](TASK-002A-MANUALS-CREATE.md)
+- [x] [TASK-002B Listar mis manuales](TASK-002B-MANUALS-LIST.md)
+- [x] [TASK-003A Editar una manual](TASK-003A-MANUALS-UPDATE.md)
+- [x] [TASK-003B Quitar una manual](TASK-003B-MANUALS-DELETE.md)

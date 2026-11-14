@@ -12,6 +12,8 @@ type UserRepository interface {
 	Create(ctx context.Context, user domain.User) (domain.User, error)
 	// FindByEmail returns ErrNotFound when no user has that normalized email.
 	FindByEmail(ctx context.Context, email string) (domain.User, error)
+	// FindByID returns ErrNotFound when no user has that ID.
+	FindByID(ctx context.Context, id int64) (domain.User, error)
 }
 
 // LoginCodes keeps one code per user.
@@ -27,7 +29,8 @@ type LoginCodes interface {
 }
 
 type CodeSends interface {
-	List(ctx context.Context, email string) ([]time.Time, error)
+	// ListSince returns the sends to email after since (strictly).
+	ListSince(ctx context.Context, email string, since time.Time) ([]time.Time, error)
 	Record(ctx context.Context, send domain.CodeSend) error
 }
 
@@ -42,4 +45,10 @@ type Sessions interface {
 // CodeSender delivers the code: console in development, Resend in production.
 type CodeSender interface {
 	Send(ctx context.Context, email, code string) error
+}
+
+// ExpiredAccess deletes the codes and sessions that expired and the sends that
+// no longer count for the limit.
+type ExpiredAccess interface {
+	DeleteExpired(ctx context.Context, cutoff domain.CleanupCutoff) error
 }

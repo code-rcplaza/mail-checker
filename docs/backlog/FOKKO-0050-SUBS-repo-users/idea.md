@@ -20,6 +20,6 @@
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Tabla `users`](TASK-001-USERS-MIGRATION.md)
-- [ ] [TASK-002 Crear usuarios](TASK-002-USERS-REPO-CREATE.md)
-- [ ] [TASK-003 Buscar usuarios](TASK-003-USERS-REPO-FIND.md)
+- [x] [TASK-001 Tabla `users`](TASK-001-USERS-MIGRATION.md)
+- [x] [TASK-002 Crear usuarios](TASK-002-USERS-REPO-CREATE.md)
+- [x] [TASK-003 Buscar usuarios](TASK-003-USERS-REPO-FIND.md)

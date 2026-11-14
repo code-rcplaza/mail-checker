@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"reflect"
+	"slices"
 	"testing"
 
 	shared "github.com/code-rcplaza/mail-checker/backend/internal/shared/domain"
@@ -13,18 +14,20 @@ import (
 
 var _ ports.PriceAlertDecisions = keptRisesByUser{}
 
-// keptRisesByUser keeps, per user and line, the amount whose rise was kept.
-type keptRisesByUser map[int64]map[domain.GroupKey]shared.Money
+// keptRisesByUser keeps, per user and line, every amount whose rise was kept, like the UNIQUE of the table.
+type keptRisesByUser map[int64]map[domain.GroupKey][]shared.Money
 
-func (k keptRisesByUser) List(_ context.Context, userID int64) (map[domain.GroupKey]shared.Money, error) {
+func (k keptRisesByUser) List(_ context.Context, userID int64) (map[domain.GroupKey][]shared.Money, error) {
 	return k[userID], nil
 }
 
 func (k keptRisesByUser) Save(_ context.Context, userID int64, kept domain.KeptRise) error {
 	if k[userID] == nil {
-		k[userID] = make(map[domain.GroupKey]shared.Money)
+		k[userID] = make(map[domain.GroupKey][]shared.Money)
 	}
-	k[userID][kept.Key] = kept.NewAmount
+	if !slices.Contains(k[userID][kept.Key], kept.NewAmount) {
+		k[userID][kept.Key] = append(k[userID][kept.Key], kept.NewAmount)
+	}
 	return nil
 }
 
@@ -38,7 +41,7 @@ func TestKeptRisesByUser_SavingTwiceKeepsOne(t *testing.T) {
 	}
 
 	got, _ := kept.List(context.Background(), userOne)
-	if !reflect.DeepEqual(got, map[domain.GroupKey]shared.Money{streamingLine: 1050000}) {
+	if !reflect.DeepEqual(got, map[domain.GroupKey][]shared.Money{streamingLine: {1050000}}) {
 		t.Errorf("kept = %v, want one entry for the line", got)
 	}
 }
@@ -61,7 +64,7 @@ func TestKeepPriceRise(t *testing.T) {
 		wantErr error
 		want    keptRisesByUser
 	}{
-		{"a line with a rise is kept at its new amount", chargesByUser{userOne: risingStreaming()}, nil, keptRisesByUser{userOne: {risingLine: 1050000}}},
+		{"a line with a rise is kept at its new amount", chargesByUser{userOne: risingStreaming()}, nil, keptRisesByUser{userOne: {risingLine: {1050000}}}},
 		{"a line without a rise is not found", chargesByUser{userOne: risingStreaming()[:2]}, shared.ErrNotFound, keptRisesByUser{}},
 		{"the line of another user is not found", chargesByUser{userTwo: risingStreaming()}, shared.ErrNotFound, keptRisesByUser{}},
 	}
@@ -100,7 +103,7 @@ func TestGetSummary_HidesTheKeptRiseUntilANewOne(t *testing.T) {
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
-			kept := keptRisesByUser{userOne: {risingLine: 1050000}}
+			kept := keptRisesByUser{userOne: {risingLine: {1050000}}}
 			sources := summarySourcesOf(chargesByUser{userOne: tc.charges})
 			sources.KeptRises = kept
 			useCase := NewGetSummary(sources)

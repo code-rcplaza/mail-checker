@@ -89,12 +89,11 @@ func LineRise(groups []ChargeGroup, key GroupKey) (Rise, bool) {
 	return Rise{}, false
 }
 
-// HideKeptRises drops the rises the user kept at that same new amount; a
-// later rise above it shows again.
-func HideKeptRises(summary Summary, kept map[GroupKey]shared.Money) Summary {
+// HideKeptRises drops the rises whose new amount the user already kept on that
+// line (kept is the history of every kept amount); a rise to a new amount shows.
+func HideKeptRises(summary Summary, kept map[GroupKey][]shared.Money) Summary {
 	summary.Rises = slices.DeleteFunc(slices.Clone(summary.Rises), func(rise Rise) bool {
-		keptAmount, isKept := kept[rise.Key]
-		return isKept && keptAmount == rise.After
+		return slices.Contains(kept[rise.Key], rise.After)
 	})
 	return summary
 }

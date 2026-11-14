@@ -107,7 +107,7 @@ backend/
     │   │   ├── http/                summary, decisions, aliases, overrides, manual, price-alerts, cancellations (reconciliation: post-MVP)
     │   │   ├── catalog/             ServiceCatalog (descriptor de cobro → servicio, enlace para cancelar)
     │   │   ├── exchangerates/       ExchangeRates (tipo de cambio; fuente abierta)
-    │   │   └── sqlite/              ChargeReader, SubscriptionDecisions, LineAliases, ManualSubscriptions, LineOverrides, PriceAlertDecisions, Cancellations
+    │   │   └── sqlite/              ChargeReader, SubscriptionDecisions, LineAliases, ManualSubscriptions, LineOverrides, PriceAlertDecisions, HiddenLines, Cancellations, ExchangeRates
     │   ├── domain/                  Subscription, Summary, Reconciliation, reglas de recurrencia y de coincidencia
     │   ├── ports/                   ChargeReader, ServiceCatalog, SubscriptionDecisions, LineAliases, ManualSubscriptions, LineOverrides, PriceAlertDecisions, Cancellations, ExchangeRates
     │   └── usecases/                get_summary, decide_possible_subscription, undo_decision, name_line, manuales, overrides, alzas, cancelaciones (reconcile_charges: post-MVP)
@@ -239,7 +239,8 @@ type CodeSend  struct { Email string; SentAt time.Time }
 
 type UserRepository interface {
     Create(ctx, user User) (User, error)          // asigna el ID
-    FindByEmail(ctx, email string) (User, error)  // ErrNotFound
+    FindByEmail(ctx, email string) (User, error)  // ErrNotFound, sin distinguir mayúsculas
+    FindByID(ctx, id int64) (User, error)         // ErrNotFound
 }
 type LoginCodes interface { // un código por usuario
     Save(ctx, code LoginCode) error                       // reemplaza el anterior
@@ -248,7 +249,7 @@ type LoginCodes interface { // un código por usuario
     Delete(ctx, userID int64) error                       // idempotente
 }
 type CodeSends interface {
-    List(ctx, email string) ([]time.Time, error)
+    ListSince(ctx, email string, since time.Time) ([]time.Time, error) // envíos después de since
     Record(ctx, send CodeSend) error
 }
 type Sessions interface {
@@ -259,13 +260,17 @@ type Sessions interface {
 type CodeSender interface {
     Send(ctx, email, code string) error // consola en desarrollo, Resend en producción
 }
+type ExpiredAccess interface { // borra en una transacción
+    DeleteExpired(ctx, cutoff CleanupCutoff) error // CleanupCutoffAt(now): vencidos a now; envíos de hace 1 h o más
+}
 ```
 
 - Casos de uso: `CodeDelivery` (componente: admite la petición según el límite y la registra; emite
   el código y lo envía), `RegisterUser`, `Login`, `VerifyCode` (devuelve el usuario),
   `OpenSession` (verifica y abre la sesión; devuelve el token en claro una sola vez),
   `ValidateSession` (token → `userID`; vencida o desconocida → `ErrUnauthorized` con
-  `common.unauthorized`, sin distinguir), `CloseSession` (idempotente).
+  `common.unauthorized`, sin distinguir), `CloseSession` (idempotente), `CleanExpiredAccess`
+  (borra códigos, sesiones y envíos que ya no sirven; dónde y cada cuánto corre lo arma `main.go`).
 - `GET /api/export` y `DELETE /api/me` recorren datos de varias features: se resuelven con
   adaptadores puente (ver Pendiente).
 
@@ -446,8 +451,8 @@ type LineOverrides interface {
     Delete(ctx context.Context, userID int64, key GroupKey) error
 }
 type PriceAlertDecisions interface {
-    List(ctx context.Context, userID int64) (map[GroupKey]Money, error)    // monto nuevo del alza mantenida
-    Save(ctx context.Context, userID int64, k KeptRise) error              // KeptRise{Key, NewAmount}; reemplaza
+    List(ctx context.Context, userID int64) (map[GroupKey][]Money, error)  // historial de montos mantenidos, del más antiguo al último
+    Save(ctx context.Context, userID int64, k KeptRise) error              // KeptRise{Key, NewAmount}; agrega al historial, sin repetir
 }
 type HiddenLines interface {
     List(ctx context.Context, userID int64) ([]GroupKey, error)
@@ -612,18 +617,19 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 | Tabla | Feature dueña | Columnas clave | Notas |
 |---|---|---|---|
 | `users` | auth | `id`, `public_id` UNIQUE, `name`, `email` UNIQUE, `accepted_terms_at`, `created_at` | |
-| `login_codes` | auth | `user_id` UNIQUE, `code_hash`, `expires_at`, `attempts` | un código por usuario; `ON DELETE CASCADE` |
+| `login_codes` | auth | `id`, `user_id` UNIQUE, `code_hash`, `expires_at`, `attempts` | un código por usuario; `ON DELETE CASCADE` |
 | `code_sends` | auth | `id`, `email`, `sent_at` | por correo, exista o no la cuenta |
 | `sessions` | auth | `id`, `user_id`, `token_hash` UNIQUE, `expires_at` | `ON DELETE CASCADE` |
 | `accounts` (post-MVP) | accounts | `id`, `public_id` UNIQUE, `user_id`, `email`, `password_enc`, `last_sync_at`, `last_error_key` | `UNIQUE(user_id, email)` |
-| `statements` | statements | `id`, `public_id` UNIQUE, `user_id`, `bank`, `filename`, `kind`, `billing_date`, `bad_lines` (JSON) | `UNIQUE(user_id, bank, billing_date)` |
-| `charges` | shared | `id`, `user_id`, `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card`, `card_last4` (vacío o 4 dígitos) | `UNIQUE(user_id, source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola |
+| `statements` | statements | `id`, `public_id` UNIQUE, `user_id`, `bank`, `filename`, `kind`, `billing_date`, `imported_at`, `bad_lines` (JSON) | `UNIQUE(user_id, bank, billing_date)` |
+| `charges` | shared | `id`, `user_id`, `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card`, `card_last4` (vacío o 4 dígitos) | `UNIQUE(user_id, source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola; `account_id` llega con la tabla `accounts` (post-MVP) |
 | `subscription_decisions` | subscriptions | `id`, `user_id`, `group_key` (clave de línea; `UNIQUE(user_id, group_key)`), `decision` (`confirmed`/`dismissed`), `cadence` (`monthly`/`yearly`, solo si confirmada), `decided_at` | |
 | `line_aliases` | subscriptions | `id`, `user_id`, `line_key`, `alias` (≤ 40 caracteres) | `UNIQUE(user_id, line_key)` |
 | `unparsed_emails` (post-MVP) | emailsync | `id`, `external_id` UNIQUE, `account_id`, `bank`, `subject`, `received_at`, `preview` | |
 | `manual_subscriptions` | subscriptions | `id`, `public_id` UNIQUE, `user_id`, `name`, `amount`, `currency`, `billing_day` | `CHECK(billing_day BETWEEN 1 AND 31)` |
 | `line_overrides` | subscriptions | `id`, `user_id`, `line_key`, `amount`?, `billing_day`? | `UNIQUE(user_id, line_key)` |
-| `price_alert_decisions` | subscriptions | `id`, `user_id`, `line_key`, `amount` (el monto nuevo) | `UNIQUE(user_id, line_key, amount)` |
+| `price_alert_decisions` | subscriptions | `id`, `user_id`, `line_key`, `amount` (el monto nuevo) | `UNIQUE(user_id, line_key, amount)`: historial de alzas mantenidas; no vuelve a avisar un monto ya mantenido. El resumen muestra siempre el último monto cobrado |
+| `exchange_rates` | statements escribe, subscriptions lee | `id`, `user_id`, `pesos_per_dollar`, `date` | `UNIQUE(user_id, date)`; `pesos_per_dollar > 0`; cada feature con su adaptador, como `charges` |
 | `hidden_lines` | subscriptions | `id`, `user_id`, `line_key`, `hidden_at` | `UNIQUE(user_id, line_key)`; la usa "dejar de seguir" |
 | `cancellations` | subscriptions | `id`, `user_id`, `line_key`, `marked_at` | `UNIQUE(user_id, line_key)` |
 
@@ -631,13 +637,19 @@ Toda tabla de datos lleva `user_id` con `ON DELETE CASCADE` desde `users`.
 
 - `id`: `INTEGER PRIMARY KEY AUTOINCREMENT` en todas las tablas; solo para uso interno (joins, FKs,
   `external_id`), nunca sale por la API.
-- `public_id`: `TEXT UNIQUE NOT NULL`, UUID v7 generado en Go por el repo en `Create`. Solo en las
+- `public_id`: `TEXT UNIQUE NOT NULL`, UUID v7 generado en Go por el caso de uso (`NewPublicID`). Solo en las
   tablas que la API referencia (`users`, `accounts`, `statements`, `manual_subscriptions`).
 - Fechas: `INTEGER` unix en segundos, UTC. Una fecha sin hora (`billing_date`) se guarda como las
   00:00 de ese día en `America/Santiago`. La conversión `time.Time` ↔ unix vive solo en los
   adaptadores sqlite y http.
 - Migraciones: centralizadas en `shared/sqlite/migrations`, porque es una sola base.
-- Consultas: cada feature tiene las suyas en `adapters/sqlite/queries.sql`, y sqlc genera el código Go.
+- Consultas: cada feature tiene las suyas en `adapters/sqlite/queries.sql`, y sqlc genera el código Go
+  en `adapters/sqlite/queries` (paquete `queries`). `backend/sqlc.yaml` toma el esquema de las
+  migraciones y lleva una entrada por feature (`omit_unused_structs`: cada paquete solo trae los
+  modelos que usa). sqlc v1.31.1 se corre con `go run`, sin instalarlo; lo generado se commitea y
+  `sqlc diff` comprueba que está al día.
+- Un `UNIQUE` violado se traduce a `ErrConflict` con `sqlite.IsUniqueViolation`. Los tests de repos
+  usan una base temporal real ya migrada (`sqlitetest.OpenMigrated`).
 - Conexión: `PRAGMA journal_mode=WAL`, `foreign_keys=ON`, `busy_timeout=5000`, `synchronous=FULL`;
   un solo escritor. Si algo falla al abrir la base o migrar, la app no arranca.
 - Transacciones: viven dentro de los métodos de los repos (adaptador). Los casos de uso no las

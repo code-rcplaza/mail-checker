@@ -63,6 +63,16 @@ func (u *usersByEmail) FindByEmail(_ context.Context, email string) (domain.User
 	return user, nil
 }
 
+func (u *usersByEmail) FindByID(_ context.Context, id int64) (domain.User, error) {
+	u.calls++
+	for _, user := range u.users {
+		if user.ID == id {
+			return user, nil
+		}
+	}
+	return domain.User{}, fmt.Errorf("find user: %w", shared.ErrNotFound)
+}
+
 var _ ports.LoginCodes = (*codesByUser)(nil)
 
 type codesByUser struct {
@@ -104,8 +114,14 @@ var _ ports.CodeSends = sendsByEmail{}
 
 type sendsByEmail map[string][]time.Time
 
-func (s sendsByEmail) List(_ context.Context, email string) ([]time.Time, error) {
-	return s[email], nil
+func (s sendsByEmail) ListSince(_ context.Context, email string, since time.Time) ([]time.Time, error) {
+	var after []time.Time
+	for _, sentAt := range s[email] {
+		if sentAt.After(since) {
+			after = append(after, sentAt)
+		}
+	}
+	return after, nil
 }
 
 func (s sendsByEmail) Record(_ context.Context, send domain.CodeSend) error {

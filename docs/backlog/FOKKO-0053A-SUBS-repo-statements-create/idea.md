@@ -21,7 +21,7 @@ Una cartola y sus cargos deben guardarse juntos o ninguno, sin duplicar al reimp
 - Dentro de `sqlite.WithTx` solo se usa la transacción, nunca el repo ni `db` (la base tiene una sola conexión y se bloquea). Los tests con `-timeout 60s` lo detectan.
 
 ## Tareas
-- [ ] [TASK-001A Tabla `statements`](TASK-001A-MIGRATION-STATEMENTS.md)
-- [ ] [TASK-001B Tabla `charges`](TASK-001B-MIGRATION-CHARGES.md)
-- [ ] [TASK-002A Crear una cartola con sus cargos](TASK-002A-CREATE-WITH-CHARGES.md)
-- [ ] [TASK-002B Rechazar una cartola repetida](TASK-002B-CREATE-CONFLICT.md)
+- [x] [TASK-001A Tabla `statements`](TASK-001A-MIGRATION-STATEMENTS.md)
+- [x] [TASK-001B Tabla `charges`](TASK-001B-MIGRATION-CHARGES.md)
+- [x] [TASK-002A Crear una cartola con sus cargos](TASK-002A-CREATE-WITH-CHARGES.md)
+- [x] [TASK-002B Rechazar una cartola repetida](TASK-002B-CREATE-CONFLICT.md)

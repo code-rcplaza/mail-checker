@@ -21,7 +21,7 @@ Los c처digos de acceso deben persistir para sobrevivir a un reinicio. Un solo c�
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Tabla `login_codes`](TASK-001-CODES-MIGRATION.md)
-- [ ] [TASK-002A Guardar un c처digo](TASK-002A-CODES-SAVE.md)
-- [ ] [TASK-002B Sumar un intento](TASK-002B-CODES-ATTEMPTS.md)
-- [ ] [TASK-002C Consumir un c처digo](TASK-002C-CODES-CONSUME.md)
+- [x] [TASK-001 Tabla `login_codes`](TASK-001-CODES-MIGRATION.md)
+- [x] [TASK-002A Guardar un c처digo](TASK-002A-CODES-SAVE.md)
+- [x] [TASK-002B Sumar un intento](TASK-002B-CODES-ATTEMPTS.md)
+- [x] [TASK-002C Consumir un c처digo](TASK-002C-CODES-CONSUME.md)

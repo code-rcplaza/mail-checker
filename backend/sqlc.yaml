@@ -1,0 +1,29 @@
+# Una sola fuente del esquema: las migraciones de goose (sqlc ignora las secciones Down).
+# Cada feature escribe sus consultas en adapters/sqlite/queries.sql y recibe su propio
+# paquete generado en adapters/sqlite/queries. Lo generado se commitea.
+version: "2"
+sql:
+  - engine: sqlite
+    schema: internal/shared/sqlite/migrations
+    queries: internal/auth/adapters/sqlite/queries.sql
+    gen:
+      go:
+        package: queries
+        out: internal/auth/adapters/sqlite/queries
+        omit_unused_structs: true
+  - engine: sqlite
+    schema: internal/shared/sqlite/migrations
+    queries: internal/statements/adapters/sqlite/queries.sql
+    gen:
+      go:
+        package: queries
+        out: internal/statements/adapters/sqlite/queries
+        omit_unused_structs: true
+  - engine: sqlite
+    schema: internal/shared/sqlite/migrations
+    queries: internal/subscriptions/adapters/sqlite/queries.sql
+    gen:
+      go:
+        package: queries
+        out: internal/subscriptions/adapters/sqlite/queries
+        omit_unused_structs: true

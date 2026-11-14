@@ -20,5 +20,5 @@ Los overrides de monto y día de una línea deben persistir.
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Tabla `line_overrides`](TASK-001-OVERRIDES-MIGRATION.md)
-- [ ] [TASK-002 Adaptador de overrides](TASK-002-OVERRIDES-REPO.md)
+- [x] [TASK-001 Tabla `line_overrides`](TASK-001-OVERRIDES-MIGRATION.md)
+- [x] [TASK-002 Adaptador de overrides](TASK-002-OVERRIDES-REPO.md)

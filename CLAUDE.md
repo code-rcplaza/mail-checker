@@ -223,6 +223,8 @@ Backend (desde `backend/`, módulo `github.com/code-rcplaza/mail-checker/backend
 - Vet: `go vet ./...`
 - Staticcheck: `staticcheck ./...` (instalado en `$(go env GOPATH)/bin`)
 - Build: `go build ./...`
+- sqlc (tras cambiar un `queries.sql` o una migración): `go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1 generate`
+- Comprobar que lo generado está al día: `go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1 diff` (sin salida = al día)
 
 Tests solo con la stdlib `testing` (tablas), sin testify.
 

@@ -108,6 +108,7 @@ Para detenerlo, `Ctrl+C`.
 | Go | 1.27 o superior | Compilar y correr el servidor |
 | Git | cualquiera | Obtener el código |
 | Staticcheck | última | Solo para revisar el código (`go install honnef.co/go/tools/cmd/staticcheck@latest`) |
+| sqlc | v1.31.1 | No se instala: `go run github.com/sqlc-dev/sqlc/cmd/sqlc@v1.31.1 generate` regenera las consultas y `diff` comprueba que estén al día; el código generado ya viene en el repo |
 
 El frontend y Docker todavía no están listos; hoy no hay nada que instalar para ellos.
 

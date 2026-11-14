@@ -19,5 +19,5 @@ Las consultas SQL viven solo en queries de sqlc (principio DRY del proyecto), pe
 - Versión de `sqlc` a fijar: se decide al escribir la tarea.
 
 ## Tareas
-- [ ] [TASK-001 Configuración de sqlc](TASK-001-SQLC-CONFIG.md)
-- [ ] [TASK-002 Comprobar que lo generado está al día](TASK-002-SQLC-VERIFY.md)
+- [x] [TASK-001 Configuración de sqlc](TASK-001-SQLC-CONFIG.md)
+- [x] [TASK-002 Comprobar que lo generado está al día](TASK-002-SQLC-VERIFY.md)

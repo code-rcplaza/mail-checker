@@ -19,5 +19,5 @@ Códigos, envíos y sesiones vencidos se acumulan sin límite.
 - Se propone una tarea periódica que arranca `main.go` (cada hora, cancelable con el contexto). Lo vencido ya no vale aunque no se borre, así que no es urgente.
 
 ## Tareas
-- [ ] [TASK-001 Borrar lo vencido](TASK-001-CLEANUP-QUERIES.md)
-- [ ] [TASK-002 Caso de uso de limpieza](TASK-002-CLEANUP-USECASE.md)
+- [x] [TASK-001 Borrar lo vencido](TASK-001-CLEANUP-QUERIES.md)
+- [x] [TASK-002 Caso de uso de limpieza](TASK-002-CLEANUP-USECASE.md)

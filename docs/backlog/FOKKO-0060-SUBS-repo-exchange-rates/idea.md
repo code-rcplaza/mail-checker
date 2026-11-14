@@ -18,9 +18,9 @@ El tipo de cambio derivado de cada cartola debe guardarse con su fecha, y `subsc
 - `internal/shared` (`sqlite/migrations`)
 
 ## Dudas abiertas
-- La tabla se comparte entre dos features sin que una importe a la otra: cada una tiene su adaptador sobre la misma tabla. ¿Se acepta o va a `shared`?
+- Resuelto como `charges` (FOKKO-0053C-SUBS): cada feature tiene su adaptador sobre la misma tabla. "Leer el último" lo hace `LatestExchangeRate` en el dominio; el lector entrega los del usuario ordenados por fecha.
 
 ## Tareas
-- [ ] [TASK-001 Tabla `exchange_rates`](TASK-001-EXCHANGE-RATES-MIGRATION.md)
-- [ ] [TASK-002 Guardar el tipo de cambio](TASK-002-EXCHANGE-RATE-WRITER.md)
-- [ ] [TASK-003 Leer el más reciente](TASK-003-EXCHANGE-RATE-READER.md)
+- [x] [TASK-001 Tabla `exchange_rates`](TASK-001-EXCHANGE-RATES-MIGRATION.md)
+- [x] [TASK-002 Guardar el tipo de cambio](TASK-002-EXCHANGE-RATE-WRITER.md)
+- [x] [TASK-003 Leer el más reciente](TASK-003-EXCHANGE-RATE-READER.md)

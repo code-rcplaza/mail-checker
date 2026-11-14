@@ -20,6 +20,6 @@ Las sesiones deben persistir entre reinicios, guardadas por el hash del token.
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Tabla `sessions`](TASK-001-SESSIONS-MIGRATION.md)
-- [ ] [TASK-002A Buscar una sesión por su hash](TASK-002A-SESSIONS-FIND.md)
-- [ ] [TASK-002B Borrar una sesión](TASK-002B-SESSIONS-DELETE.md)
+- [x] [TASK-001 Tabla `sessions`](TASK-001-SESSIONS-MIGRATION.md)
+- [x] [TASK-002A Buscar una sesión por su hash](TASK-002A-SESSIONS-FIND.md)
+- [x] [TASK-002B Borrar una sesión](TASK-002B-SESSIONS-DELETE.md)

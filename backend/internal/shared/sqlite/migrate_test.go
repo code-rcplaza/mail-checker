@@ -7,6 +7,8 @@ import (
 	"testing"
 	"testing/fstest"
 
+	"github.com/pressly/goose/v3"
+
 	"github.com/code-rcplaza/mail-checker/backend/internal/shared/sqlite/migrations"
 )
 
@@ -44,9 +46,31 @@ func TestMigrate_AppliesEmbeddedMigrationsToNewDB(t *testing.T) {
 		t.Fatalf("Migrate() error = %v, want nil", err)
 	}
 
-	got := tableNames(t, db)
-	if len(got) != 1 || got[0] != "goose_db_version" {
-		t.Errorf("tables = %v, want only [goose_db_version]", got)
+	got := strings.Join(tableNames(t, db), ",")
+	for _, table := range []string{"goose_db_version", "users", "login_codes", "code_sends", "sessions", "statements", "charges", "subscription_decisions", "line_aliases", "line_overrides", "manual_subscriptions", "hidden_lines", "cancellations", "price_alert_decisions", "exchange_rates"} {
+		if !strings.Contains(","+got+",", ","+table+",") {
+			t.Errorf("tables = [%s], want %s", got, table)
+		}
+	}
+}
+
+func TestMigrations_GoDownCleanly(t *testing.T) {
+	db := openTempDB(t)
+	ctx := context.Background()
+	if err := Migrate(ctx, db, migrations.FS); err != nil {
+		t.Fatalf("Migrate() error = %v, want nil", err)
+	}
+	provider, err := goose.NewProvider(goose.DialectSQLite3, db, migrations.FS)
+	if err != nil {
+		t.Fatalf("goose provider: %v", err)
+	}
+
+	if _, err := provider.DownTo(ctx, 0); err != nil {
+		t.Fatalf("DownTo(0) error = %v, want nil", err)
+	}
+
+	if got := tableNames(t, db); len(got) != 1 || got[0] != "goose_db_version" {
+		t.Errorf("tables after down = %v, want only [goose_db_version]", got)
 	}
 }
 

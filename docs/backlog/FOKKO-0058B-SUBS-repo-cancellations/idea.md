@@ -20,5 +20,5 @@ La marca "por cancelar" debe persistir con la fecha en que se marcó.
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Tabla `cancellations`](TASK-001-CANCELLATIONS-MIGRATION.md)
-- [ ] [TASK-002 Adaptador de cancelaciones](TASK-002-CANCELLATIONS-REPO.md)
+- [x] [TASK-001 Tabla `cancellations`](TASK-001-CANCELLATIONS-MIGRATION.md)
+- [x] [TASK-002 Adaptador de cancelaciones](TASK-002-CANCELLATIONS-REPO.md)

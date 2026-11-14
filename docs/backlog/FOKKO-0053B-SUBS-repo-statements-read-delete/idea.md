@@ -19,5 +19,5 @@ El usuario debe poder ver y borrar solo sus cartolas, y borrar una cartola borra
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Listar mis cartolas](TASK-001A-STATEMENTS-LIST.md)
-- [ ] [TASK-001B Borrar una cartola con sus cargos](TASK-001B-STATEMENTS-DELETE.md)
+- [x] [TASK-001A Listar mis cartolas](TASK-001A-STATEMENTS-LIST.md)
+- [x] [TASK-001B Borrar una cartola con sus cargos](TASK-001B-STATEMENTS-DELETE.md)

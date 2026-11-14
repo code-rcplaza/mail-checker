@@ -20,6 +20,6 @@ El límite de 3 envíos por hora por correo necesita un registro persistente de 
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Tabla `code_sends`](TASK-001-SENDS-MIGRATION.md)
-- [ ] [TASK-002A Registrar un envío](TASK-002A-SENDS-RECORD.md)
-- [ ] [TASK-002B Contar los envíos de la última hora](TASK-002B-SENDS-COUNT.md)
+- [x] [TASK-001 Tabla `code_sends`](TASK-001-SENDS-MIGRATION.md)
+- [x] [TASK-002A Registrar un envío](TASK-002A-SENDS-RECORD.md)
+- [x] [TASK-002B Contar los envíos de la última hora](TASK-002B-SENDS-COUNT.md)

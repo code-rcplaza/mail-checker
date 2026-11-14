@@ -88,23 +88,23 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 
 | # | Idea | Estado |
 |---|---|---|
-| FOKKO-0049-SUBS | [`sqlc.yaml` y generación de queries (la migración base no crea tablas)](FOKKO-0049-SUBS-sqlc-setup/idea.md) | todo |
-| FOKKO-0050-SUBS | [Repo de usuarios](FOKKO-0050-SUBS-repo-users/idea.md) | todo |
-| FOKKO-0051A-SUBS | [Repo de códigos de acceso](FOKKO-0051A-SUBS-repo-login-codes/idea.md) | todo |
-| FOKKO-0051B-SUBS | [Repo del registro de envíos de códigos](FOKKO-0051B-SUBS-repo-code-sends/idea.md) | todo |
-| FOKKO-0052-SUBS | [Repo de sesiones](FOKKO-0052-SUBS-repo-sessions/idea.md) | todo |
-| FOKKO-0053A-SUBS | [Repo de cartolas: crear con sus cargos](FOKKO-0053A-SUBS-repo-statements-create/idea.md) | todo |
-| FOKKO-0053B-SUBS | [Repo de cartolas: lectura y borrado](FOKKO-0053B-SUBS-repo-statements-read-delete/idea.md) | todo |
-| FOKKO-0053C-SUBS | [Lector de cargos de `subscriptions`](FOKKO-0053C-SUBS-charge-reader/idea.md) | todo |
-| FOKKO-0054-SUBS | [Repo de decisiones](FOKKO-0054-SUBS-repo-decisions/idea.md) | todo |
-| FOKKO-0055-SUBS | [Repo de alias](FOKKO-0055-SUBS-repo-aliases/idea.md) | todo |
-| FOKKO-0056-SUBS | [Repo de overrides](FOKKO-0056-SUBS-repo-overrides/idea.md) | todo |
-| FOKKO-0057-SUBS | [Repo de manuales](FOKKO-0057-SUBS-repo-manuals/idea.md) | todo |
-| FOKKO-0058A-SUBS | [Repo de líneas ocultas](FOKKO-0058A-SUBS-repo-hidden-lines/idea.md) | todo |
-| FOKKO-0058B-SUBS | [Repo de cancelaciones](FOKKO-0058B-SUBS-repo-cancellations/idea.md) | todo |
-| FOKKO-0059-SUBS | [Repo de decisiones de alza](FOKKO-0059-SUBS-repo-price-alerts/idea.md) | todo |
-| FOKKO-0060-SUBS | [Repo del tipo de cambio](FOKKO-0060-SUBS-repo-exchange-rates/idea.md) | todo |
-| FOKKO-0061-SUBS | [Limpiar códigos y sesiones vencidos](FOKKO-0061-SUBS-cleanup-expired/idea.md) | todo |
+| FOKKO-0049-SUBS | [`sqlc.yaml` y generación de queries (la migración base no crea tablas)](FOKKO-0049-SUBS-sqlc-setup/idea.md) | done |
+| FOKKO-0050-SUBS | [Repo de usuarios](FOKKO-0050-SUBS-repo-users/idea.md) | done |
+| FOKKO-0051A-SUBS | [Repo de códigos de acceso](FOKKO-0051A-SUBS-repo-login-codes/idea.md) | done |
+| FOKKO-0051B-SUBS | [Repo del registro de envíos de códigos](FOKKO-0051B-SUBS-repo-code-sends/idea.md) | done |
+| FOKKO-0052-SUBS | [Repo de sesiones](FOKKO-0052-SUBS-repo-sessions/idea.md) | done |
+| FOKKO-0053A-SUBS | [Repo de cartolas: crear con sus cargos](FOKKO-0053A-SUBS-repo-statements-create/idea.md) | done |
+| FOKKO-0053B-SUBS | [Repo de cartolas: lectura y borrado](FOKKO-0053B-SUBS-repo-statements-read-delete/idea.md) | done |
+| FOKKO-0053C-SUBS | [Lector de cargos de `subscriptions`](FOKKO-0053C-SUBS-charge-reader/idea.md) | done |
+| FOKKO-0054-SUBS | [Repo de decisiones](FOKKO-0054-SUBS-repo-decisions/idea.md) | done |
+| FOKKO-0055-SUBS | [Repo de alias](FOKKO-0055-SUBS-repo-aliases/idea.md) | done |
+| FOKKO-0056-SUBS | [Repo de overrides](FOKKO-0056-SUBS-repo-overrides/idea.md) | done |
+| FOKKO-0057-SUBS | [Repo de manuales](FOKKO-0057-SUBS-repo-manuals/idea.md) | done |
+| FOKKO-0058A-SUBS | [Repo de líneas ocultas](FOKKO-0058A-SUBS-repo-hidden-lines/idea.md) | done |
+| FOKKO-0058B-SUBS | [Repo de cancelaciones](FOKKO-0058B-SUBS-repo-cancellations/idea.md) | done |
+| FOKKO-0059-SUBS | [Repo de decisiones de alza](FOKKO-0059-SUBS-repo-price-alerts/idea.md) | done |
+| FOKKO-0060-SUBS | [Repo del tipo de cambio](FOKKO-0060-SUBS-repo-exchange-rates/idea.md) | done |
+| FOKKO-0061-SUBS | [Limpiar códigos y sesiones vencidos](FOKKO-0061-SUBS-cleanup-expired/idea.md) | done |
 
 ### E. HTTP
 

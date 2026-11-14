@@ -17,8 +17,9 @@ Las alzas descartadas deben persistir con el monto que se descartó.
 - `internal/shared` (`sqlite/migrations`)
 
 ## Dudas abiertas
-- Con `later` fuera del MVP no hace falta la columna `decision`; la tabla guarda solo el descarte. Se actualiza `ARCHITECTURE.md` cuando se escriba.
+- Con `later` fuera del MVP no hace falta la columna `decision`.
+- Decidido: se guarda el historial de montos mantenidos por línea (un monto que ya se mantuvo no vuelve a avisar); el resumen muestra el último monto cobrado. El puerto pasó a `map[GroupKey][]Money`.
 
 ## Tareas
-- [ ] [TASK-001 Tabla `price_alert_decisions`](TASK-001-PRICE-ALERTS-MIGRATION.md)
-- [ ] [TASK-002 Adaptador de alzas descartadas](TASK-002-PRICE-ALERTS-REPO.md)
+- [x] [TASK-001 Tabla `price_alert_decisions`](TASK-001-PRICE-ALERTS-MIGRATION.md)
+- [x] [TASK-002 Adaptador de alzas descartadas](TASK-002-PRICE-ALERTS-REPO.md)

@@ -33,10 +33,11 @@ type ExchangeRates interface {
 	List(ctx context.Context, userID int64) ([]shared.ExchangeRate, error)
 }
 
-// PriceAlertDecisions keeps, per line, the new amount of a rise the user
-// chose to keep, so its notice does not show again; saving again replaces it.
+// PriceAlertDecisions keeps the history of every new amount the user kept on a
+// line, oldest first, so those notices do not show again; keeping the same
+// amount again changes nothing.
 type PriceAlertDecisions interface {
-	List(ctx context.Context, userID int64) (map[domain.GroupKey]shared.Money, error)
+	List(ctx context.Context, userID int64) (map[domain.GroupKey][]shared.Money, error)
 	Save(ctx context.Context, userID int64, kept domain.KeptRise) error
 }
 

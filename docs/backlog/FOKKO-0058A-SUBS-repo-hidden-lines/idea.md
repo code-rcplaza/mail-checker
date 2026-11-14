@@ -20,5 +20,5 @@
 - `hidden_lines` no está en el modelo de datos de `ARCHITECTURE.md`: hay que sumarla cuando se actualice.
 
 ## Tareas
-- [ ] [TASK-001 Tabla `hidden_lines`](TASK-001-HIDDEN-MIGRATION.md)
-- [ ] [TASK-002 Adaptador de líneas ocultas](TASK-002-HIDDEN-LINES-REPO.md)
+- [x] [TASK-001 Tabla `hidden_lines`](TASK-001-HIDDEN-MIGRATION.md)
+- [x] [TASK-002 Adaptador de líneas ocultas](TASK-002-HIDDEN-LINES-REPO.md)
