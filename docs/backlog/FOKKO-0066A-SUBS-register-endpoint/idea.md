@@ -23,8 +23,8 @@ Esta idea cubre solo: `POST /api/auth/register`. El resto del trabajo original e
 
 ## Tareas
 - [ ] [TASK-001A Registrar enviando el código](TASK-001A-REGISTER-SENDS-CODE.md)
-- [ ] [TASK-001B Rechazar un correo registrado](TASK-001B-REGISTER-CONFLICT.md)
+- [ ] [TASK-001B Registrar un correo ya registrado](TASK-001B-REGISTER-CONFLICT.md)
 - [ ] [TASK-001C Propagar un fallo del envío](TASK-001C-REGISTER-SEND-FAILS.md)
 - [ ] [TASK-002A Responder 204 al registrar](TASK-002A-REGISTER-204.md)
 - [ ] [TASK-002B Responder 400 por datos inválidos](TASK-002B-REGISTER-400.md)
-- [ ] [TASK-002C Responder 409 por correo repetido](TASK-002C-REGISTER-409.md)
+- [ ] [TASK-002C Responder 204 por correo repetido](TASK-002C-REGISTER-409.md)

@@ -16,5 +16,5 @@ Enviar el código es un puerto (`CodeSender`). En desarrollo se usa un doble que
 - El código en consola es un secreto: el adaptador de consola solo se usa en desarrollo y `main.go` se niega a usarlo en producción.
 
 ## Tareas
-- [ ] [TASK-001 Puerto de envío](TASK-001-CODE-SENDER-PORT.md)
-- [ ] [TASK-002 Envío por consola para desarrollo](TASK-002-CONSOLE-SENDER.md)
+- [x] [TASK-001 Puerto de envío](TASK-001-CODE-SENDER-PORT.md)
+- [x] [TASK-002 Envío por consola para desarrollo](TASK-002-CONSOLE-SENDER.md)

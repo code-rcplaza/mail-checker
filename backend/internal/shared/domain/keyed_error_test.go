@@ -26,7 +26,7 @@ func TestInvalid_WrapsErrInvalidAndKeepsKeyAndParams(t *testing.T) {
 	}
 }
 
-func TestNotFoundAndConflict_WrapSentinelAndKeepKey(t *testing.T) {
+func TestKeyedErrors_WrapTheirSentinelAndKeepKey(t *testing.T) {
 	cases := []struct {
 		name     string
 		err      error
@@ -35,6 +35,8 @@ func TestNotFoundAndConflict_WrapSentinelAndKeepKey(t *testing.T) {
 	}{
 		{"NotFound", NotFound("accounts.not_found"), ErrNotFound, "accounts.not_found"},
 		{"Conflict", Conflict("accounts.email_taken"), ErrConflict, "accounts.email_taken"},
+		{"TooMany", TooMany("auth.too_many_sends", nil), ErrTooMany, "auth.too_many_sends"},
+		{"Unauthorized", Unauthorized(KeyUnauthorized), ErrUnauthorized, "common.unauthorized"},
 	}
 	for _, tc := range cases {
 		t.Run(tc.name, func(t *testing.T) {
@@ -69,9 +71,11 @@ func TestKeyedError_SurvivesFmtErrorfWrapping(t *testing.T) {
 
 func TestSentinels_AreDistinct(t *testing.T) {
 	sentinels := map[string]error{
-		"ErrInvalid":  ErrInvalid,
-		"ErrNotFound": ErrNotFound,
-		"ErrConflict": ErrConflict,
+		"ErrInvalid":      ErrInvalid,
+		"ErrNotFound":     ErrNotFound,
+		"ErrConflict":     ErrConflict,
+		"ErrTooMany":      ErrTooMany,
+		"ErrUnauthorized": ErrUnauthorized,
 	}
 	for nameA, a := range sentinels {
 		for nameB, b := range sentinels {
@@ -97,5 +101,17 @@ func TestInvalid_CopiesParams(t *testing.T) {
 	}
 	if keyed.Params["count"] != 2 {
 		t.Errorf("Params[count] = %v after mutating caller map, want 2", keyed.Params["count"])
+	}
+}
+
+func TestTooMany_KeepsAndCopiesParams(t *testing.T) {
+	params := map[string]any{"minutes": 60}
+	err := TooMany("auth.too_many_sends", params)
+
+	params["minutes"] = 1
+
+	var keyed KeyedError
+	if !errors.As(err, &keyed) || keyed.Params["minutes"] != 60 {
+		t.Errorf("keyed = %+v, want params with minutes 60", keyed)
 	}
 }

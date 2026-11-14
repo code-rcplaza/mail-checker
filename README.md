@@ -115,6 +115,9 @@ El frontend y Docker todavía no están listos; hoy no hay nada que instalar par
 |---|---|---|
 | `MAILCHECKER_PORT` | `8080` | Puerto del servidor, entre 1 y 65535 |
 | `MAILCHECKER_DB_PATH` | `data/mail-checker.db` | Archivo de la base de datos; la carpeta se crea sola |
+| `MAILCHECKER_ENV` | `development` | `development` o `production` |
+| `MAILCHECKER_RESEND_API_KEY` | — | Llave de Resend para enviar los códigos; obligatoria en `production`. En `development`, sin llave, el código se escribe en la consola |
+| `MAILCHECKER_MAIL_FROM` | — | Remitente de los códigos (dominio verificado en Resend); obligatorio en `production` |
 
 Un valor inválido hace que el programa se detenga con un mensaje claro en lugar de arrancar a medias.
 

@@ -8,7 +8,7 @@ El código llega por correo con Resend. Se llama por HTTP con `net/http`, sin SD
 
 ## Alcance
 - Adaptador `CodeSender` con la API de Resend.
-- Configuración (`RESEND_API_KEY`, remitente) que detiene el arranque si falta.
+- Configuración (`MAILCHECKER_ENV`, `MAILCHECKER_RESEND_API_KEY`, `MAILCHECKER_MAIL_FROM`) que detiene el arranque si falta.
 
 ## Fuera
 - Plantillas de correo bonitas: texto simple.
@@ -18,10 +18,10 @@ El código llega por correo con Resend. Se llama por HTTP con `net/http`, sin SD
 - `cmd/api` (`config.go`)
 
 ## Dudas abiertas
-- Hay que tener un dominio verificado en Resend y definir el remitente (`MAIL_FROM`); sin eso solo llegan correos a la cuenta dueña.
-- Texto del correo en español: asunto y cuerpo se definen al escribir la tarea.
+- Hay que tener un dominio verificado en Resend y definir el remitente (`MAILCHECKER_MAIL_FROM`); sin eso solo llegan correos a la cuenta dueña. Lo configura el usuario antes de probar con correos reales.
+- Texto del correo: decidido. Asunto "Tu código de acceso a Fokko"; cuerpo "Tu código es 123456. Vence en 10 minutos. Si no lo pediste, ignora este correo."
 
 ## Tareas
-- [ ] [TASK-001 Enviar el código por Resend](TASK-001-RESEND-SEND.md)
-- [ ] [TASK-002 Errores del envío](TASK-002-RESEND-ERRORS.md)
-- [ ] [TASK-003 Configuración del envío](TASK-003-RESEND-CONFIG.md)
+- [x] [TASK-001 Enviar el código por Resend](TASK-001-RESEND-SEND.md)
+- [x] [TASK-002 Errores del envío](TASK-002-RESEND-ERRORS.md)
+- [x] [TASK-003 Configuración del envío](TASK-003-RESEND-CONFIG.md)

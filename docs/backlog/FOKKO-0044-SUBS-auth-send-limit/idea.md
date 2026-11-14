@@ -20,6 +20,6 @@ Sin tope de envíos, alguien podría llenar un correo ajeno de códigos. El lím
 - Hoy los errores compartidos son inválido, no existe y conflicto. Un límite pide un error propio (`ErrTooMany` → HTTP 429). Se propone agregarlo a `shared/domain`.
 
 ## Tareas
-- [ ] [TASK-001 Error de límite excedido](TASK-001-TOO-MANY-ERROR.md)
-- [ ] [TASK-002 Política de 3 envíos por hora](TASK-002-SEND-LIMIT-POLICY.md)
-- [ ] [TASK-003 Aplicar el límite al emitir](TASK-003-ENFORCE-SEND-LIMIT.md)
+- [x] [TASK-001 Error de límite excedido](TASK-001-TOO-MANY-ERROR.md)
+- [x] [TASK-002 Política de 3 envíos por hora](TASK-002-SEND-LIMIT-POLICY.md)
+- [x] [TASK-003 Aplicar el límite al emitir](TASK-003-ENFORCE-SEND-LIMIT.md)

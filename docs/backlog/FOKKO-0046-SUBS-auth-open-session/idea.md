@@ -21,7 +21,7 @@ Verificar el código abre una sesión de 30 días. No hay contraseña: la sesió
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001A Generar el token](TASK-001A-SESSION-TOKEN.md)
-- [ ] [TASK-001B Fijar el vencimiento](TASK-001B-SESSION-EXPIRY.md)
-- [ ] [TASK-001C Guardar solo el hash](TASK-001C-SESSION-HASH.md)
-- [ ] [TASK-002 Abrir la sesión tras verificar](TASK-002-OPEN-SESSION.md)
+- [x] [TASK-001A Generar el token](TASK-001A-SESSION-TOKEN.md)
+- [x] [TASK-001B Fijar el vencimiento](TASK-001B-SESSION-EXPIRY.md)
+- [x] [TASK-001C Guardar solo el hash](TASK-001C-SESSION-HASH.md)
+- [x] [TASK-002 Abrir la sesión tras verificar](TASK-002-OPEN-SESSION.md)

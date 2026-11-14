@@ -15,12 +15,12 @@ No existe la feature `auth`. Todo dato pertenece a un usuario, así que primero 
 - `internal/auth` (`domain`, `ports`, `usecases`)
 
 ## Dudas abiertas
-- Registrar un correo que ya existe: responder `auth.email_taken` revela que la cuenta existe. Se propone aceptarlo en el MVP (el registro lo exige para no duplicar) y revisarlo antes de salir a producción.
-- Largo máximo del nombre: se propone 60 caracteres.
+- Registrar un correo que ya existe: Decidido: respuesta neutra (ver `auth` en `docs/ARCHITECTURE.md`). No se crea otro usuario ni se devuelve error.
+- Largo máximo del nombre: decidido, 60 caracteres (`auth.name_too_long`).
 
 ## Tareas
-- [ ] [TASK-001A Aceptar un usuario válido](TASK-001A-USER-VALID.md)
-- [ ] [TASK-001B Rechazar nombre o correo inválido](TASK-001B-USER-NAME-EMAIL.md)
-- [ ] [TASK-001C Exigir los términos](TASK-001C-USER-TERMS.md)
-- [ ] [TASK-002A Crear un usuario](TASK-002A-CREATE-USER.md)
-- [ ] [TASK-002B Rechazar un correo repetido](TASK-002B-CREATE-USER-DUPLICATE.md)
+- [x] [TASK-001A Aceptar un usuario válido](TASK-001A-USER-VALID.md)
+- [x] [TASK-001B Rechazar nombre o correo inválido](TASK-001B-USER-NAME-EMAIL.md)
+- [x] [TASK-001C Exigir los términos](TASK-001C-USER-TERMS.md)
+- [x] [TASK-002A Crear un usuario](TASK-002A-CREATE-USER.md)
+- [x] [TASK-002B No duplicar un correo registrado](TASK-002B-CREATE-USER-DUPLICATE.md)

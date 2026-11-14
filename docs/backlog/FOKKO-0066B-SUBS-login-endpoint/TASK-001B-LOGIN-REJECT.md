@@ -5,7 +5,7 @@ Feature: `internal/auth/adapters/http`
 
 ## Criterios
 - Dado un correo con formato inválido, cuando se envía, entonces responde 400 con `fields`.
-- Dado un correo no registrado, cuando se envía, entonces responde 404 con `auth.user_not_found`.
+- Dado un correo no registrado, cuando se envía, entonces responde 204, igual que con uno registrado.
 
 ## Fuera
 - Nada.

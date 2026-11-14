@@ -23,5 +23,5 @@ Esta idea cubre solo: Validar la sesión. El resto del trabajo original está en
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Error de falta de sesión](TASK-001-UNAUTHORIZED-ERROR.md)
-- [ ] [TASK-002 Validar una sesión](TASK-002-VALIDATE-SESSION.md)
+- [x] [TASK-001 Error de falta de sesión](TASK-001-UNAUTHORIZED-ERROR.md)
+- [x] [TASK-002 Validar una sesión](TASK-002-VALIDATE-SESSION.md)

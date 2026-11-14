@@ -73,16 +73,16 @@ respeta las dependencias. ⛔ marca una decisión abierta que la bloquea.
 
 | # | Idea | Estado |
 |---|---|---|
-| FOKKO-0040-SUBS | [Registrar usuario](FOKKO-0040-SUBS-auth-user/idea.md) | todo |
-| FOKKO-0041-SUBS | [Pedir código al entrar (login)](FOKKO-0041-SUBS-auth-login/idea.md) | todo |
-| FOKKO-0042-SUBS | [Generar el código](FOKKO-0042-SUBS-auth-issue-code/idea.md) | todo |
-| FOKKO-0043-SUBS | [Verificar el código (vigencia y 5 intentos)](FOKKO-0043-SUBS-auth-verify-code/idea.md) | todo |
-| FOKKO-0044-SUBS | [Límite de 3 envíos por hora](FOKKO-0044-SUBS-auth-send-limit/idea.md) | todo |
-| FOKKO-0045-SUBS | [Puerto de envío con doble de consola](FOKKO-0045-SUBS-auth-code-sender/idea.md) | todo |
-| FOKKO-0046-SUBS | [Crear sesión de 30 días](FOKKO-0046-SUBS-auth-open-session/idea.md) | todo |
-| FOKKO-0047A-SUBS | [Validar la sesión](FOKKO-0047A-SUBS-validate-session/idea.md) | todo |
-| FOKKO-0047B-SUBS | [Cerrar la sesión](FOKKO-0047B-SUBS-close-session/idea.md) | todo |
-| FOKKO-0048-SUBS | [Envío del código con Resend (`net/http`, timeout, llave por entorno)](FOKKO-0048-SUBS-auth-resend-mailer/idea.md) | todo |
+| FOKKO-0040-SUBS | [Registrar usuario](FOKKO-0040-SUBS-auth-user/idea.md) | done |
+| FOKKO-0041-SUBS | [Pedir código al entrar (login)](FOKKO-0041-SUBS-auth-login/idea.md) | done |
+| FOKKO-0042-SUBS | [Generar el código](FOKKO-0042-SUBS-auth-issue-code/idea.md) | done |
+| FOKKO-0043-SUBS | [Verificar el código (vigencia y 5 intentos)](FOKKO-0043-SUBS-auth-verify-code/idea.md) | done |
+| FOKKO-0044-SUBS | [Límite de 3 envíos por hora](FOKKO-0044-SUBS-auth-send-limit/idea.md) | done |
+| FOKKO-0045-SUBS | [Puerto de envío con doble de consola](FOKKO-0045-SUBS-auth-code-sender/idea.md) | done |
+| FOKKO-0046-SUBS | [Crear sesión de 30 días](FOKKO-0046-SUBS-auth-open-session/idea.md) | done |
+| FOKKO-0047A-SUBS | [Validar la sesión](FOKKO-0047A-SUBS-validate-session/idea.md) | done |
+| FOKKO-0047B-SUBS | [Cerrar la sesión](FOKKO-0047B-SUBS-close-session/idea.md) | done |
+| FOKKO-0048-SUBS | [Envío del código con Resend (`net/http`, timeout, llave por entorno)](FOKKO-0048-SUBS-auth-resend-mailer/idea.md) | done |
 
 ### D. Persistencia
 

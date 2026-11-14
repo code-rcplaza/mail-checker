@@ -18,4 +18,5 @@ const (
 	KeyExternalIDMissing     MessageKey = "common.external_id_missing"
 	KeyCardLastDigitsInvalid MessageKey = "common.card_last_digits_invalid"
 	KeyUserMissing           MessageKey = "common.user_missing"
+	KeyUnauthorized          MessageKey = "common.unauthorized"
 )

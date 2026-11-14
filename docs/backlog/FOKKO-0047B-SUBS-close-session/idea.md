@@ -22,4 +22,4 @@ Esta idea cubre solo: Cerrar la sesión. El resto del trabajo original está en 
 - Ninguna.
 
 ## Tareas
-- [ ] [TASK-001 Cerrar la sesión](TASK-001-CLOSE-SESSION.md)
+- [x] [TASK-001 Cerrar la sesión](TASK-001-CLOSE-SESSION.md)

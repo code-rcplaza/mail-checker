@@ -68,8 +68,9 @@ backend/
     ├── auth/                            registro, código por correo, sesión
     │   ├── adapters/                    http/, sqlite/, mailer/ (envío del código)
     │   ├── domain/                      User
-    │   ├── ports/                       UserRepository, CodeSender (formas abiertas, mvp.md decisión 11)
-    │   └── usecases/                    register, login, verify_code, logout, get_me
+    │   ├── ports/                       UserRepository, LoginCodes, CodeSends, Sessions, CodeSender
+    │   └── usecases/                    code_delivery, register_user, login, verify_code, open_session,
+    │                                    validate_session, close_session, get_me
     │
     ├── accounts/                        (post-MVP)
     │   ├── adapters/
@@ -148,8 +149,8 @@ Máximo 2 parámetros por función (sin contar `ctx`); con más, un objeto con e
   cancelaciones) pertenece a un usuario y lleva `user_id`.
 - Todo puerto de lectura y escritura filtra por el usuario; los `UNIQUE` pasan a ser por usuario.
   Un usuario nunca ve ni toca datos de otro.
-- El `userID` sale de la sesión en el handler HTTP. Cómo viaja por las capas (parámetro o contexto)
-  se define al construir `auth`.
+- El `userID` sale de la sesión en el handler HTTP y viaja como parámetro (`userID int64`) por
+  casos de uso y puertos; nunca en el contexto.
 - Eliminar al usuario borra todo lo suyo en cascada.
 
 ### `shared/domain`
@@ -188,10 +189,11 @@ type Charge struct {
     CardLast4   string // vacío o exactamente 4 dígitos (common.card_last_digits_invalid)
 }
 
-var ErrInvalid, ErrNotFound, ErrConflict error
-// Invalid(key, params), NotFound(key), Conflict(key): envuelven los anteriores y llevan una
-// llave i18n (nunca texto para el usuario). Llaves comunes: common.invalid_json, common.not_found,
-// common.conflict, common.route_not_found, common.validation_failed, common.internal.
+var ErrInvalid, ErrNotFound, ErrConflict, ErrTooMany, ErrUnauthorized error // HTTP 400, 404, 409, 429, 401
+// Invalid(key, params), NotFound(key), Conflict(key), TooMany(key, params), Unauthorized(key):
+// envuelven los anteriores y llevan una llave i18n (nunca texto para el usuario). Llaves comunes:
+// common.invalid_json, common.not_found, common.conflict, common.route_not_found,
+// common.validation_failed, common.internal, common.unauthorized.
 ```
 
 ### `auth`
@@ -199,12 +201,71 @@ var ErrInvalid, ErrNotFound, ErrConflict error
 - **Registro** `{name, email, acceptedTerms}` y **login** `{email}` envían un código al correo;
   **verificar el código** abre la sesión; **cerrar sesión** la termina. No hay contraseñas: el único
   secreto es el código.
-- Fail fast en el borde: correo con formato válido y términos aceptados; si no, `ErrInvalid` con
-  una llave `auth.*`.
-- Enviar el código es un puerto (`CodeSender`) con un adaptador de correo saliente (proveedor abierto).
-- Código de 6 dígitos, vigencia de 10 minutos, 5 intentos por código, 3 envíos por hora por correo
-  y sesión de 30 días (`docs/mvp.md`, decisión 11). La forma de los puertos queda abierta hasta
-  construir `auth`.
+- Fail fast en el borde: nombre no vacío y de hasta 60 caracteres, correo con formato válido
+  (se guarda en minúsculas y sin espacios) y términos aceptados; si no, `ErrInvalid` con una llave
+  `auth.*`.
+- **Respuesta neutra**: la respuesta no revela qué correos tienen cuenta. Registrar un correo que ya
+  existe no crea otro usuario ni falla: se envía un código a su dueño. Entrar con un correo
+  desconocido responde igual que con uno registrado y no envía nada. Verificar con un correo sin
+  código responde `auth.code_invalid`.
+- Código de 6 dígitos, vigencia de 10 minutos (a los 10 minutos exactos ya venció), 5 intentos por
+  código, 3 peticiones por hora por correo y sesión de 30 días (`docs/mvp.md`, decisión 11). El límite
+  cuenta las peticiones por correo exista o no la cuenta (si no, un 429 revelaría el correo).
+- Un código nuevo reemplaza al anterior. El quinto intento fallido invalida el código. Un código
+  correcto se consume.
+- Ni el código ni el token de sesión se guardan en claro: solo su hash SHA-256 (`HashSecret`), y el
+  código se compara en tiempo constante. Con 6 dígitos el hash no impide un ataque offline: lo que
+  protege es el límite de intentos. El token son 32 bytes de `crypto/rand` en base64 URL-safe.
+- La fuente aleatoria (`io.Reader`) y el reloj se inyectan.
+- Envío: `mailer.ResendSender` hace `POST /emails` a la API de Resend con `net/http`, sin SDK y con
+  timeout. Un rechazo se reporta solo con el status, nunca con el cuerpo, el correo ni el código.
+  Asunto "Tu código de acceso a Fokko", texto simple en español. Configuración: `MAILCHECKER_ENV`
+  (`development` por defecto, o `production`), `MAILCHECKER_RESEND_API_KEY` y `MAILCHECKER_MAIL_FROM`.
+  En producción faltar la llave o el remitente detiene el arranque; en desarrollo, sin llave, se usa
+  `mailer.ConsoleSender`. La llave es un `Secret` que nunca se imprime ni se loguea.
+
+```go
+type User struct {
+    ID              int64
+    PublicID        string    // UUID v7, generado en el caso de uso
+    Name            string
+    Email           string    // normalizado
+    AcceptedTermsAt time.Time
+}
+
+type LoginCode struct { UserID int64; CodeHash string; ExpiresAt time.Time; Attempts int }
+type Session   struct { UserID int64; TokenHash string; ExpiresAt time.Time }
+type CodeSend  struct { Email string; SentAt time.Time }
+
+type UserRepository interface {
+    Create(ctx, user User) (User, error)          // asigna el ID
+    FindByEmail(ctx, email string) (User, error)  // ErrNotFound
+}
+type LoginCodes interface { // un código por usuario
+    Save(ctx, code LoginCode) error                       // reemplaza el anterior
+    Find(ctx, userID int64) (LoginCode, error)            // ErrNotFound
+    AddFailedAttempt(ctx, userID int64) (int, error)      // atómico; devuelve los intentos
+    Delete(ctx, userID int64) error                       // idempotente
+}
+type CodeSends interface {
+    List(ctx, email string) ([]time.Time, error)
+    Record(ctx, send CodeSend) error
+}
+type Sessions interface {
+    Create(ctx, session Session) error
+    FindByTokenHash(ctx, tokenHash string) (Session, error) // ErrNotFound
+    Delete(ctx, tokenHash string) error                     // idempotente
+}
+type CodeSender interface {
+    Send(ctx, email, code string) error // consola en desarrollo, Resend en producción
+}
+```
+
+- Casos de uso: `CodeDelivery` (componente: admite la petición según el límite y la registra; emite
+  el código y lo envía), `RegisterUser`, `Login`, `VerifyCode` (devuelve el usuario),
+  `OpenSession` (verifica y abre la sesión; devuelve el token en claro una sola vez),
+  `ValidateSession` (token → `userID`; vencida o desconocida → `ErrUnauthorized` con
+  `common.unauthorized`, sin distinguir), `CloseSession` (idempotente).
 - `GET /api/export` y `DELETE /api/me` recorren datos de varias features: se resuelven con
   adaptadores puente (ver Pendiente).
 
@@ -551,7 +612,9 @@ El catálogo es el mismo para todos los bancos, porque el comercio ("NETFLIX.COM
 | Tabla | Feature dueña | Columnas clave | Notas |
 |---|---|---|---|
 | `users` | auth | `id`, `public_id` UNIQUE, `name`, `email` UNIQUE, `accepted_terms_at`, `created_at` | |
-| sesiones y códigos de acceso | auth | forma abierta; reglas en `docs/mvp.md`, decisión 11 | |
+| `login_codes` | auth | `user_id` UNIQUE, `code_hash`, `expires_at`, `attempts` | un código por usuario; `ON DELETE CASCADE` |
+| `code_sends` | auth | `id`, `email`, `sent_at` | por correo, exista o no la cuenta |
+| `sessions` | auth | `id`, `user_id`, `token_hash` UNIQUE, `expires_at` | `ON DELETE CASCADE` |
 | `accounts` (post-MVP) | accounts | `id`, `public_id` UNIQUE, `user_id`, `email`, `password_enc`, `last_sync_at`, `last_error_key` | `UNIQUE(user_id, email)` |
 | `statements` | statements | `id`, `public_id` UNIQUE, `user_id`, `bank`, `filename`, `kind`, `billing_date`, `bad_lines` (JSON) | `UNIQUE(user_id, bank, billing_date)` |
 | `charges` | shared | `id`, `user_id`, `bank`, `source`, `external_id`, `account_id`?, `statement_id`?, `occurred_at`, `amount`, `currency`, `merchant`, `card`, `card_last4` (vacío o 4 dígitos) | `UNIQUE(user_id, source, external_id)`; `ON DELETE CASCADE` desde la cuenta y desde la cartola |

@@ -18,5 +18,5 @@ El código es de 6 dígitos, vale 10 minutos y se puede intentar 5 veces. Hay qu
 - Se propone guardar solo un hash del código (SHA-256), no el código, y compararlo en tiempo constante. Con 6 dígitos el hash no impide un ataque offline: el límite de intentos es lo que protege.
 
 ## Tareas
-- [ ] [TASK-001 `LoginCode`](TASK-001-CODE-DOMAIN.md)
-- [ ] [TASK-002 Emitir un código](TASK-002-ISSUE-CODE.md)
+- [x] [TASK-001 `LoginCode`](TASK-001-CODE-DOMAIN.md)
+- [x] [TASK-002 Emitir un código](TASK-002-ISSUE-CODE.md)

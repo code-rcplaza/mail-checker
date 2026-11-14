@@ -5,11 +5,13 @@ import (
 	"maps"
 )
 
-// Sentinels: the kind of failure. HTTP maps them to 400, 404 and 409.
+// Sentinels: the kind of failure. HTTP maps them to 400, 404, 409, 429 and 401.
 var (
-	ErrInvalid  = errors.New("invalid")
-	ErrNotFound = errors.New("not found")
-	ErrConflict = errors.New("conflict")
+	ErrInvalid      = errors.New("invalid")
+	ErrNotFound     = errors.New("not found")
+	ErrConflict     = errors.New("conflict")
+	ErrTooMany      = errors.New("too many")
+	ErrUnauthorized = errors.New("unauthorized")
 )
 
 // KeyedError is a domain failure that carries an i18n key for the front
@@ -35,4 +37,12 @@ func NotFound(key MessageKey) error {
 
 func Conflict(key MessageKey) error {
 	return KeyedError{Kind: ErrConflict, Key: key}
+}
+
+func TooMany(key MessageKey, params map[string]any) error {
+	return KeyedError{Kind: ErrTooMany, Key: key, Params: maps.Clone(params)}
+}
+
+func Unauthorized(key MessageKey) error {
+	return KeyedError{Kind: ErrUnauthorized, Key: key}
 }
